@@ -1,0 +1,63 @@
+{
+  "name": "geostyler-lyrx-parser",
+  "version": "0.0.1",
+  "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
+  "type": "module",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "browser": "dist/main.umd.cjs",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geostyler/geostyler-lyrx-parser.git"
+  },
+  "keywords": [
+    "geostyler",
+    "parser",
+    "style",
+    "arc gis",
+    "lyrx"
+  ],
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/geostyler/geostyler-lyrx-parser/issues"
+  },
+  "homepage": "https://github.com/geostyler/geostyler-lyrx-parser#readme",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": " tsc --noEmit --project tsconfig.json",
+    "lint": "eslint",
+    "prepublishOnly": "npm run build",
+    "release": "np --no-yarn",
+    "test": "vitest",
+    "lint:test": "npm run lint && npm run test",
+    "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
+  },
+  "dependencies": {
+    "geostyler-style": "^8.1.0"
+  },
+  "devDependencies": {
+    "@terrestris/eslint-config-typescript": "^5.0.0",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^7.12.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
+    "@typescript-eslint/parser": "^7.12.0",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.40.0",
+    "np": "^10.0.5",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.0"
+  },
+  "browserslist": [
+    ">1%",
+    "last 4 versions",
+    "Firefox ESR",
+    "not ie < 9"
+  ],
+  "funding": "https://opencollective.com/geostyler"
+}
