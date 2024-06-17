@@ -5,6 +5,7 @@ import {
   UnsupportedProperties,
   WriteStyleResult
 } from 'geostyler-style';
+import {GeoStylerWriter} from "./toGeostyler.ts";
 
 /**
  * This parser can be used with the GeoStyler.
@@ -24,10 +25,12 @@ export class LyrxParser implements StyleParser<any> {
   };
 
   readStyle(inputStyle: any): Promise<ReadStyleResult> {
+    const toGeoStyler = new GeoStylerWriter();
+    const geostyleStyle =  toGeoStyler.convert(inputStyle)
     return Promise.resolve({
       output: {
-        name: '',
-        rules: []
+        name: 'TBD',
+        rules: geostyleStyle
       },
       warnings: [],
       errors: []
@@ -35,6 +38,7 @@ export class LyrxParser implements StyleParser<any> {
   }
 
   writeStyle(geoStylerStyle: Style): Promise<WriteStyleResult<any>> {
+    console.log(geoStylerStyle);
     return Promise.resolve({
       output: {
         stylingRules: []
