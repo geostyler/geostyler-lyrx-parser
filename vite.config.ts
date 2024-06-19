@@ -26,9 +26,6 @@ export default defineConfig({
       },
     },
   },
-  define: {
-    appName: 'GeoStyler'
-  },
   server: {
     host: '0.0.0.0'
   }
