@@ -91,3 +91,56 @@ describe("LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx", (
     expect(symbolizer2.outlineOpacity).toEqual(1);
   });
 });
+
+describe("LyrxParser should parse feature-layer-point-graduated-colors-renderer.lyrx", () => {
+  var lyrx: any;
+  var lyrxParser: LyrxParser;
+  var geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    lyrxParser = new LyrxParser();
+    lyrx = JSON.parse(
+      fs.readFileSync(
+        "./data/lyrx/feature-layer-point-graduated-colors-renderer.lyrx",
+        "utf8"
+      )
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  test("should create the geostyler style", async () => {
+    expect(geostylerStyle.output).toBeDefined();
+  });
+
+  test("should have correct number of rules", () => {
+    expect((geostylerStyle.output?.rules[0] as any).rules.length).toEqual(5);
+  });
+
+  test("should set filters", () => {
+    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+      (x: Rule) => x.name === "6 - 35"
+    );
+    expect(rule.filter).toBeDefined();
+    const expectedFilter = ["<=", "fragebogennr", 35];
+    expect(rule.filter).toEqual(expectedFilter);
+  });
+
+  test("should set symbolizers", () => {
+    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+      (x: Rule) => x.name === "6 - 35"
+    );
+    expect(rule).toBeDefined();
+    expect(rule.symbolizers).toHaveLength(1);
+    const symbolizer = rule.symbolizers[0];
+    expect(symbolizer.kind).toEqual("Mark");
+    expect(symbolizer.wellKnownName).toEqual("circle");
+    expect(symbolizer.opacity).toEqual(1);
+    expect(symbolizer.fillOpacity).toEqual(1);
+    expect(symbolizer.color).toEqual("#f4f400");
+    expect(symbolizer.rotate).toEqual(0);
+    expect(symbolizer.radius).toEqual(2.6666666666666665);
+    expect(symbolizer.strokeColor).toEqual("#000000");
+    expect(symbolizer.strokeWidth).toEqual(0.9333333333333332);
+    expect(symbolizer.strokeOpacity).toEqual(1);
+  });
+});
