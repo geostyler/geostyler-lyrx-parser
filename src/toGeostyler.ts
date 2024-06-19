@@ -1,18 +1,19 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
 import {convertExpression, convertWhereClause, processRotationExpression} from "./expressions.ts";
-import {Group, LabelClass, Layer, Options, Renderer, Rule, Symbolizer} from "./badTypes.ts";
+import {Group, LabelClass, Options, Rule, Symbolizer} from "./badTypes.ts";
 import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils.ts";
 import {processSymbolReference} from "./processSymbolReference.ts";
+import { CIMLayerDocument, CIMLayerDefinition, CIMRenderer } from './esri/types';
 
 
 const usedIcons: string[] = []
 
-export const convert = (arcgis:any , options=undefined): any => {
-  const geoStyler = processLayer(arcgis["layerDefinitions"][0], options);
+export const convert = (layerDocument: CIMLayerDocument , options=undefined): any => {
+  const geoStyler = processLayer(layerDocument?.layerDefinitions?.[0], options);
   return [geoStyler, usedIcons, WARNINGS]
 }
 
-const processLayer = (layer: Layer, options: Options = {}): Style => {
+const processLayer = (layer: CIMLayerDefinition, options: Options = {}): Style => {
     const style: Style = {
         name: layer.name,
         rules: []
@@ -26,7 +27,7 @@ const processLayer = (layer: Layer, options: Options = {}): Style => {
     return style;
 }
 
-const processFeatureLayer = (layer: Layer, options: Options = {}):FIXMERULE[] => {
+const processFeatureLayer = (layer: any, options: Options = {}):FIXMERULE[] => {
     const toLowerCase = options.toLowerCase || false;
     const renderer = layer.renderer!;
     const rules: Rule[] = [];
@@ -73,14 +74,14 @@ const processFeatureLayer = (layer: Layer, options: Options = {}):FIXMERULE[] =>
     return rules as FIXMERULE[];
 }
 
-const processRasterLayer = (_layer: Layer): FIXMERULE[] => {
+const processRasterLayer = (_layer: any): FIXMERULE[] => {
     WARNINGS.push("CIMRasterLayer are not supported yet.");
     // const rules = [{ name: layer.name, symbolizers: [rasterSymbolizer(layer)] }];
     // geostyler.rules = rules;
     return [];
 }
 
-const processClassBreaksRenderer = (renderer: Renderer, options: Options = {}): Rule[] => {
+const processClassBreaksRenderer = (renderer: any, options: Options = {}): Rule[] => {
   const rules: Rule[] = [];
   const symbolsAscending: Symbolizer[][] = [];
   const field = renderer.field;
@@ -225,7 +226,7 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
   return rule;
 }
 
-const processSimpleRenderer = (renderer: Renderer, options: Options): Rule => {
+const processSimpleRenderer = (renderer: any, options: Options): Rule => {
   return {
     name: renderer.label || "",
     symbolizers: processSymbolReference(renderer.symbol, options),

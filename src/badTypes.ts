@@ -3,26 +3,6 @@ export type Stroke = Record<string, any>;
 export type Fill = Record<string, any>;
 export type Marker = Record<string, any>;
 
-export interface Layer {
-    name: string;
-    type: string;
-    renderer?: Renderer;
-    labelVisibility?: boolean;
-    labelClasses?: LabelClass[];
-
-    [key: string]: any;
-}
-
-export interface Renderer {
-    type: string;
-    fields?: string[];
-    groups?: Group[];
-    defaultSymbol?: SymbolReference;
-    classBreakType?: string;
-
-    [key: string]: any;
-}
-
 export interface Group {
     [key: string]: any;
 }

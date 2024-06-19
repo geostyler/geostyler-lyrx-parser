@@ -1,4 +1,4 @@
-import { Fill, Layer, Marker, Stroke } from "./badTypes.ts";
+import { Fill, Marker, Stroke } from "./badTypes.ts";
 import { toWKT } from "./wktGeometries.ts";
 import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from "./constants";
 import { processColor, processOpacity } from "./processUtils.ts";
@@ -145,19 +145,19 @@ const processSymbolCharacterMarker = (
   };
 };
 
-const processSymbolVectorMarker = (layer: Layer): Marker => {
-  if (layer.size) {
-    layer.size = ptToPxProp(layer, "size", 3);
-  }
-  // Default values
-  let fillColor = "#ff0000";
-  let strokeColor = "#000000";
-  let strokeWidth = 1.0;
-  let markerSize = 10;
-  let strokeOpacity = 1;
-  let wellKnownName = "circle";
-  let maxX: number | null = null;
-  let maxY: number | null = null;
+const processSymbolVectorMarker = (layer: any): Marker => {
+    if (layer.size) {
+        layer.size = ptToPxProp(layer, "size", 3);
+    }
+    // Default values
+    let fillColor = "#ff0000";
+    let strokeColor = "#000000";
+    let strokeWidth = 1.0;
+    let markerSize = 10;
+    let strokeOpacity = 1;
+    let wellKnownName = "circle";
+    let maxX: number | null = null;
+    let maxY: number | null = null;
 
   let markerGraphics =
     layer.markerGraphics !== undefined ? layer.markerGraphics : [];
@@ -230,10 +230,10 @@ const processSymbolVectorMarker = (layer: Layer): Marker => {
   return marker;
 };
 
-const processSymbolHatchFill = (layer: Layer): { [key: string]: any } => {
-  let rotation = layer.rotation || 0;
-  let symbolLayers = layer.lineSymbol.symbolLayers;
-  let [color, width, opacity] = extractStroke(symbolLayers);
+const processSymbolHatchFill = (layer: any): { [key: string]: any } => {
+    let rotation = layer.rotation || 0;
+    let symbolLayers = layer.lineSymbol.symbolLayers;
+    let [color, width, opacity] = extractStroke(symbolLayers);
 
   // Use symbol and not rotation because rotation crops the line.
   let wellKnowName = hatchMarkerForAngle(rotation);
