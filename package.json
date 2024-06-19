@@ -6,7 +6,7 @@
   "main": "dist/LyrxParser.js",
   "module": "dist/LyrxParser.js",
   "types": "dist/LyrxParser.d.ts",
-  "browser": "dist/lyrxParser.iife.js",
+  "browser": "dist/LyrxParser.iife.js",
   "files": [
     "dist"
   ],

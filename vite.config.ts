@@ -14,7 +14,7 @@ export default defineConfig({
       entry: './src/LyrxParser.ts',
       name: 'GeoStylerLyrxParser',
       formats: ['es', 'iife'],
-      fileName: 'lyrxParser',
+      fileName: 'LyrxParser',
     },
     sourcemap: true,
     rollupOptions: {
