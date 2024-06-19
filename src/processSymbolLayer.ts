@@ -40,7 +40,7 @@ export const processSymbolLayer = (layer: any, symboltype: any, options?: any) =
     }
 }
 
-const processSymbolSolidStroke = (symboltype: any, layer: any) => {
+const processSymbolSolidStroke = (layer: any, symboltype: any) => {
     let effects = extractEffect(layer);
     if (symboltype === "CIMPolygonSymbol") {
         let stroke: Stroke = {
