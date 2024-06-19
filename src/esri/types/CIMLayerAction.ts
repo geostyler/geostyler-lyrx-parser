@@ -1,4 +1,6 @@
-import { CIMActivity, CIMCondition } from "./layers/CIMFeatureLayer";
+
+type CIMActivity = {};
+type CIMCondition = {};
 
 export type CIMLayerAction = {
     /**

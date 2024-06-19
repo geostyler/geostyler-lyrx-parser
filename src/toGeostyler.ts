@@ -3,7 +3,8 @@ import {convertExpression, convertWhereClause, processRotationExpression} from "
 import {Group, LabelClass, Options, Rule, Symbolizer} from "./badTypes.ts";
 import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils.ts";
 import {processSymbolReference} from "./processSymbolReference.ts";
-import { CIMLayerDocument, CIMLayerDefinition, CIMRenderer } from './esri/types';
+import { CIMLayerDocument, CIMLayerDefinition, CIMRenderer, CIMFeatureLayer } from './esri/types';
+import { CIMLabelClass } from './esri/types/labeling/CIMLabelClass.ts';
 
 
 const usedIcons: string[] = []
@@ -14,20 +15,21 @@ export const convert = (layerDocument: CIMLayerDocument , options=undefined): an
 }
 
 const processLayer = (layer: CIMLayerDefinition, options: Options = {}): Style => {
-    const style: Style = {
-        name: layer.name,
-        rules: []
-    };
-    if (layer.type === "CIMFeatureLayer") {
-        style.rules = processFeatureLayer(layer, options);
-    } else if (layer.type === "CIMRasterLayer") {
-        style.rules = processRasterLayer(layer);
-    }
+  const style: Style = {
+    name: layer.name,
+    rules: []
+  };
 
-    return style;
+  if (layer.type === "CIMFeatureLayer") {
+      style.rules = processFeatureLayer(layer, options);
+  } else if (layer.type === "CIMRasterLayer") {
+      style.rules = processRasterLayer(layer);
+  }
+  
+  return style;
 }
 
-const processFeatureLayer = (layer: any, options: Options = {}):FIXMERULE[] => {
+const processFeatureLayer = (layer: CIMFeatureLayer, options: Options = {}):FIXMERULE[] => {
     const toLowerCase = options.toLowerCase || false;
     const renderer = layer.renderer!;
     const rules: Rule[] = [];
@@ -143,8 +145,8 @@ const processClassBreaksRenderer = (renderer: any, options: Options = {}): Rule[
   return rules;
 }
 
-const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false): Rule => {
-  const textSymbol = labelClass.textSymbol.symbol;
+const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = false): Rule => {
+  const textSymbol = labelClass.textSymbol?.symbol;
   const expression = convertExpression(labelClass.expression, labelClass.expressionEngine, toLowerCase);
   const fontFamily = textSymbol.fontFamilyName || "Arial";
   const fontSize = ptToPxProp(textSymbol, "height", 12, true);

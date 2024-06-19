@@ -1,4 +1,4 @@
-import { CIMLayerDefinition } from "./layers/CIMLayerDefinition";
+import { CIMLayerDefinition } from "./CIMLayerDefinition";
 
 export type CIMRasterLayer = CIMLayerDefinition & {
 
