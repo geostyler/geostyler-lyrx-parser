@@ -15,21 +15,20 @@ import {convert} from "./toGeostyler.ts";
  * @class LyrcParser
  * @implements StyleParser
  */
-export class LyrxParser implements StyleParser<any> {
+export class LyrxParser implements StyleParser<string> {
 
-  public static title = 'ArcGIS Pro lyrx parser';
-
+  static title = 'ArcGIS Pro lyrx parser';
   title = 'ArcGIS Pro lyrx parser';
 
   unsupportedProperties: UnsupportedProperties = {
   };
 
-  readStyle(inputStyle: any): Promise<ReadStyleResult> {
-    const geostyleStyle =  convert(inputStyle)
+  readStyle(inputStyle: string): Promise<ReadStyleResult> {
+    const geostyleStyle = convert(inputStyle)
     return Promise.resolve({
       output: {
-        name: 'TBD',
-        rules: geostyleStyle
+        name: geostyleStyle[0].name,
+        rules: geostyleStyle[0].rules
       },
       warnings: [],
       errors: []

@@ -158,7 +158,7 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: expression,
+    label: expression.join('-'), // FIXME
     size: fontSize,
     weight: fontWeight,
   };
