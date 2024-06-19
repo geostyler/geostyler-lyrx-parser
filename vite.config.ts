@@ -1,19 +1,35 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import dts from 'vite-plugin-dts';
+import dts from "vite-plugin-dts";
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     dts({
-      include: ['src/LyrxParser.ts']
-    })
+      insertTypesEntry: true,
+    }),
   ],
   build: {
+    manifest: true,
     lib: {
-      name: 'geostyler-lyrx-parser',
-      fileName: 'main',
-      entry: resolve(__dirname, 'src/LyrxParser.ts'),
-      formats: ['es', 'umd'],
-    }
+      entry: './src/LyrxParser.ts',
+      name: 'GeoStylerLyrxParser',
+      formats: ['es', 'iife'],
+      fileName: 'lyrxParser',
+    },
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        dir: 'dist',
+        exports: 'named',
+        generatedCode: 'es5',
+        format: 'iife',
+      },
+    },
+  },
+  define: {
+    appName: 'GeoStyler'
+  },
+  server: {
+    host: '0.0.0.0'
   }
 });
