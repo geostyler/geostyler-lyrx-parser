@@ -1,13 +1,14 @@
-
-export default {
-  extends: '@terrestris/eslint-config-typescript',
+const config = {
+  extends: "@terrestris/eslint-config-typescript",
   rules: {
-    'no-underscore-dangle': 'off',
+    "no-underscore-dangle": "off",
     camelcase: [
-      'off',
+      "off",
       {
-        ignoreImports: true
-      }
-    ]
-  }
+        ignoreImports: true,
+      },
+    ],
+  },
 };
+
+export default config;
