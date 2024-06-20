@@ -1,6 +1,6 @@
 {
   "name": "geostyler-lyrx-parser",
-  "version": "0.0.1",
+  "version": "1.0.0-next.1",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
   "main": "dist/LyrxParser.mjs",
   "types": "dist/LyrxParser.d.ts",
