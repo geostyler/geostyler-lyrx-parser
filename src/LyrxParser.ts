@@ -5,8 +5,8 @@ import {
   UnsupportedProperties,
   WriteStyleResult
 } from 'geostyler-style';
-import {convert} from "./toGeostyler.ts";
-import { CIMLayerDocument } from './esri/types/CIMLayerDocument.ts';
+import {convert} from "./toGeostyler";
+import { CIMLayerDocument } from './esri/types/CIMLayerDocument';
 
 /**
  * This parser can be used with the GeoStyler.
@@ -17,22 +17,20 @@ import { CIMLayerDocument } from './esri/types/CIMLayerDocument.ts';
  * @implements StyleParser
  */
 export class LyrxParser implements StyleParser<string> {
+  static title = "ArcGIS Pro lyrx parser";
+  title = "ArcGIS Pro lyrx parser";
 
-  static title = 'ArcGIS Pro lyrx parser';
-  title = 'ArcGIS Pro lyrx parser';
-
-  unsupportedProperties: UnsupportedProperties = {
-  };
+  unsupportedProperties: UnsupportedProperties = {};
 
   readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
     const geostyleStyle =  convert(inputStyle)
     return Promise.resolve({
       output: {
         name: geostyleStyle[0].name,
-        rules: geostyleStyle[0].rules
+        rules: geostyleStyle[0].rules,
       },
       warnings: [],
-      errors: []
+      errors: [],
     });
   }
 
@@ -40,11 +38,12 @@ export class LyrxParser implements StyleParser<string> {
     console.log(geoStylerStyle);
     return Promise.resolve({
       output: {
-        stylingRules: []
+        stylingRules: [],
       },
       errors: [],
-      warnings: []
+      warnings: [],
     });
   }
-
 }
+
+export default LyrxParser;

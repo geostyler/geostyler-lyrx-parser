@@ -1,7 +1,7 @@
-import { Fill, Marker, Stroke } from "./badTypes.ts";
-import { toWKT } from "./wktGeometries.ts";
+import { Fill, Marker, Stroke } from "./badTypes";
+import { toWKT } from "./wktGeometries";
 import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from "./constants";
-import { processColor, processOpacity } from "./processUtils.ts";
+import { processColor, processOpacity } from "./processUtils";
 import {
   esriFontToStandardSymbols,
   extractFillColor,
@@ -9,8 +9,8 @@ import {
   extractStroke,
   ptToPxProp,
   WARNINGS,
-} from "./toGeostylerUtils.ts";
-import { processSymbolReference } from "./processSymbolReference.ts";
+} from "./toGeostylerUtils";
+import { processSymbolReference } from "./processSymbolReference";
 // import { writeFileSync, existsSync, mkdirSync } from 'fs';
 // import uuid from 'uuid';
 // import { tmpdir } from 'os';
