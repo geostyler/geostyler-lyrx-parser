@@ -12,7 +12,7 @@ export enum LabelExpressionEngine {
   Arcade
 };
   
-  /**
+/**
  * Represents a label class which describes how to generate a set of text labels from a group of features in a feature layer.
  *
  */
