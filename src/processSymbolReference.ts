@@ -92,7 +92,7 @@ const formatPolygonSymbolizer = (
   symbolizer: Symbolizer,
   markerPlacement: MarkerPlacement
 ): Symbolizer | null => {
-  const markerPlacementType = markerPlacement.get("type");
+  const markerPlacementType = markerPlacement.type;
   if (markerPlacementType == "CIMMarkerPlacementInsidePolygon") {
     const margin = processMarkerPlacementInsidePolygon(
       symbolizer,
