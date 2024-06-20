@@ -10,20 +10,22 @@ export const processColor = (color: any): string => {
         return "#000000";
     }
     let values = color.values;
-
     if (color.type === "CIMRGBColor") {
-        return `#${values[0].toString(16)}${values[1].toString(16)}${values[2].toString(16)}`;
+        return rgbaToHex(values);
     } else if (color.type === "CIMCMYKColor") {
-        let [r, g, b] = cmyk2Rgb(values);
-        return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+        return rgbaToHex(cmyk2Rgb(values))
     } else if (color.type === "CIMHSVColor") {
-        let [r, g, b] = hsv2rgb(values);
-        return `#${Math.floor(r).toString(16)}${Math.floor(g).toString(16)}${Math.floor(b).toString(16)}`;
+        return rgbaToHex(hsv2rgb(values))
     } else if (color.type === "CIMGrayColor") {
-        return `#${Math.floor(values[0]).toString(16)}${Math.floor(values[0]).toString(16)}${Math.floor(values[0]).toString(16)}`;
+        return rgbaToHex(hsv2rgb(values))
     } else {
         return "#000000";
     }
+}
+
+const rgbaToHex = (rgba: number[]): string => {
+    const value = (1<<24)+(rgba[0]<<16)+(rgba[1]<<8)+rgba[2];
+    return (`#${value.toString(16).slice(1).split('.')[0]}`);
 }
 
 const cmyk2Rgb = (cmykArray: number[]): [number, number, number] => {

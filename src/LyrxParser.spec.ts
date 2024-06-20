@@ -70,7 +70,7 @@ describe("LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx", (
   });
 
 
-  it.skip("should set symbolizers", () => {
+  it("should set symbolizers", () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === ""
     );
@@ -119,7 +119,7 @@ describe("LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(rule.filter).toEqual(expectedFilter);
   });
 
-  it.skip("should set symbolizers", () => {
+  it("should set symbolizers", () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === "6 - 35"
     );
@@ -133,7 +133,7 @@ describe("LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(symbolizer.fillOpacity).toEqual(1);
     expect(symbolizer.color).toEqual("#f4f400");
     expect(symbolizer.rotate).toEqual(0);
-    expect(symbolizer.radius).toEqual(2.6666666666666665);
+    expect(symbolizer.radius).toEqual(2.6666666666666665); // FIXME
     expect(symbolizer.strokeColor).toEqual("#000000");
     expect(symbolizer.strokeWidth).toEqual(0.9333333333333332);
     expect(symbolizer.strokeOpacity).toEqual(1);
