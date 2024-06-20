@@ -15,12 +15,11 @@ import {
   MarkerPlacement,
   Options,
   Symbolizer,
-  SymbolReference,
 } from "./badTypes.ts";
 import { processSymbolLayer } from "./processSymbolLayer.ts";
 
 export const processSymbolReference = (
-  symbolref: SymbolReference,
+  symbolref: any,
   options: Options
 ): Symbolizer[] => {
   const symbol = symbolref.symbol;

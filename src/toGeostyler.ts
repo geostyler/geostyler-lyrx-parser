@@ -167,7 +167,7 @@ const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = fal
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: expression.join('-'), // FIXME
+    label: Array.isArray(expression) ? expression.join('-') : expression, // FIXME
     size: fontSize,
     weight: fontWeight,
   };
