@@ -3,14 +3,6 @@ export type Stroke = Record<string, any>;
 export type Fill = Record<string, any>;
 export type Marker = Record<string, any>;
 
-export interface Group {
-    [key: string]: any;
-}
-
-export interface SymbolReference {
-    [key: string]: any;
-}
-
 export interface Options {
     toLowerCase?: boolean;
 
@@ -67,7 +59,7 @@ export interface Symbolizer {
     rotate?: any;
     color?: any;
     font?: string;
-    label?: string;
+    label?: string | string[];
     size?: number;
     weight?: any;
     perpendicularOffset?: number;

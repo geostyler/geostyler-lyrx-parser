@@ -1,12 +1,18 @@
 import { CIMObject } from "../CIMObject";
+import { CIMMaplexLabelPlacementProperties } from "./CIMMaplexLabelPlacementProperties";
+import { CIMStandardLabelPlacementProperties } from "./CIMStandardLabelPlacementProperties";
 import { CIMSymbolReference } from "./CIMSymbolReference";
 
-type LabelExpressionEngine = {};
 type FeaturesToLabel = {};
-type CIMMaplexLabelPlacementProperties = {};
-type CIMStandardLabelPlacementProperties = {};
 
-/**
+export enum LabelExpressionEngine {
+  VBScript,
+  JScript,
+  Python,
+  Arcade
+};
+  
+  /**
  * Represents a label class which describes how to generate a set of text labels from a group of features in a feature layer.
  *
  */

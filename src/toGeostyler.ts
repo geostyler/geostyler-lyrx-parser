@@ -1,10 +1,11 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
 import {convertExpression, convertWhereClause, processRotationExpression} from "./expressions.ts";
-import {Group, LabelClass, Options, Rule, Symbolizer} from "./badTypes.ts";
+import {Options, Rule, Symbolizer} from "./badTypes.ts";
 import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils.ts";
 import {processSymbolReference} from "./processSymbolReference.ts";
-import { CIMLayerDocument, CIMLayerDefinition, CIMRenderer, CIMFeatureLayer } from './esri/types';
-import { CIMLabelClass } from './esri/types/labeling/CIMLabelClass.ts';
+import { CIMLayerDocument, CIMLayerDefinition, CIMFeatureLayer, LabelFeatureType } from './esri/types';
+import { CIMLabelClass, LabelExpressionEngine } from './esri/types/labeling/CIMLabelClass.ts';
+import { CIMTextSymbol } from './esri/types/symbols/index.ts';
 
 
 const usedIcons: string[] = []
@@ -146,11 +147,16 @@ const processClassBreaksRenderer = (renderer: any, options: Options = {}): Rule[
 }
 
 const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = false): Rule => {
-  const textSymbol = labelClass.textSymbol?.symbol;
-  const expression = convertExpression(labelClass.expression, labelClass.expressionEngine, toLowerCase);
-  const fontFamily = textSymbol.fontFamilyName || "Arial";
+
+  // todo ConvertTextSymbol:
+  if (labelClass.textSymbol?.symbol?.type != "CIMTextSymbol")
+    return { name: "", symbolizers: [] };
+
+  const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
+  const expression = convertExpression(labelClass?.expression ?? "", labelClass.expressionEngine ?? LabelExpressionEngine.Arcade, toLowerCase);
+  const fontFamily = textSymbol?.fontFamilyName || "Arial";
   const fontSize = ptToPxProp(textSymbol, "height", 12, true);
-  const color = extractFillColor(textSymbol.symbol.symbolLayers);
+  const color = extractFillColor(textSymbol?.symbol?.symbolLayers ?? []);
   const fontWeight = extractFontWeight(textSymbol);
   const rotationProps = labelClass.maplexLabelPlacementProperties?.rotationProperties || {};
   const rotationField = rotationProps.rotationField;
@@ -166,22 +172,22 @@ const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = fal
     weight: fontWeight,
   };
 
-  const stdProperties = labelClass.standardLabelPlacementProperties || {};
-  const stdPlacementType = stdProperties.featureType;
-  const stdPointPlacementType = stdProperties.pointPlacementMethod;
-  const maplexProperties = labelClass.maplexLabelPlacementProperties || {};
-  const maplexPlacementType = maplexProperties.featureType;
-  const maplexPrimaryOffset = ptToPxProp(maplexProperties, "primaryOffset", 0);
-  const maplexPointPlacementMethod = maplexProperties.pointPlacementMethod;
+  const stdProperties = labelClass.standardLabelPlacementProperties;
+  const stdPlacementType = stdProperties?.featureType;
+  const stdPointPlacementType = stdProperties?.pointPlacementMethod;
+  const maplexProperties = labelClass.maplexLabelPlacementProperties;
+  const maplexPlacementType = maplexProperties?.featureType;
+  const maplexPrimaryOffset = ptToPxProp(maplexProperties ?? {}, "primaryOffset", 0);
+  const maplexPointPlacementMethod = maplexProperties?.pointPlacementMethod;
 
-  if (stdPlacementType === "Line" && maplexPlacementType === "Line") {
+  if (stdPlacementType === LabelFeatureType.Line && maplexPlacementType === LabelFeatureType.Line) {
     const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
     symbolizer.perpendicularOffset = primaryOffset + fontSize;
-  } else if (maplexPlacementType === "Point" && maplexPointPlacementMethod === "AroundPoint") {
+  } else if (maplexPlacementType === LabelFeatureType.Point && maplexPointPlacementMethod === "AroundPoint") {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
     symbolizer.anchorPointX = symbolizer.anchorPointY = 0.0;
-  } else if (stdPlacementType === "Point" && stdPointPlacementType === "AroundPoint") {
+  } else if (stdPlacementType === LabelFeatureType.Point && stdPointPlacementType === "AroundPoint") {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
     symbolizer.anchorPointX = symbolizer.anchorPointY = 0.0;
@@ -201,7 +207,7 @@ const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = fal
 
   const haloSize = ptToPxProp(textSymbol, "haloSize", 0);
   if (haloSize && textSymbol.haloSymbol) {
-    const haloColor = extractFillColor(textSymbol.haloSymbol.symbolLayers);
+    const haloColor = extractFillColor(textSymbol?.haloSymbol?.symbolLayers ?? []);
     Object.assign(symbolizer, {
       haloColor: haloColor,
       haloSize: haloSize,
@@ -210,7 +216,7 @@ const processLabelClass = (labelClass: CIMLabelClass, toLowerCase: boolean = fal
   }
 
   symbolizer.group = labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels || (
-    maplexPlacementType === "Polygon" &&
+    maplexPlacementType === LabelFeatureType.Polygon &&
     labelClass.standardLabelPlacementProperties?.numLabelsOption === "OneLabelPerName"
   );
 
@@ -235,7 +241,7 @@ const processSimpleRenderer = (renderer: any, options: Options): Rule => {
   };
 }
 
-const processUniqueValueGroup = (fields: string[], group: Group, options: Options): Rule[] =>{
+const processUniqueValueGroup = (fields: string[], group: any, options: Options): Rule[] =>{
   const toLowerCase = options.toLowerCase || false;
 
   const _and = (a: any[], b: any[]): any[] => {

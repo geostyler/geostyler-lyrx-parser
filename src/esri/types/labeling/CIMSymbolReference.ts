@@ -1,6 +1,7 @@
+import { CIMSymbol } from "../symbols";
+
 type CIMPrimitiveOverride = {};
 type CIMScaleDependentSizeVariation = {};
-type CIMSymbol = {};
 
 /**
  * Represents a symbol reference.
