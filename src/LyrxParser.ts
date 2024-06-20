@@ -15,7 +15,7 @@ import { convert } from "./toGeostyler";
  * @class LyrcParser
  * @implements StyleParser
  */
-export class LyrxParser implements StyleParser<string> {
+class LyrxParser implements StyleParser<string> {
   static title = "ArcGIS Pro lyrx parser";
   title = "ArcGIS Pro lyrx parser";
 
