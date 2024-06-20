@@ -1,4 +1,4 @@
-const config = {
+module.exports = {
   extends: "@terrestris/eslint-config-typescript",
   rules: {
     "no-underscore-dangle": "off",
@@ -10,5 +10,3 @@ const config = {
     ],
   },
 };
-
-export default config;
