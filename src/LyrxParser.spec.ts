@@ -4,9 +4,9 @@ import { LyrxParser } from "./LyrxParser";
 import { ReadStyleResult, Rule } from "geostyler-style";
 
 describe("LyrxParser should parse ae_netzbetreiber.lyrx", () => {
-  var lyrx: any;
-  var lyrxParser: LyrxParser;
-  var geostylerStyle: ReadStyleResult;
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
     lyrxParser = new LyrxParser();
@@ -17,44 +17,46 @@ describe("LyrxParser should parse ae_netzbetreiber.lyrx", () => {
   });
 
   it("should create the geostyler style", async () => {
-    expect(geostylerStyle.output).toBeDefined();
+    expect(geostylerStyle.output!).toBeDefined();
   });
 
   it("should have correct number of rules", () => {
-    expect((geostylerStyle.output?.rules[0] as any).rules.length).toEqual(118);
+    expect(geostylerStyle.output!.rules.length).toEqual(118);
   });
 
   it.skip("should set filter for rule AEW Energie AG", () => {
-    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+    const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === "AEW Energie AG"
     );
-    expect(rule.filter).toBeDefined();
+    expect(rule?.filter).toBeDefined();
 
     // const expectedFilter = [
     //   "PropertyIsEqualTo",
     //   ["PropertyName", "ANBIETER"],
     //   "AEW Energie AG",
     // ]; // test succeeds with this filter
-    const expectedFilter = '["==", "anbieter", "AEW Energie AG"]'; // test fails with this filter (output generated in sldParser)
-    expect(rule.filter).toEqual(expectedFilter);
+    const expectedFilter = '["==", "anbieter", "AEW Energie AG"]'; // test fails with this filter (output! generated in sldParser)
+    expect(rule?.filter).toEqual(expectedFilter);
   });
 
   it("should set symbolizers for rule AEW Energie AG", () => {
-    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+    const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === "AEW Energie AG"
     );
+    expect(rule).toBeDefined;
+    if (!rule) return;
     expect(rule.symbolizers).toBeDefined();
     expect(rule.symbolizers.length).toEqual(1);
     expect(rule.symbolizers[0].kind).toEqual("Fill");
-    expect(rule.symbolizers[0].color).toEqual("#ffffbe");
-    expect(rule.symbolizers[0].fillOpacity).toEqual(1);
+    expect((rule.symbolizers as any)[0].color).toEqual("#ffffbe");
+    expect((rule.symbolizers as any)[0].fillOpacity).toEqual(1);
   });
 });
 
 describe("LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx", () => {
-  var lyrx: any;
-  var lyrxParser: LyrxParser;
-  var geostylerStyle: ReadStyleResult;
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
     lyrxParser = new LyrxParser();
@@ -67,25 +69,19 @@ describe("LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx", (
     geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
-  it("should create the geostyler style", async () => {
-    expect(geostylerStyle.output).toBeDefined();
-  });
-
-  it("should have correct number of rules", () => {
-    expect((geostylerStyle.output?.rules[0] as any).rules.length).toEqual(1);
-  });
 
   it.skip("should set symbolizers", () => {
-    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+    const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === ""
     );
     expect(rule).toBeDefined();
+    if (!rule) return;
     expect(rule.symbolizers).toHaveLength(2);
-    const symbolizer1 = rule.symbolizers[0];
+    const symbolizer1 = rule.symbolizers[0] as any;
     expect(symbolizer1.kind).toEqual("Fill");
     expect(symbolizer1.color).toEqual("#d1cffc");
     expect(symbolizer1.fillOpacity).toEqual(1);
-    const symbolizer2 = rule.symbolizers[1];
+    const symbolizer2 = rule.symbolizers[1] as any;
     expect(symbolizer2.kind).toEqual("Fill");
     expect(symbolizer2.outlineWidth).toEqual(0.9333333333333332);
     expect(symbolizer2.outlineOpacity).toEqual(1);
@@ -93,9 +89,9 @@ describe("LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx", (
 });
 
 describe("LyrxParser should parse feature-layer-point-graduated-colors-renderer.lyrx", () => {
-  var lyrx: any;
-  var lyrxParser: LyrxParser;
-  var geostylerStyle: ReadStyleResult;
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
     lyrxParser = new LyrxParser();
@@ -108,30 +104,29 @@ describe("LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
-  it("should create the geostyler style", async () => {
-    expect(geostylerStyle.output).toBeDefined();
-  });
-
   it("should have correct number of rules", () => {
-    expect((geostylerStyle.output?.rules[0] as any).rules.length).toEqual(5);
+    expect(geostylerStyle.output!.rules.length).toEqual(5);
   });
 
   it.skip("should set filters", () => {
-    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+    const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === "6 - 35"
     );
+    expect(rule).toBeDefined();
+    if (!rule) return;
     expect(rule.filter).toBeDefined();
     const expectedFilter = ["<=", "fragebogennr", 35];
     expect(rule.filter).toEqual(expectedFilter);
   });
 
   it.skip("should set symbolizers", () => {
-    const rule = (geostylerStyle.output?.rules[0] as any).rules.find(
+    const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === "6 - 35"
     );
     expect(rule).toBeDefined();
+    if (!rule) return;
     expect(rule.symbolizers).toHaveLength(1);
-    const symbolizer = rule.symbolizers[0];
+    const symbolizer = rule.symbolizers[0] as any;
     expect(symbolizer.kind).toEqual("Mark");
     expect(symbolizer.wellKnownName).toEqual("circle");
     expect(symbolizer.opacity).toEqual(1);
