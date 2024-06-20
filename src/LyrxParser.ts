@@ -3,9 +3,9 @@ import {
   Style,
   StyleParser,
   UnsupportedProperties,
-  WriteStyleResult
-} from 'geostyler-style';
-import {convert} from "./toGeostyler.ts";
+  WriteStyleResult,
+} from "geostyler-style";
+import { convert } from "./toGeostyler";
 
 /**
  * This parser can be used with the GeoStyler.
@@ -16,22 +16,20 @@ import {convert} from "./toGeostyler.ts";
  * @implements StyleParser
  */
 export class LyrxParser implements StyleParser<string> {
+  static title = "ArcGIS Pro lyrx parser";
+  title = "ArcGIS Pro lyrx parser";
 
-  static title = 'ArcGIS Pro lyrx parser';
-  title = 'ArcGIS Pro lyrx parser';
-
-  unsupportedProperties: UnsupportedProperties = {
-  };
+  unsupportedProperties: UnsupportedProperties = {};
 
   readStyle(inputStyle: string): Promise<ReadStyleResult> {
-    const geostyleStyle = convert(inputStyle)
+    const geostyleStyle = convert(inputStyle);
     return Promise.resolve({
       output: {
         name: geostyleStyle[0].name,
-        rules: geostyleStyle[0].rules
+        rules: geostyleStyle[0].rules,
       },
       warnings: [],
-      errors: []
+      errors: [],
     });
   }
 
@@ -39,11 +37,12 @@ export class LyrxParser implements StyleParser<string> {
     console.log(geoStylerStyle);
     return Promise.resolve({
       output: {
-        stylingRules: []
+        stylingRules: [],
       },
       errors: [],
-      warnings: []
+      warnings: [],
     });
   }
-
 }
+
+export default LyrxParser;

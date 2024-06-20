@@ -2,11 +2,8 @@
   "name": "geostyler-lyrx-parser",
   "version": "0.0.1",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
-  "type": "module",
-  "main": "dist/LyrxParser.js",
-  "module": "dist/LyrxParser.js",
+  "main": "dist/LyrxParser.mjs",
   "types": "dist/LyrxParser.d.ts",
-  "browser": "dist/LyrxParser.iife.js",
   "files": [
     "dist"
   ],
@@ -28,7 +25,7 @@
   },
   "homepage": "https://github.com/geostyler/geostyler-lyrx-parser#readme",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc",
     "typecheck": " tsc --noEmit --project tsconfig.json",
     "lint": "eslint",
     "prepublishOnly": "npm run build",

@@ -1,86 +1,103 @@
-import {Rule as FIXMERULE, Style} from 'geostyler-style';
-import {convertExpression, convertWhereClause, processRotationExpression} from "./expressions.ts";
-import {Group, LabelClass, Layer, Options, Renderer, Rule, Symbolizer} from "./badTypes.ts";
-import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils.ts";
-import {processSymbolReference} from "./processSymbolReference.ts";
+import { Rule as FIXMERULE, Style } from "geostyler-style";
+import {
+  convertExpression,
+  convertWhereClause,
+  processRotationExpression,
+} from "./expressions";
+import { Group, Options, Rule, Symbolizer } from "./badTypes";
+import {
+  extractFillColor,
+  extractFontWeight,
+  ptToPxProp,
+  WARNINGS,
+} from "./toGeostylerUtils";
+import { processSymbolReference } from "./processSymbolReference";
 
+const usedIcons: string[] = [];
 
-const usedIcons: string[] = []
+export const convert = (layerDocument: any, options = undefined): any => {
+  const geoStyler = processLayer(layerDocument?.layerDefinitions?.[0], options);
+  return [geoStyler, usedIcons, WARNINGS];
+};
 
-export const convert = (arcgis:any , options=undefined): any => {
-  const geoStyler = processLayer(arcgis["layerDefinitions"][0], options);
-  return [geoStyler, usedIcons, WARNINGS]
-}
+const processLayer = (layer: any, options: Options = {}): Style => {
+  const style: Style = {
+    name: layer.name,
+    rules: [],
+  };
 
-const processLayer = (layer: Layer, options: Options = {}): Style => {
-    const style: Style = {
-        name: layer.name,
-        rules: []
-    };
-    if (layer.type === "CIMFeatureLayer") {
-        style.rules = processFeatureLayer(layer, options);
-    } else if (layer.type === "CIMRasterLayer") {
-        style.rules = processRasterLayer(layer);
+  if (layer.type === "CIMFeatureLayer") {
+    style.rules = processFeatureLayer(layer, options);
+  } else if (layer.type === "CIMRasterLayer") {
+    style.rules = processRasterLayer(layer);
+  }
+
+  return style;
+};
+
+const processFeatureLayer = (
+  layer: any,
+  options: Options = {}
+): FIXMERULE[] => {
+  const toLowerCase = options.toLowerCase || false;
+  const renderer = layer.renderer!;
+  const rules: Rule[] = [];
+
+  if (renderer.type === "CIMSimpleRenderer") {
+    rules.push(processSimpleRenderer(renderer, options));
+  } else if (renderer.type === "CIMUniqueValueRenderer") {
+    if (renderer.groups) {
+      for (const group of renderer.groups) {
+        rules.push(
+          ...processUniqueValueGroup(renderer.fields!, group, options)
+        );
+      }
+    } else if (renderer.defaultSymbol) {
+      // This is really a simple renderer
+      const rule: Rule = {
+        name: "",
+        symbolizers: processSymbolReference(renderer.defaultSymbol, options),
+      };
+      rules.push(rule);
     }
-
-    return style;
-}
-
-const processFeatureLayer = (layer: Layer, options: Options = {}):FIXMERULE[] => {
-    const toLowerCase = options.toLowerCase || false;
-    const renderer = layer.renderer!;
-    const rules: Rule[] = [];
-
-    if (renderer.type === "CIMSimpleRenderer") {
-        rules.push(processSimpleRenderer(renderer, options));
-    } else if (renderer.type === "CIMUniqueValueRenderer") {
-        if (renderer.groups) {
-            for (const group of renderer.groups) {
-                rules.push(...processUniqueValueGroup(renderer.fields!, group, options));
-            }
-        } else if (renderer.defaultSymbol) {
-            // This is really a simple renderer
-            const rule: Rule = {
-                name: "",
-                symbolizers: processSymbolReference(renderer.defaultSymbol, options),
-            };
-            rules.push(rule);
-        }
-    } else if (
-        renderer.type === "CIMClassBreaksRenderer" &&
-        ["GraduatedColor", "GraduatedSymbol"].includes(renderer.classBreakType!)
-    ) {
-        rules.push(...processClassBreaksRenderer(renderer, options));
-    } else {
-        WARNINGS.push(`Unsupported renderer type: ${renderer}`);
-        return [];
-    }
-
-    if (layer.labelVisibility) {
-        for (const labelClass of layer.labelClasses || []) {
-            rules.push(processLabelClass(labelClass, toLowerCase));
-        }
-    }
-
-    const rotation = getSymbolRotationFromVisualVariables(renderer, toLowerCase);
-    if (rotation) {
-        for (const rule of rules) {
-            for (const symbolizer of rule.symbolizers ?? []) {
-                symbolizer.rotate = rotation;
-            }
-        }
-    }
-    return rules as FIXMERULE[];
-}
-
-const processRasterLayer = (_layer: Layer): FIXMERULE[] => {
-    WARNINGS.push("CIMRasterLayer are not supported yet.");
-    // const rules = [{ name: layer.name, symbolizers: [rasterSymbolizer(layer)] }];
-    // geostyler.rules = rules;
+  } else if (
+    renderer.type === "CIMClassBreaksRenderer" &&
+    ["GraduatedColor", "GraduatedSymbol"].includes(renderer.classBreakType!)
+  ) {
+    rules.push(...processClassBreaksRenderer(renderer, options));
+  } else {
+    WARNINGS.push(`Unsupported renderer type: ${renderer}`);
     return [];
-}
+  }
 
-const processClassBreaksRenderer = (renderer: Renderer, options: Options = {}): Rule[] => {
+  if (layer.labelVisibility) {
+    for (const labelClass of layer.labelClasses || []) {
+      rules.push(processLabelClass(labelClass, toLowerCase));
+    }
+  }
+
+  const rotation = getSymbolRotationFromVisualVariables(renderer, toLowerCase);
+  if (rotation) {
+    for (const rule of rules) {
+      for (const symbolizer of rule.symbolizers ?? []) {
+        symbolizer.rotate = rotation;
+      }
+    }
+  }
+  return rules as FIXMERULE[];
+};
+
+const processRasterLayer = (_layer: any): FIXMERULE[] => {
+  WARNINGS.push("CIMRasterLayer are not supported yet.");
+  // const rules = [{ name: layer.name, symbolizers: [rasterSymbolizer(layer)] }];
+  // geostyler.rules = rules;
+  return [];
+};
+
+const processClassBreaksRenderer = (
+  renderer: any,
+  options: Options = {}
+): Rule[] => {
   const rules: Rule[] = [];
   const symbolsAscending: Symbolizer[][] = [];
   const field = renderer.field;
@@ -140,16 +157,24 @@ const processClassBreaksRenderer = (renderer: Renderer, options: Options = {}): 
   }
 
   return rules;
-}
+};
 
-const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false): Rule => {
-  const textSymbol = labelClass.textSymbol.symbol;
-  const expression = convertExpression(labelClass.expression, labelClass.expressionEngine, toLowerCase);
+const processLabelClass = (
+  labelClass: any,
+  toLowerCase: boolean = false
+): Rule => {
+  const textSymbol = labelClass.textSymbol?.symbol;
+  const expression = convertExpression(
+    labelClass.expression,
+    labelClass.expressionEngine,
+    toLowerCase
+  );
   const fontFamily = textSymbol.fontFamilyName || "Arial";
   const fontSize = ptToPxProp(textSymbol, "height", 12, true);
   const color = extractFillColor(textSymbol.symbol.symbolLayers);
   const fontWeight = extractFontWeight(textSymbol);
-  const rotationProps = labelClass.maplexLabelPlacementProperties?.rotationProperties || {};
+  const rotationProps =
+    labelClass.maplexLabelPlacementProperties?.rotationProperties || {};
   const rotationField = rotationProps.rotationField;
 
   const symbolizer: Symbolizer = {
@@ -158,7 +183,7 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: expression.join('-'), // FIXME
+    label: expression,
     size: fontSize,
     weight: fontWeight,
   };
@@ -174,11 +199,17 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
   if (stdPlacementType === "Line" && maplexPlacementType === "Line") {
     const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
     symbolizer.perpendicularOffset = primaryOffset + fontSize;
-  } else if (maplexPlacementType === "Point" && maplexPointPlacementMethod === "AroundPoint") {
+  } else if (
+    maplexPlacementType === "Point" &&
+    maplexPointPlacementMethod === "AroundPoint"
+  ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
     symbolizer.anchorPointX = symbolizer.anchorPointY = 0.0;
-  } else if (stdPlacementType === "Point" && stdPointPlacementType === "AroundPoint") {
+  } else if (
+    stdPlacementType === "Point" &&
+    stdPointPlacementType === "AroundPoint"
+  ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
     symbolizer.anchorPointX = symbolizer.anchorPointY = 0.0;
@@ -189,7 +220,10 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
   if (rotationField) {
     symbolizer.rotate = [
       "Mul",
-      ["PropertyName", toLowerCase ? rotationField.toLowerCase() : rotationField],
+      [
+        "PropertyName",
+        toLowerCase ? rotationField.toLowerCase() : rotationField,
+      ],
       -1,
     ];
   } else {
@@ -206,14 +240,18 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
     });
   }
 
-  symbolizer.group = labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels || (
-    maplexPlacementType === "Polygon" &&
-    labelClass.standardLabelPlacementProperties?.numLabelsOption === "OneLabelPerName"
-  );
+  symbolizer.group =
+    labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels ||
+    (maplexPlacementType === "Polygon" &&
+      labelClass.standardLabelPlacementProperties?.numLabelsOption ===
+        "OneLabelPerName");
 
   const rule: Rule = { name: "", symbolizers: [symbolizer] };
 
-  const scaleDenominator = processScaleDenominator(labelClass.minimumScale, labelClass.maximumScale);
+  const scaleDenominator = processScaleDenominator(
+    labelClass.minimumScale,
+    labelClass.maximumScale
+  );
   if (scaleDenominator) {
     rule.scaleDenominator = scaleDenominator;
   }
@@ -223,16 +261,20 @@ const processLabelClass = (labelClass: LabelClass, toLowerCase: boolean = false)
   }
 
   return rule;
-}
+};
 
-const processSimpleRenderer = (renderer: Renderer, options: Options): Rule => {
+const processSimpleRenderer = (renderer: any, options: Options): Rule => {
   return {
     name: renderer.label || "",
     symbolizers: processSymbolReference(renderer.symbol, options),
   };
-}
+};
 
-const processUniqueValueGroup = (fields: string[], group: Group, options: Options): Rule[] =>{
+const processUniqueValueGroup = (
+  fields: string[],
+  group: Group,
+  options: Options
+): Rule[] => {
   const toLowerCase = options.toLowerCase || false;
 
   const _and = (a: any[], b: any[]): any[] => {
@@ -247,9 +289,16 @@ const processUniqueValueGroup = (fields: string[], group: Group, options: Option
 
   const _equal = (name: string, val: any): any[] => {
     if (val === "<Null>") {
-      return ["PropertyIsNull", ["PropertyName", toLowerCase ? name.toLowerCase() : name]];
+      return [
+        "PropertyIsNull",
+        ["PropertyName", toLowerCase ? name.toLowerCase() : name],
+      ];
     }
-    return ["PropertyIsEqualTo", ["PropertyName", toLowerCase ? name.toLowerCase() : name], val];
+    return [
+      "PropertyIsEqualTo",
+      ["PropertyName", toLowerCase ? name.toLowerCase() : name],
+      val,
+    ];
   };
 
   const rules: Rule[] = [];
@@ -263,7 +312,9 @@ const processUniqueValueGroup = (fields: string[], group: Group, options: Option
       if ("fieldValues" in v) {
         const fieldValues = v.fieldValues!;
         let condition = _equal(fields[0], fieldValues[0]);
-        for (const [fieldValue, fieldName] of fieldValues.slice(1).map((fv: unknown, idx: number) => [fv, fields[idx + 1]])) {
+        for (const [fieldValue, fieldName] of fieldValues
+          .slice(1)
+          .map((fv: unknown, idx: number) => [fv, fields[idx + 1]])) {
           condition = _and(condition, _equal(fieldName, fieldValue));
         }
         conditions.push(condition);
@@ -275,7 +326,10 @@ const processUniqueValueGroup = (fields: string[], group: Group, options: Option
       rule.filter = ruleFilter;
       rule.symbolizers = processSymbolReference(clazz.symbol, options);
 
-      const scaleDenominator = processScaleDenominator(clazz.symbol.minScale, clazz.symbol.maxScale);
+      const scaleDenominator = processScaleDenominator(
+        clazz.symbol.minScale,
+        clazz.symbol.maxScale
+      );
       if (scaleDenominator) {
         rule.scaleDenominator = scaleDenominator;
       }
@@ -289,7 +343,10 @@ const processUniqueValueGroup = (fields: string[], group: Group, options: Option
       }
       altRule.symbolizers = processSymbolReference(symbolRef, options);
 
-      const scaleDenominator = processScaleDenominator(symbolRef.minScale, symbolRef.maxScale);
+      const scaleDenominator = processScaleDenominator(
+        symbolRef.minScale,
+        symbolRef.maxScale
+      );
       if (scaleDenominator) {
         altRule.scaleDenominator = scaleDenominator;
       }
@@ -298,29 +355,35 @@ const processUniqueValueGroup = (fields: string[], group: Group, options: Option
   }
 
   return rules;
-}
+};
 
-const getSymbolRotationFromVisualVariables = (renderer: any, toLowerCase: boolean) => {
-    const visualVariables = renderer?.visualVariables ?? [];
-    for (const visualVariable of visualVariables) {
-        if (visualVariable.type === "CIMRotationVisualVariable") {
-            const expression = visualVariable.visualVariableInfoZ?.valueExpressionInfo?.expression ||
-                visualVariable.visualVariableInfoZ?.expression;
-            const rotationType = visualVariable.rotationTypeZ;
-            return processRotationExpression(expression, rotationType, toLowerCase);
-        }
+const getSymbolRotationFromVisualVariables = (
+  renderer: any,
+  toLowerCase: boolean
+) => {
+  const visualVariables = renderer?.visualVariables ?? [];
+  for (const visualVariable of visualVariables) {
+    if (visualVariable.type === "CIMRotationVisualVariable") {
+      const expression =
+        visualVariable.visualVariableInfoZ?.valueExpressionInfo?.expression ||
+        visualVariable.visualVariableInfoZ?.expression;
+      const rotationType = visualVariable.rotationTypeZ;
+      return processRotationExpression(expression, rotationType, toLowerCase);
     }
-    return null;
-}
+  }
+  return null;
+};
 
-const processScaleDenominator = (minimumScale?: number, maximumScale?: number): { [key: string]: number } => {
-    let scaleDenominator: { [key: string]: number } = {};
-    if (minimumScale !== undefined) {
-        scaleDenominator["max"] = minimumScale;
-    }
-    if (maximumScale !== undefined) {
-        scaleDenominator["min"] = maximumScale;
-    }
-    return scaleDenominator;
-}
-
+const processScaleDenominator = (
+  minimumScale?: number,
+  maximumScale?: number
+): { [key: string]: number } => {
+  let scaleDenominator: { [key: string]: number } = {};
+  if (minimumScale !== undefined) {
+    scaleDenominator["max"] = minimumScale;
+  }
+  if (maximumScale !== undefined) {
+    scaleDenominator["min"] = maximumScale;
+  }
+  return scaleDenominator;
+};
