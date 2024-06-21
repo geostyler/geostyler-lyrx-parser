@@ -5,7 +5,7 @@ import {
   UnsupportedProperties,
   WriteStyleResult
 } from 'geostyler-style';
-import {convert} from "./toGeostyler.ts";
+import {convert} from "./toGeostyler";
 
 /**
  * This parser can be used with the GeoStyler.

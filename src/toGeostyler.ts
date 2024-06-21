@@ -1,8 +1,8 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
-import {convertExpression, convertWhereClause, processRotationExpression} from "./expressions.ts";
-import {Group, LabelClass, Layer, Options, Renderer, Rule, Symbolizer} from "./badTypes.ts";
-import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils.ts";
-import {processSymbolReference} from "./processSymbolReference.ts";
+import {convertExpression, convertWhereClause, processRotationExpression} from "./expressions";
+import {Group, LabelClass, Layer, Options, Renderer, Rule, Symbolizer} from "./badTypes";
+import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from "./toGeostylerUtils";
+import {processSymbolReference} from "./processSymbolReference";
 
 
 const usedIcons: string[] = []
