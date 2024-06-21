@@ -1,20 +1,20 @@
-import { ptToPx } from "./constants";
-import { processColor, processOpacity } from "./processUtils";
+import {ptToPx} from './constants';
+import {processColor, processOpacity} from './processUtils';
 
 export const WARNINGS: string[] = [];
 
 export const esriFontToStandardSymbols = (charIndex: number): string => {
   const mapping: { [index: number]: string } = {
-    33: "circle",
-    34: "square",
-    35: "triangle",
-    40: "circle",
-    41: "square",
-    42: "triangle",
-    94: "star",
-    95: "star",
-    203: "cross",
-    204: "cross",
+    33: 'circle',
+    34: 'square',
+    35: 'triangle',
+    40: 'circle',
+    41: 'square',
+    42: 'triangle',
+    94: 'star',
+    95: 'star',
+    203: 'cross',
+    204: 'cross',
   };
 
   if (mapping.hasOwnProperty(charIndex)) {
@@ -23,7 +23,7 @@ export const esriFontToStandardSymbols = (charIndex: number): string => {
     WARNINGS.push(
       `Unsupported symbol from ESRI font (character index ${charIndex}) replaced by default marker`
     );
-    return "circle";
+    return 'circle';
   }
 };
 
@@ -46,22 +46,22 @@ export const extractStroke = (
   symbolLayers: any[]
 ): [string, number, number] => {
   for (let sl of symbolLayers) {
-    if (sl.type === "CIMSolidStroke") {
-      let color = processColor(sl.color ?? "");
-      let width = ptToPxProp(sl, "width", 0);
-      let opacity = processOpacity(sl.color ?? "");
+    if (sl.type === 'CIMSolidStroke') {
+      let color = processColor(sl.color ?? '');
+      let width = ptToPxProp(sl, 'width', 0);
+      let opacity = processOpacity(sl.color ?? '');
       return [color, width, opacity];
     }
   }
-  return ["#000000", 0, 0];
+  return ['#000000', 0, 0];
 };
 
 export const extractFillColor = (symbolLayers: any[]): string => {
-  let color: string = "#ffffff";
+  let color: string = '#ffffff';
   for (let sl of symbolLayers) {
-    if (sl.type === "CIMSolidFill") {
-      color = processColor(sl.color ?? "");
-    } else if (sl.type === "CIMCharacterMarker") {
+    if (sl.type === 'CIMSolidFill') {
+      color = processColor(sl.color ?? '');
+    } else if (sl.type === 'CIMCharacterMarker') {
       color = extractFillColor(sl.symbol.symbolLayers);
     }
   }
@@ -70,7 +70,7 @@ export const extractFillColor = (symbolLayers: any[]): string => {
 
 export const extractFillOpacity = (symbolLayers: any[]): number => {
   for (let sl of symbolLayers) {
-    if (sl.type === "CIMSolidFill") {
+    if (sl.type === 'CIMSolidFill') {
       return processOpacity(sl.color);
     }
   }
@@ -78,5 +78,5 @@ export const extractFillOpacity = (symbolLayers: any[]): number => {
 };
 
 export const extractFontWeight = (textSymbol: any): string => {
-  return textSymbol.fontStyleName === "Bold" ? "bold" : "normal";
+  return textSymbol.fontStyleName === 'Bold' ? 'bold' : 'normal';
 };
