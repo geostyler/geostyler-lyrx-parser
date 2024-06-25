@@ -16,7 +16,7 @@ import { CIMLayerDocument } from './esri/types/CIMLayerDocument';
  * @class LyrcParser
  * @implements StyleParser
  */
-export class LyrxParser implements StyleParser<string> {
+export class LyrxParser implements StyleParser<CIMLayerDocument> {
   static title = "ArcGIS Pro lyrx parser";
   title = "ArcGIS Pro lyrx parser";
 
