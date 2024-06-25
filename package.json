@@ -35,7 +35,7 @@
     "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
-    "geostyler-style": "^8.1.0"
+    "geostyler-style": "^9.0.0"
   },
   "devDependencies": {
     "@terrestris/eslint-config-typescript": "^5.0.0",
