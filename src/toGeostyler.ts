@@ -1,34 +1,49 @@
-import { Rule as FIXMERULE, Style } from "geostyler-style";
+import { Rule as FIXMERULE, Style } from 'geostyler-style';
 import {
   convertExpression,
   convertWhereClause,
   processRotationExpression,
-} from "./expressions";
-import { Group, Options, Rule, Symbolizer } from "./badTypes";
+} from './expressions';
+import { Options, Rule, Symbolizer } from './badTypes';
 import {
   extractFillColor,
   extractFontWeight,
   ptToPxProp,
   WARNINGS,
-} from "./toGeostylerUtils";
-import { processSymbolReference } from "./processSymbolReference";
+} from './toGeostylerUtils';
+import { processSymbolReference } from './processSymbolReference';
+import {
+  CIMFeatureLayer,
+  CIMLabelClass,
+  CIMLayerDefinition,
+  CIMLayerDocument,
+  LabelExpressionEngine,
+  LabelFeatureType,
+} from './esri/types';
+import { CIMTextSymbol } from './esri/types/symbols';
 
 const usedIcons: string[] = [];
 
-export const convert = (layerDocument: any, options = undefined): any => {
+export const convert = (
+  layerDocument: CIMLayerDocument,
+  options = undefined
+): any => {
   const geoStyler = processLayer(layerDocument?.layerDefinitions?.[0], options);
   return [geoStyler, usedIcons, WARNINGS];
 };
 
-const processLayer = (layer: any, options: Options = {}): Style => {
+const processLayer = (
+  layer: CIMLayerDefinition,
+  options: Options = {}
+): Style => {
   const style: Style = {
     name: layer.name,
     rules: [],
   };
 
-  if (layer.type === "CIMFeatureLayer") {
+  if (layer.type === 'CIMFeatureLayer') {
     style.rules = processFeatureLayer(layer, options);
-  } else if (layer.type === "CIMRasterLayer") {
+  } else if (layer.type === 'CIMRasterLayer') {
     style.rules = processRasterLayer(layer);
   }
 
@@ -36,16 +51,16 @@ const processLayer = (layer: any, options: Options = {}): Style => {
 };
 
 const processFeatureLayer = (
-  layer: any,
+  layer: CIMFeatureLayer,
   options: Options = {}
 ): FIXMERULE[] => {
   const toLowerCase = options.toLowerCase || false;
   const renderer = layer.renderer!;
   const rules: Rule[] = [];
 
-  if (renderer.type === "CIMSimpleRenderer") {
+  if (renderer.type === 'CIMSimpleRenderer') {
     rules.push(processSimpleRenderer(renderer, options));
-  } else if (renderer.type === "CIMUniqueValueRenderer") {
+  } else if (renderer.type === 'CIMUniqueValueRenderer') {
     if (renderer.groups) {
       for (const group of renderer.groups) {
         rules.push(
@@ -55,14 +70,14 @@ const processFeatureLayer = (
     } else if (renderer.defaultSymbol) {
       // This is really a simple renderer
       const rule: Rule = {
-        name: "",
+        name: '',
         symbolizers: processSymbolReference(renderer.defaultSymbol, options),
       };
       rules.push(rule);
     }
   } else if (
-    renderer.type === "CIMClassBreaksRenderer" &&
-    ["GraduatedColor", "GraduatedSymbol"].includes(renderer.classBreakType!)
+    renderer.type === 'CIMClassBreaksRenderer' &&
+    ['GraduatedColor', 'GraduatedSymbol'].includes(renderer.classBreakType!)
   ) {
     rules.push(...processClassBreaksRenderer(renderer, options));
   } else {
@@ -88,7 +103,7 @@ const processFeatureLayer = (
 };
 
 const processRasterLayer = (_layer: any): FIXMERULE[] => {
-  WARNINGS.push("CIMRasterLayer are not supported yet.");
+  WARNINGS.push('CIMRasterLayer are not supported yet.');
   // const rules = [{ name: layer.name, symbolizers: [rasterSymbolizer(layer)] }];
   // geostyler.rules = rules;
   return [];
@@ -112,22 +127,22 @@ const processClassBreaksRenderer = (
     let filt: any[];
     if (lastbound !== null) {
       filt = [
-        "And",
+        'And',
         [
-          "PropertyIsGreaterThan",
-          ["PropertyName", toLowerCase ? field.toLowerCase() : field],
+          'PropertyIsGreaterThan',
+          ['PropertyName', toLowerCase ? field.toLowerCase() : field],
           lastbound,
         ],
         [
-          "PropertyIsLessThanOrEqualTo",
-          ["PropertyName", toLowerCase ? field.toLowerCase() : field],
+          'PropertyIsLessThanOrEqualTo',
+          ['PropertyName', toLowerCase ? field.toLowerCase() : field],
           upperbound,
         ],
       ];
     } else {
       filt = [
-        "PropertyIsLessThanOrEqualTo",
-        ["PropertyName", toLowerCase ? field.toLowerCase() : field],
+        'PropertyIsLessThanOrEqualTo',
+        ['PropertyName', toLowerCase ? field.toLowerCase() : field],
         upperbound,
       ];
     }
@@ -140,7 +155,7 @@ const processClassBreaksRenderer = (
     }
 
     const ruledef: Rule = {
-      name: classbreak.label || "classbreak",
+      name: classbreak.label || 'classbreak',
       symbolizers: symbolizers,
       filter: filt,
     };
@@ -160,55 +175,68 @@ const processClassBreaksRenderer = (
 };
 
 const processLabelClass = (
-  labelClass: any,
+  labelClass: CIMLabelClass,
   toLowerCase: boolean = false
 ): Rule => {
-  const textSymbol = labelClass.textSymbol?.symbol;
+  // todo ConvertTextSymbol:
+  if (labelClass.textSymbol?.symbol?.type != 'CIMTextSymbol') {
+    return { name: '', symbolizers: [] };
+  }
+
+  const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
   const expression = convertExpression(
-    labelClass.expression,
-    labelClass.expressionEngine,
+    labelClass?.expression ?? '',
+    labelClass.expressionEngine ?? LabelExpressionEngine.Arcade,
     toLowerCase
   );
-  const fontFamily = textSymbol.fontFamilyName || "Arial";
-  const fontSize = ptToPxProp(textSymbol, "height", 12, true);
-  const color = extractFillColor(textSymbol.symbol.symbolLayers);
+  const fontFamily = textSymbol?.fontFamilyName || 'Arial';
+  const fontSize = ptToPxProp(textSymbol, 'height', 12, true);
+  const color = extractFillColor(textSymbol?.symbol?.symbolLayers ?? []);
   const fontWeight = extractFontWeight(textSymbol);
   const rotationProps =
-    labelClass.maplexLabelPlacementProperties?.rotationProperties || {};
+    labelClass.maplexLabelPlacementProperties?.rotationProperties ||
+    ({} as any);
   const rotationField = rotationProps.rotationField;
 
   const symbolizer: Symbolizer = {
-    kind: "Text",
-    anchor: "right",
+    kind: 'Text',
+    anchor: 'right',
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: expression,
+    label: Array.isArray(expression) ? expression.join('-') : expression, // FIXME
     size: fontSize,
     weight: fontWeight,
   };
 
-  const stdProperties = labelClass.standardLabelPlacementProperties || {};
-  const stdPlacementType = stdProperties.featureType;
-  const stdPointPlacementType = stdProperties.pointPlacementMethod;
-  const maplexProperties = labelClass.maplexLabelPlacementProperties || {};
-  const maplexPlacementType = maplexProperties.featureType;
-  const maplexPrimaryOffset = ptToPxProp(maplexProperties, "primaryOffset", 0);
-  const maplexPointPlacementMethod = maplexProperties.pointPlacementMethod;
+  const stdProperties = labelClass.standardLabelPlacementProperties;
+  const stdPlacementType = stdProperties?.featureType;
+  const stdPointPlacementType = stdProperties?.pointPlacementMethod;
+  const maplexProperties = labelClass.maplexLabelPlacementProperties;
+  const maplexPlacementType = maplexProperties?.featureType;
+  const maplexPrimaryOffset = ptToPxProp(
+    maplexProperties ?? {},
+    'primaryOffset',
+    0
+  );
+  const maplexPointPlacementMethod = maplexProperties?.pointPlacementMethod;
 
-  if (stdPlacementType === "Line" && maplexPlacementType === "Line") {
-    const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
+  if (
+    stdPlacementType === LabelFeatureType.Line &&
+    maplexPlacementType === LabelFeatureType.Line
+  ) {
+    const primaryOffset = ptToPxProp(textSymbol, 'primaryOffset', 0);
     symbolizer.perpendicularOffset = primaryOffset + fontSize;
   } else if (
-    maplexPlacementType === "Point" &&
-    maplexPointPlacementMethod === "AroundPoint"
+    maplexPlacementType === LabelFeatureType.Point &&
+    maplexPointPlacementMethod === 'AroundPoint'
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
     symbolizer.anchorPointX = symbolizer.anchorPointY = 0.0;
   } else if (
-    stdPlacementType === "Point" &&
-    stdPointPlacementType === "AroundPoint"
+    stdPlacementType === LabelFeatureType.Point &&
+    stdPointPlacementType === 'AroundPoint'
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset];
@@ -219,9 +247,9 @@ const processLabelClass = (
 
   if (rotationField) {
     symbolizer.rotate = [
-      "Mul",
+      'Mul',
       [
-        "PropertyName",
+        'PropertyName',
         toLowerCase ? rotationField.toLowerCase() : rotationField,
       ],
       -1,
@@ -230,9 +258,11 @@ const processLabelClass = (
     symbolizer.rotate = 0.0;
   }
 
-  const haloSize = ptToPxProp(textSymbol, "haloSize", 0);
+  const haloSize = ptToPxProp(textSymbol, 'haloSize', 0);
   if (haloSize && textSymbol.haloSymbol) {
-    const haloColor = extractFillColor(textSymbol.haloSymbol.symbolLayers);
+    const haloColor = extractFillColor(
+      textSymbol?.haloSymbol?.symbolLayers ?? []
+    );
     Object.assign(symbolizer, {
       haloColor: haloColor,
       haloSize: haloSize,
@@ -242,11 +272,11 @@ const processLabelClass = (
 
   symbolizer.group =
     labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels ||
-    (maplexPlacementType === "Polygon" &&
+    (maplexPlacementType === LabelFeatureType.Polygon &&
       labelClass.standardLabelPlacementProperties?.numLabelsOption ===
-        "OneLabelPerName");
+        'OneLabelPerName');
 
-  const rule: Rule = { name: "", symbolizers: [symbolizer] };
+  const rule: Rule = { name: '', symbolizers: [symbolizer] };
 
   const scaleDenominator = processScaleDenominator(
     labelClass.minimumScale,
@@ -265,51 +295,51 @@ const processLabelClass = (
 
 const processSimpleRenderer = (renderer: any, options: Options): Rule => {
   return {
-    name: renderer.label || "",
+    name: renderer.label || '',
     symbolizers: processSymbolReference(renderer.symbol, options),
   };
 };
 
 const processUniqueValueGroup = (
   fields: string[],
-  group: Group,
+  group: any,
   options: Options
 ): Rule[] => {
   const toLowerCase = options.toLowerCase || false;
 
   const _and = (a: any[], b: any[]): any[] => {
-    return ["And", a, b];
+    return ['And', a, b];
   };
 
   const _or = (listConditions: any[]): any[] => {
     const orConditions = listConditions;
-    orConditions.unshift("Or");
+    orConditions.unshift('Or');
     return orConditions;
   };
 
   const _equal = (name: string, val: any): any[] => {
-    if (val === "<Null>") {
+    if (val === '<Null>') {
       return [
-        "PropertyIsNull",
-        ["PropertyName", toLowerCase ? name.toLowerCase() : name],
+        'PropertyIsNull',
+        ['PropertyName', toLowerCase ? name.toLowerCase() : name],
       ];
     }
     return [
-      "PropertyIsEqualTo",
-      ["PropertyName", toLowerCase ? name.toLowerCase() : name],
+      'PropertyIsEqualTo',
+      ['PropertyName', toLowerCase ? name.toLowerCase() : name],
       val,
     ];
   };
 
   const rules: Rule[] = [];
   for (const clazz of group.classes || []) {
-    const rule: Rule = { name: clazz.label || "label" };
+    const rule: Rule = { name: clazz.label || 'label' };
     const values = clazz.values;
     const conditions: any[] = [];
     let ruleFilter: any[] | null = null;
 
     for (const v of values) {
-      if ("fieldValues" in v) {
+      if ('fieldValues' in v) {
         const fieldValues = v.fieldValues!;
         let condition = _equal(fields[0], fieldValues[0]);
         for (const [fieldValue, fieldName] of fieldValues
@@ -363,7 +393,7 @@ const getSymbolRotationFromVisualVariables = (
 ) => {
   const visualVariables = renderer?.visualVariables ?? [];
   for (const visualVariable of visualVariables) {
-    if (visualVariable.type === "CIMRotationVisualVariable") {
+    if (visualVariable.type === 'CIMRotationVisualVariable') {
       const expression =
         visualVariable.visualVariableInfoZ?.valueExpressionInfo?.expression ||
         visualVariable.visualVariableInfoZ?.expression;
@@ -380,10 +410,10 @@ const processScaleDenominator = (
 ): { [key: string]: number } => {
   let scaleDenominator: { [key: string]: number } = {};
   if (minimumScale !== undefined) {
-    scaleDenominator["max"] = minimumScale;
+    scaleDenominator.max = minimumScale;
   }
   if (maximumScale !== undefined) {
-    scaleDenominator["min"] = maximumScale;
+    scaleDenominator.min = maximumScale;
   }
   return scaleDenominator;
 };

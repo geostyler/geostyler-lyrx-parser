@@ -1,13 +1,16 @@
 import {WellKnownText} from "./customProperties";
+import { LabelExpressionEngine } from "./esri/types";
 
-export const convertExpression = (rawExpression: string, engine: string, toLowerCase: boolean) => {
-    let expression: any = rawExpression;
-    if (engine == "Arcade") {
+export const convertExpression = (rawExpression: string, engine: LabelExpressionEngine, toLowerCase: boolean) => {
+    let expression: string = rawExpression;
+    if (engine == LabelExpressionEngine.Arcade) {
         expression = convertArcadeExpression(rawExpression);
     }
+
     if (toLowerCase) {
         expression = rawExpression.toLowerCase();
     }
+    
     if (expression.includes("+") || expression.includes("&")) {
         let tokens: string[] = expression.includes("+") ? expression.split("+").reverse() : expression.split("&").reverse();
         let addends = [];
@@ -24,10 +27,9 @@ export const convertExpression = (rawExpression: string, engine: string, toLower
             }
             expression = allOps;
         }
-    } else {
-        expression = ["PropertyName", processPropertyName(expression)];
+        return expression;
     }
-    return expression;
+    return ["PropertyName", processPropertyName(expression)];
 }
 
 

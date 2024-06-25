@@ -3,9 +3,10 @@ import {
   Style,
   StyleParser,
   UnsupportedProperties,
-  WriteStyleResult,
-} from "geostyler-style";
-import { convert } from "./toGeostyler";
+  WriteStyleResult
+} from 'geostyler-style';
+import {convert} from "./toGeostyler";
+import { CIMLayerDocument } from './esri/types/CIMLayerDocument';
 
 /**
  * This parser can be used with the GeoStyler.
@@ -15,14 +16,14 @@ import { convert } from "./toGeostyler";
  * @class LyrcParser
  * @implements StyleParser
  */
-export class LyrxParser implements StyleParser<string> {
+export class LyrxParser implements StyleParser<CIMLayerDocument> {
   static title = "ArcGIS Pro lyrx parser";
   title = "ArcGIS Pro lyrx parser";
 
   unsupportedProperties: UnsupportedProperties = {};
 
-  readStyle(inputStyle: string): Promise<ReadStyleResult> {
-    const geostyleStyle = convert(inputStyle);
+  readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+    const geostyleStyle =  convert(inputStyle)
     return Promise.resolve({
       output: {
         name: geostyleStyle[0].name,
