@@ -1,9 +1,9 @@
 {
   "name": "geostyler-lyrx-parser",
-  "version": "0.0.1",
+  "version": "1.0.0-next.1",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
-  "main": "dist/LyrxParser.mjs",
-  "types": "dist/LyrxParser.d.ts",
+  "type": "module",
+  "main": "dist/LyrxParser.js",
   "files": [
     "dist"
   ],
@@ -35,7 +35,7 @@
     "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
-    "geostyler-style": "^8.1.0"
+    "geostyler-style": "^9.0.1"
   },
   "devDependencies": {
     "@terrestris/eslint-config-typescript": "^5.0.0",
@@ -46,7 +46,6 @@
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.40.0",
-    "np": "^10.0.5",
     "typescript": "^5.4.5",
     "vite": "^5.2.12",
     "vite-plugin-dts": "^3.9.1",
