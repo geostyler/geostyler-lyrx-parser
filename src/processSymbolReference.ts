@@ -9,7 +9,7 @@ import {
   extractFillColor,
   extractFillOpacity,
   extractStroke,
-  ptToPxProp,
+  ptToPxProp, toHex,
 } from './toGeostylerUtils';
 import {
   MarkerPlacement,
@@ -126,7 +126,7 @@ const processOrientedMarkerAtEndOfLine = (
 ): Record<string, any> | undefined => {
   let markerPositionFnc: string, markerRotationFnc: string, rotation: number;
 
-  if (orientedMarker == 'start') {
+  if (orientedMarker === 'start') {
     markerPositionFnc = MarkerPlacementPosition.START;
     markerRotationFnc = MarkerPlacementAngle.START;
     rotation = layer?.rotation ?? 180;
@@ -138,10 +138,10 @@ const processOrientedMarkerAtEndOfLine = (
     return undefined;
   }
 
-  const replaceesri = options?.replaceesri ?? false;
+  const replaceesri = !!options?.replaceesri;
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
-  const hexcode = charindex.toString(16);
+  const hexcode = toHex(charindex);
 
   let name;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {

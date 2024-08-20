@@ -3,6 +3,10 @@ import {processColor, processOpacity} from './processUtils';
 
 export const WARNINGS: string[] = [];
 
+export const toHex = (value: number): string => {
+  return `0x${value.toString(16)}`;
+};
+
 export const esriFontToStandardSymbols = (charIndex: number): string => {
   const mapping: { [index: number]: string } = {
     33: 'circle',

@@ -7,7 +7,7 @@ import {
   extractFillColor,
   extractFillOpacity,
   extractStroke,
-  ptToPxProp,
+  ptToPxProp, toHex,
   WARNINGS,
 } from "./toGeostylerUtils";
 import { processSymbolReference } from "./processSymbolReference";
@@ -90,12 +90,11 @@ const processSymbolCharacterMarker = (
   layer: any,
   options: { [key: string]: any }
 ): { [key: string]: any } => {
-  let replaceesri =
-    options.replaceesri === undefined ? false : options.replaceesri;
-  let fontFamily = layer.fontFamilyName;
-  let charindex = layer.characterIndex;
-  let hexcode = charindex.toString(16);
-  let size = ptToPxProp(layer, "size", 12);
+  const replaceesri = !!options.replaceesri;
+  const fontFamily = layer.fontFamilyName;
+  const charindex = layer.characterIndex;
+  const hexcode = toHex(charindex);
+  const size = ptToPxProp(layer, "size", 12);
 
   let name: string;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
@@ -107,7 +106,7 @@ const processSymbolCharacterMarker = (
   let rotate = layer.rotation === undefined ? 0 : layer.rotation;
   let rotateClockwise =
     layer.rotateClockwise === undefined ? false : layer.rotateClockwise;
-  if (!rotateClockwise) {
+  if (!rotateClockwise && rotate !== 0) {
     rotate *= -1;
   }
 
@@ -146,26 +145,26 @@ const processSymbolCharacterMarker = (
 };
 
 const processSymbolVectorMarker = (layer: any): Marker => {
-    if (layer.size) {
-        layer.size = ptToPxProp(layer, "size", 3);
-    }
-    // Default values
-    let fillColor = "#ff0000";
-    let strokeColor = "#000000";
-    let strokeWidth = 1.0;
-    let markerSize = 10;
-    let strokeOpacity = 1;
-    let wellKnownName = "circle";
-    let maxX: number | null = null;
-    let maxY: number | null = null;
+  if (layer.size) {
+    layer.size = ptToPxProp(layer, "size", 3);
+  }
+  // Default values
+  let fillColor = "#ff0000";
+  let strokeColor = "#000000";
+  let strokeWidth = 1.0;
+  let markerSize = 10;
+  let strokeOpacity = 1;
+  let wellKnownName = "circle";
+  let maxX: number | null = null;
+  let maxY: number | null = null;
 
-  let markerGraphics =
+  const markerGraphics =
     layer.markerGraphics !== undefined ? layer.markerGraphics : [];
   if (markerGraphics.length > 0) {
     // TODO: support multiple marker graphics
-    let markerGraphic = markerGraphics[0];
-    let marker = processSymbolReference(markerGraphic, {})[0];
-    let sublayers = markerGraphic.symbol.symbolLayers.filter(
+    const markerGraphic = markerGraphics[0];
+    const marker = processSymbolReference(markerGraphic, {})[0];
+    const sublayers = markerGraphic.symbol.symbolLayers.filter(
       (sublayer: any) => sublayer.enable
     );
     fillColor = extractFillColor(sublayers);
@@ -174,8 +173,8 @@ const processSymbolVectorMarker = (layer: any): Marker => {
       marker.size !== undefined
         ? marker.size
         : layer.size !== undefined
-        ? layer.size
-        : 10;
+          ? layer.size
+          : 10;
     if (markerGraphic.symbol.type === "CIMPointSymbol") {
       wellKnownName = marker.wellKnownName ?? "";
     } else if (
@@ -212,7 +211,7 @@ const processSymbolVectorMarker = (layer: any): Marker => {
     marker["maxY"] = maxY;
   }
 
-  let markerPlacement =
+  const markerPlacement =
     layer.markerPlacement != undefined &&
     layer.markerPlacement.placementTemplate !== undefined
       ? layer.markerPlacement.placementTemplate
@@ -351,7 +350,7 @@ const processEffect = (effect: Record<string, any>): Record<string, any> => {
     if (dasharrayValues.length > 1) {
       return {
         dasharrayValues: dasharrayValues,
-        dasharray: dasharrayValues.join(" "),
+        dasharray: dasharrayValues, // TODO was a string, can be simplified now
       };
     }
   } else if (effect.type === "CIMGeometricEffectOffset") {

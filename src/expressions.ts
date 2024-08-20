@@ -10,7 +10,7 @@ export const convertExpression = (rawExpression: string, engine: LabelExpression
     if (toLowerCase) {
         expression = rawExpression.toLowerCase();
     }
-    
+
     if (expression.includes("+") || expression.includes("&")) {
         let tokens: string[] = expression.includes("+") ? expression.split("+").reverse() : expression.split("&").reverse();
         let addends = [];
@@ -18,7 +18,7 @@ export const convertExpression = (rawExpression: string, engine: LabelExpression
             if (token.includes("[")) {
                 addends.push(["PropertyName", processPropertyName(token)]);
             } else {
-                let literal = token.replace('"', "");
+                let literal = token.replaceAll('"', "");
                 addends.push(replaceSpecialLiteral(literal));
             }
             let allOps: any = addends[0];
