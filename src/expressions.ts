@@ -1,35 +1,31 @@
 import {WellKnownText} from './customProperties';
 import { LabelExpressionEngine } from './esri/types';
 
-export const convertExpression = (rawExpression: string, engine: LabelExpressionEngine, toLowerCase: boolean) => {
+export const convertExpression = (
+  rawExpression: string, engine: LabelExpressionEngine,
+  toLowerCase: boolean
+): string => {
   let expression: string = rawExpression;
   if (engine === LabelExpressionEngine.Arcade) {
     expression = convertArcadeExpression(rawExpression);
   }
-
   if (toLowerCase) {
     expression = rawExpression.toLowerCase();
   }
-
   if (expression.includes('+') || expression.includes('&')) {
-    let tokens: string[] = expression.includes('+') ? expression.split('+').reverse() : expression.split('&').reverse();
-    let addends = [];
-    for (let token of tokens) {
+    const tokens = expression.includes('+') ? expression.split('+') : expression.split('&');
+    const parsedExpression = tokens.map((token) => {
+      token = token.trimStart().trimEnd();
       if (token.includes('[')) {
-        addends.push(['PropertyName', processPropertyName(token)]);
+        return processPropertyName(token);
       } else {
-        let literal = token.replaceAll('"', '');
-        addends.push(replaceSpecialLiteral(literal));
+        const literal = token.replaceAll('"', '');
+        return replaceSpecialLiteral(literal);
       }
-      let allOps: any = addends[0];
-      for (let attr of addends.slice(1)) {
-        allOps = ['Concatenate', attr, allOps];
-      }
-      expression = allOps;
-    }
-    return expression;
+    });
+    return parsedExpression.join('');
   }
-  return ['PropertyName', processPropertyName(expression)];
+  return processPropertyName(expression);
 };
 
 
@@ -116,7 +112,7 @@ const replaceSpecialLiteral = (literal: string): string => {
 };
 
 const processPropertyName = (token: string): string => {
-  return token.replace('[', '').replace(']', '').trim();
+  return token.replace('[', '{{').replace(']', '}}').trim();
 };
 
 const convertArcadeExpression = (expression: string): string => {

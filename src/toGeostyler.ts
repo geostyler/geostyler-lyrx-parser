@@ -200,7 +200,7 @@ const processLabelClass = (
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: Array.isArray(expression) ? expression.join('-') : expression, // FIXME
+    label: expression,
     size: fontSize,
     weight: fontWeight,
   };

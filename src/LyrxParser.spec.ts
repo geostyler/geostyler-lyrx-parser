@@ -1,7 +1,7 @@
 import { expect, it, describe, beforeAll } from 'vitest';
 import fs from 'fs';
 import { LyrxParser } from './LyrxParser';
-import { ReadStyleResult, Rule } from 'geostyler-style';
+import {ReadStyleResult, Rule, TextSymbolizer} from 'geostyler-style';
 
 describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
   let lyrx: any;
@@ -139,5 +139,27 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(symbolizer.strokeColor).toEqual('#000000');
     expect(symbolizer.strokeWidth).toEqual(0.9333333333333332);
     expect(symbolizer.strokeOpacity).toEqual(1);
+  });
+});
+
+describe('LyrxParser should parse afu_gwn_02.lyrx', () => {
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    lyrxParser = new LyrxParser();
+    lyrx = JSON.parse(
+      fs.readFileSync('./data/lyrx/afu_gwn_02.lyrx', 'utf8')
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  it('should have parse label expression', () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(6);
+    const textSymbolizer = rules[5].symbolizers[0] as TextSymbolizer;
+    expect(textSymbolizer.kind).toEqual('Text');
+    expect(textSymbolizer.label).toEqual('{{bew_nr}} / {{bew_foerde}} l/s');
   });
 });
