@@ -27,7 +27,7 @@
   "scripts": {
     "build": "vite build && tsc",
     "typecheck": " tsc --noEmit --project tsconfig.json",
-    "lint": "eslint",
+    "lint": "eslint -c .eslintrc.cjs src/**/*.ts",
     "prepublishOnly": "npm run build",
     "release": "np --no-yarn",
     "test": "vitest",
