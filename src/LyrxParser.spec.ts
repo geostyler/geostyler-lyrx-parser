@@ -155,3 +155,23 @@ describe('LyrxParser should parse afu_gwn_02.lyrx', () => {
     expect(textSymbolizer.label).toEqual('{{bew_nr}} / {{bew_foerde}} l/s');
   });
 });
+
+describe('LyrxParser should parse kai_blattpk100_01.lyrx', () => {
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    lyrxParser = new LyrxParser();
+    lyrx = JSON.parse(
+      fs.readFileSync('./data/lyrx/kai_blattpk100_01.lyrx', 'utf8')
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  it('should have parse whereClause expression', () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(7);
+    expect(rules[6].filter).toEqual(['>', 'stand', '0']);
+  });
+});

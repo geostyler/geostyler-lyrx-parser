@@ -1,5 +1,5 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
-import {convertExpression, convertWhereClause, processRotationExpression,} from './expressions';
+import {convertExpression, convertWhereClause, getSimpleFilter, processRotationExpression,} from './expressions';
 import {Options, Rule, Symbolizer} from './badTypes';
 import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from './toGeostylerUtils';
 import {processSymbolReference} from './processSymbolReference';
@@ -313,12 +313,8 @@ const processUniqueValueGroup = (
     return orConditions;
   };
 
-  const equal = (name: string, val: any): any[] => {
-    return [
-      '==',
-      toLowerCase ? name.toLowerCase() : name,
-      val === '<Null>' ? null : val,
-    ];
+  const equal = (name: string, val: any): any => {
+    return getSimpleFilter('==', name, val, toLowerCase);
   };
 
   const rules: Rule[] = [];
