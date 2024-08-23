@@ -24,20 +24,12 @@ describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
     expect(geostylerStyle.output!.rules.length).toEqual(118);
   });
 
-  it.skip('should set filter for rule AEW Energie AG', () => {
+  it('should set simple filter for rule AEW Energie AG', () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === 'AEW Energie AG'
     );
     expect(rule?.filter).toBeDefined();
-
-    // const expectedFilter = [
-    //   "PropertyIsEqualTo",
-    //   ["PropertyName", "ANBIETER"],
-    //   "AEW Energie AG",
-    // ]; // test succeeds with this filter
-
-    // Test fails with this filter (output! generated in sldParser)
-    const expectedFilter = '["==", "anbieter", "AEW Energie AG"]';
+    const expectedFilter = ['==', 'anbieter', 'AEW Energie AG'];
     expect(rule?.filter).toEqual(expectedFilter);
   });
 
@@ -110,7 +102,7 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(geostylerStyle.output!.rules.length).toEqual(5);
   });
 
-  it.skip('should set filters', () => {
+  it('should set filters', () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === '6 - 35'
     );
