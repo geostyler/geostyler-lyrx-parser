@@ -1,5 +1,5 @@
-import { CIMObject } from "../CIMObject";
+import { CIMObject } from '../CIMObject';
 
 export type CIMLayerDefinition = CIMObject & {
     name: string;
-}
+};

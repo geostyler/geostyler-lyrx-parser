@@ -1,5 +1,9 @@
-import { CIMObject } from "../CIMObject";
-import { MaplexLabelRotationType, MaplexRotationAlignmentType, CIMExpressionInfo } from "./CIMMaplexLabelPlacementProperties";
+import { CIMObject } from '../CIMObject';
+import {
+  MaplexLabelRotationType,
+  MaplexRotationAlignmentType,
+  CIMExpressionInfo
+} from './CIMMaplexLabelPlacementProperties';
 
 /**
  * Represents Maplex rotation properties.
@@ -23,7 +27,7 @@ export type CIMMaplexRotationProperties = CIMObject & {
    */
   perpendicularToAngle?: boolean;
   /**
-   * Gets or sets a value indicating whether or not to align the label to the angle.
+   * Gets or sets a value indicating whether to align the label to the angle.
    */
   alignLabelToAngle?: boolean;
   /**

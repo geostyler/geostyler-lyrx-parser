@@ -1,4 +1,4 @@
-import { CIMObject } from "../CIMObject";
+import { CIMObject } from '../CIMObject';
 
 type Group = {};
 type SymbolReference = {};
@@ -9,4 +9,4 @@ export type CIMRenderer = CIMObject & {
     groups?: Group[];
     defaultSymbol?: SymbolReference;
     classBreakType?: string;
-}
+};

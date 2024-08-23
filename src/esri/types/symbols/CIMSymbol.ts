@@ -1,3 +1,3 @@
-import { CIMObject } from "../CIMObject";
+import { CIMObject } from '../CIMObject';
 
-export type CIMSymbol = CIMObject & {}
+export type CIMSymbol = CIMObject & {};

@@ -1,4 +1,4 @@
-import { CIMSymbol } from "../symbols";
+import { CIMSymbol } from '../symbols';
 
 type CIMPrimitiveOverride = {};
 type CIMScaleDependentSizeVariation = {};
@@ -44,4 +44,4 @@ export type CIMSymbolReference = {
      * Gets or sets the maximum distance at which symbols are visible. Objects beyond this point don't get rendered.
      */
     maxDistance?: number;
-  }
+  };

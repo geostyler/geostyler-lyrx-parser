@@ -35,6 +35,7 @@ export class LyrxParser implements StyleParser<CIMLayerDocument> {
   }
 
   writeStyle(geoStylerStyle: Style): Promise<WriteStyleResult<any>> {
+    // eslint-disable-next-line no-console
     console.log(geoStylerStyle);
     return Promise.resolve({
       output: {
