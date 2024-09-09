@@ -1,35 +1,38 @@
-import {WellKnownText} from './customProperties';
 import { LabelExpressionEngine } from './esri/types';
+import {ComparisonOperator, Filter} from 'geostyler-style';
 
-export const convertExpression = (rawExpression: string, engine: LabelExpressionEngine, toLowerCase: boolean) => {
+export const getSimpleFilter = (
+  operator: ComparisonOperator,
+  value1: string, value2: string,
+  toLowerCase=true): Filter => {
+  return [operator, stringToParameter(value1, toLowerCase), stringToParameter(value2, toLowerCase)];
+};
+
+export const convertExpression = (
+  rawExpression: string, engine: LabelExpressionEngine,
+  toLowerCase: boolean
+): string => {
   let expression: string = rawExpression;
   if (engine === LabelExpressionEngine.Arcade) {
     expression = convertArcadeExpression(rawExpression);
   }
-
   if (toLowerCase) {
     expression = rawExpression.toLowerCase();
   }
-
   if (expression.includes('+') || expression.includes('&')) {
-    let tokens: string[] = expression.includes('+') ? expression.split('+').reverse() : expression.split('&').reverse();
-    let addends = [];
-    for (let token of tokens) {
+    const tokens = expression.includes('+') ? expression.split('+') : expression.split('&');
+    const parsedExpression = tokens.map((token) => {
+      token = token.trimStart().trimEnd();
       if (token.includes('[')) {
-        addends.push(['PropertyName', processPropertyName(token)]);
+        return processPropertyName(token);
       } else {
-        let literal = token.replaceAll('"', '');
-        addends.push(replaceSpecialLiteral(literal));
+        const literal = token.replaceAll('"', '');
+        return replaceSpecialLiteral(literal);
       }
-      let allOps: any = addends[0];
-      for (let attr of addends.slice(1)) {
-        allOps = ['Concatenate', attr, allOps];
-      }
-      expression = allOps;
-    }
-    return expression;
+    });
+    return parsedExpression.join('');
   }
-  return ['PropertyName', processPropertyName(expression)];
+  return processPropertyName(expression);
 };
 
 
@@ -44,27 +47,15 @@ export const convertWhereClause = (clause: string, toLowerCase: boolean): any =>
   }
   if (clause.includes('=')) {
     let tokens = clause.split('=').map(t => t.trim());
-    expression.push(
-      'PropertyIsEqualTo',
-      stringToParameter(tokens[0], toLowerCase), stringToParameter(tokens[1], toLowerCase)
-    );
-    return expression;
+    return getSimpleFilter('==', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.includes('<>')) {
     let tokens = clause.split('<>').map(t => t.trim());
-    expression.push(
-      'PropertyIsNotEqualTo',
-      stringToParameter(tokens[0], toLowerCase), stringToParameter(tokens[1], toLowerCase)
-    );
-    return expression;
+    return getSimpleFilter('!=', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.includes('>')) {
     let tokens = clause.split('>').map(t => t.trim());
-    expression.push(
-      'PropertyIsGreaterThan',
-      stringToParameter(tokens[0], toLowerCase), stringToParameter(tokens[1], toLowerCase)
-    );
-    return expression;
+    return getSimpleFilter('>', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.toLowerCase().includes(' in ')) {
     clause = clause.replace(' IN ', ' in ');
@@ -110,31 +101,31 @@ export const processRotationExpression = (
 
 const replaceSpecialLiteral = (literal: string): string => {
   if (literal === 'vbnewline') {
-    return WellKnownText.NewLine;
+    return '/n';
   }
   return literal;
 };
 
 const processPropertyName = (token: string): string => {
-  return token.replace('[', '').replace(']', '').trim();
+  return token.replace('[', '{{').replace(']', '}}').trim();
 };
 
 const convertArcadeExpression = (expression: string): string => {
   return expression.replace('$feature.', '');
 };
 
-const stringToParameter = (s: string, toLowerCase: boolean): string | string[] => {
+const stringToParameter = (s: string, toLowerCase: boolean): string|null => {
   s = s.trim();
   if ((s.startsWith('\'') && s.endsWith('\'')) || (s.startsWith('"') && s.endsWith('"'))) {
     // Removes quote around and returns.
     return s.substring(1).substring(0, s.length -2);
   }
-  // Returns if it's alphabetical only.
-  if (s.match(/^[A-Z]*$/i)) {
-    if (toLowerCase) {
-      s = s.toLowerCase();
-    }
-    return ['PropertyName', s];
+  // Lowercase if it's wanted and alphabetical only.
+  if (toLowerCase && s.match(/^[A-Z]*$/i)) {
+    s = s.toLowerCase();
+  }
+  if (s === '<Null>') {
+    return null;
   }
   // Returns as is.
   return s;

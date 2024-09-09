@@ -1,7 +1,7 @@
 import { expect, it, describe, beforeAll } from 'vitest';
 import fs from 'fs';
 import { LyrxParser } from './LyrxParser';
-import { ReadStyleResult, Rule } from 'geostyler-style';
+import {ReadStyleResult, Rule, TextSymbolizer} from 'geostyler-style';
 
 describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
   let lyrx: any;
@@ -24,20 +24,12 @@ describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
     expect(geostylerStyle.output!.rules.length).toEqual(118);
   });
 
-  it.skip('should set filter for rule AEW Energie AG', () => {
+  it('should set simple filter for rule AEW Energie AG', () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === 'AEW Energie AG'
     );
     expect(rule?.filter).toBeDefined();
-
-    // const expectedFilter = [
-    //   "PropertyIsEqualTo",
-    //   ["PropertyName", "ANBIETER"],
-    //   "AEW Energie AG",
-    // ]; // test succeeds with this filter
-
-    // Test fails with this filter (output! generated in sldParser)
-    const expectedFilter = '["==", "anbieter", "AEW Energie AG"]';
+    const expectedFilter = ['==', 'anbieter', 'AEW Energie AG'];
     expect(rule?.filter).toEqual(expectedFilter);
   });
 
@@ -110,7 +102,7 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(geostylerStyle.output!.rules.length).toEqual(5);
   });
 
-  it.skip('should set filters', () => {
+  it('should set filters', () => {
     const rule = geostylerStyle.output!.rules.find(
       (x: Rule) => x.name === '6 - 35'
     );
@@ -139,5 +131,47 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(symbolizer.strokeColor).toEqual('#000000');
     expect(symbolizer.strokeWidth).toEqual(0.9333333333333332);
     expect(symbolizer.strokeOpacity).toEqual(1);
+  });
+});
+
+describe('LyrxParser should parse afu_gwn_02.lyrx', () => {
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    lyrxParser = new LyrxParser();
+    lyrx = JSON.parse(
+      fs.readFileSync('./data/lyrx/afu_gwn_02.lyrx', 'utf8')
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  it('should have parse label expression', () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(6);
+    const textSymbolizer = rules[5].symbolizers[0] as TextSymbolizer;
+    expect(textSymbolizer.kind).toEqual('Text');
+    expect(textSymbolizer.label).toEqual('{{bew_nr}} / {{bew_foerde}} l/s');
+  });
+});
+
+describe('LyrxParser should parse kai_blattpk100_01.lyrx', () => {
+  let lyrx: any;
+  let lyrxParser: LyrxParser;
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    lyrxParser = new LyrxParser();
+    lyrx = JSON.parse(
+      fs.readFileSync('./data/lyrx/kai_blattpk100_01.lyrx', 'utf8')
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  it('should have parse whereClause expression', () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(7);
+    expect(rules[6].filter).toEqual(['>', 'stand', '0']);
   });
 });

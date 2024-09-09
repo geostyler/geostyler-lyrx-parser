@@ -1,5 +1,5 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
-import {convertExpression, convertWhereClause, processRotationExpression,} from './expressions';
+import {convertExpression, convertWhereClause, getSimpleFilter, processRotationExpression,} from './expressions';
 import {Options, Rule, Symbolizer} from './badTypes';
 import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from './toGeostylerUtils';
 import {processSymbolReference} from './processSymbolReference';
@@ -123,22 +123,22 @@ const processClassBreaksRenderer = (
     let filt: any[];
     if (lastbound !== null) {
       filt = [
-        'And',
+        '&&',
         [
-          'PropertyIsGreaterThan',
-          ['PropertyName', toLowerCase ? field.toLowerCase() : field],
+          '>',
+          toLowerCase ? field.toLowerCase() : field,
           lastbound,
         ],
         [
-          'PropertyIsLessThanOrEqualTo',
-          ['PropertyName', toLowerCase ? field.toLowerCase() : field],
+          '<=',
+          toLowerCase ? field.toLowerCase() : field,
           upperbound,
         ],
       ];
     } else {
       filt = [
-        'PropertyIsLessThanOrEqualTo',
-        ['PropertyName', toLowerCase ? field.toLowerCase() : field],
+        '<=',
+        toLowerCase ? field.toLowerCase() : field,
         upperbound,
       ];
     }
@@ -200,7 +200,7 @@ const processLabelClass = (
     rotate: 0.0,
     color: color,
     font: fontFamily,
-    label: Array.isArray(expression) ? expression.join('-') : expression, // FIXME
+    label: expression,
     size: fontSize,
     weight: fontWeight,
   };
@@ -304,27 +304,17 @@ const processUniqueValueGroup = (
   const toLowerCase = options.toLowerCase || false;
 
   const and = (a: any[], b: any[]): any[] => {
-    return ['And', a, b];
+    return ['&&', a, b];
   };
 
   const or = (listConditions: any[]): any[] => {
     const orConditions = listConditions;
-    orConditions.unshift('Or');
+    orConditions.unshift('||');
     return orConditions;
   };
 
-  const equal = (name: string, val: any): any[] => {
-    if (val === '<Null>') {
-      return [
-        'PropertyIsNull',
-        ['PropertyName', toLowerCase ? name.toLowerCase() : name],
-      ];
-    }
-    return [
-      'PropertyIsEqualTo',
-      ['PropertyName', toLowerCase ? name.toLowerCase() : name],
-      val,
-    ];
+  const equal = (name: string, val: any): any => {
+    return getSimpleFilter('==', name, val, toLowerCase);
   };
 
   const rules: Rule[] = [];
