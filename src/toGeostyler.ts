@@ -303,17 +303,17 @@ const processUniqueValueGroup = (
 ): Rule[] => {
   const toLowerCase = options.toLowerCase || false;
 
-  const _and = (a: any[], b: any[]): any[] => {
+  const and = (a: any[], b: any[]): any[] => {
     return ['And', a, b];
   };
 
-  const _or = (listConditions: any[]): any[] => {
+  const or = (listConditions: any[]): any[] => {
     const orConditions = listConditions;
     orConditions.unshift('Or');
     return orConditions;
   };
 
-  const _equal = (name: string, val: any): any[] => {
+  const equal = (name: string, val: any): any[] => {
     if (val === '<Null>') {
       return [
         'PropertyIsNull',
@@ -337,18 +337,18 @@ const processUniqueValueGroup = (
     for (const v of values) {
       if ('fieldValues' in v) {
         const fieldValues = v.fieldValues!;
-        let condition = _equal(fields[0], fieldValues[0]);
+        let condition = equal(fields[0], fieldValues[0]);
         for (const [fieldValue, fieldName] of fieldValues
           .slice(1)
           .map((fv: unknown, idx: number) => [fv, fields[idx + 1]])) {
-          condition = _and(condition, _equal(fieldName, fieldValue));
+          condition = and(condition, equal(fieldName, fieldValue));
         }
         conditions.push(condition);
       }
     }
 
     if (conditions.length) {
-      ruleFilter = conditions.length === 1 ? conditions[0] : _or(conditions);
+      ruleFilter = conditions.length === 1 ? conditions[0] : or(conditions);
       rule.filter = ruleFilter;
       rule.symbolizers = processSymbolReference(clazz.symbol, options);
 

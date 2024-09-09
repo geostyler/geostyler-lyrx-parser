@@ -1,24 +1,24 @@
-import { CIMObject } from "../CIMObject";
-import { CIMMaplexLabelPlacementProperties } from "./CIMMaplexLabelPlacementProperties";
-import { CIMStandardLabelPlacementProperties } from "./CIMStandardLabelPlacementProperties";
-import { CIMSymbolReference } from "./CIMSymbolReference";
+import { CIMObject } from '../CIMObject';
+import { CIMMaplexLabelPlacementProperties } from './CIMMaplexLabelPlacementProperties';
+import { CIMStandardLabelPlacementProperties } from './CIMStandardLabelPlacementProperties';
+import { CIMSymbolReference } from './CIMSymbolReference';
 
 type FeaturesToLabel = {};
 
 export enum LabelExpressionEngine {
-  VBScript,
-  JScript,
-  Python,
-  Arcade
-};
-  
+  VBScript = 'VBScript',
+  JScript = 'JScript',
+  Python = 'Python',
+  Arcade = 'Arcade',
+}
+
 /**
- * Represents a label class which describes how to generate a set of text labels from a group of features in a feature layer.
- *
+ * Represents a label class which describes how to generate a set of text labels from a group
+ * of features in a feature layer.
  */
 export type CIMLabelClass = CIMObject & {
   /**
-   * Gets or sets the human readable text title that describes the label expression.
+   * Gets or sets the human-readable text title that describes the label expression.
    */
   expressionTitle?: null | string;
   /**
@@ -62,7 +62,7 @@ export type CIMLabelClass = CIMObject & {
    */
   textSymbol?: null | CIMSymbolReference;
   /**
-   * Gets or sets a value indicating whether or not to use coded value domain descriptions when labeling.
+   * Gets or sets a value indicating whether to use coded value domain descriptions when labeling.
    */
   useCodedValue?: boolean;
   /**
@@ -77,4 +77,4 @@ export type CIMLabelClass = CIMObject & {
    * Gets or sets the ID of the label class. This property is only used in the context of annotation.
    */
   id?: number;
-}
+};

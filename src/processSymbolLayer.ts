@@ -1,7 +1,7 @@
-import { Fill, Marker, Stroke } from "./badTypes";
-import { toWKT } from "./wktGeometries";
-import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from "./constants";
-import { processColor, processOpacity } from "./processUtils";
+import { Fill, Marker, Stroke } from './badTypes';
+import { toWKT } from './wktGeometries';
+import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from './constants';
+import { processColor, processOpacity } from './processUtils';
 import {
   esriFontToStandardSymbols,
   extractFillColor,
@@ -9,8 +9,8 @@ import {
   extractStroke,
   ptToPxProp, toHex,
   WARNINGS,
-} from "./toGeostylerUtils";
-import { processSymbolReference } from "./processSymbolReference";
+} from './toGeostylerUtils';
+import { processSymbolReference } from './processSymbolReference';
 // import { writeFileSync, existsSync, mkdirSync } from 'fs';
 // import uuid from 'uuid';
 // import { tmpdir } from 'os';
@@ -21,20 +21,20 @@ export const processSymbolLayer = (
   symboltype: any,
   options?: any
 ) => {
-  let layerType: string = layer["type"];
+  let layerType: string = layer.type;
   switch (layerType) {
-    case "CIMSolidStroke":
+    case 'CIMSolidStroke':
       return processSymbolSolidStroke(layer, symboltype);
-    case "CIMSolidFill":
+    case 'CIMSolidFill':
       return processSymbolSolidFill(layer);
-    case "CIMCharacterMarker":
+    case 'CIMCharacterMarker':
       return processSymbolCharacterMarker(layer, options);
-    case "CIMVectorMarker":
+    case 'CIMVectorMarker':
       return processSymbolVectorMarker(layer);
-    case "CIMHatchFill":
+    case 'CIMHatchFill':
       return processSymbolHatchFill(layer);
-    case "CIMPictureFill":
-    case "CIMPictureMarker":
+    case 'CIMPictureFill':
+    case 'CIMPictureMarker':
       return processSymbolPicture(layer);
     default:
       return;
@@ -43,32 +43,32 @@ export const processSymbolLayer = (
 
 const processSymbolSolidStroke = (layer: any, symboltype: any) => {
   let effects = extractEffect(layer);
-  if (symboltype === "CIMPolygonSymbol") {
+  if (symboltype === 'CIMPolygonSymbol') {
     let stroke: Stroke = {
-      kind: "Fill",
-      outlineColor: processColor(layer["color"]),
-      outlineOpacity: processOpacity(layer["color"]),
-      outlineWidth: ptToPxProp(layer, "width", 0),
+      kind: 'Fill',
+      outlineColor: processColor(layer.color),
+      outlineOpacity: processOpacity(layer.color),
+      outlineWidth: ptToPxProp(layer, 'width', 0),
     };
-    if ("dasharray" in effects) {
-      stroke["outlineDasharray"] = effects["dasharray"];
+    if ('dasharray' in effects) {
+      stroke.outlineDasharray = effects.dasharray;
     }
     return stroke;
   } else {
     let stroke: Stroke = {
-      kind: "Line",
-      color: processColor(layer["color"]),
-      opacity: processOpacity(layer["color"]),
-      width: ptToPxProp(layer, "width", 0),
+      kind: 'Line',
+      color: processColor(layer.color),
+      opacity: processOpacity(layer.color),
+      width: ptToPxProp(layer, 'width', 0),
       perpendicularOffset: 0,
-      cap: layer["capStyle"].toLowerCase(),
-      join: layer["joinStyle"].toLowerCase(),
+      cap: layer.capStyle.toLowerCase(),
+      join: layer.joinStyle.toLowerCase(),
     };
-    if ("dasharray" in effects) {
-      stroke["dasharray"] = effects["dasharray"];
+    if ('dasharray' in effects) {
+      stroke.dasharray = effects.dasharray;
     }
-    if ("offset" in effects) {
-      stroke["perpendicularOffset"] = effects["offset"];
+    if ('offset' in effects) {
+      stroke.perpendicularOffset = effects.offset;
     }
     return stroke;
   }
@@ -78,7 +78,7 @@ const processSymbolSolidFill = (layer: any): any => {
   let color = layer.color;
   if (color !== undefined) {
     return {
-      kind: "Fill",
+      kind: 'Fill',
       opacity: processOpacity(color),
       color: processColor(color),
       fillOpacity: 1.0,
@@ -94,7 +94,7 @@ const processSymbolCharacterMarker = (
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
   const hexcode = toHex(charindex);
-  const size = ptToPxProp(layer, "size", 12);
+  const size = ptToPxProp(layer, 'size', 12);
 
   let name: string;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
@@ -121,10 +121,10 @@ const processSymbolCharacterMarker = (
     fillOpacity = extractFillOpacity(symbolLayers);
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
   } catch (e) {
-    fillColor = "#000000";
+    fillColor = '#000000';
     fillOpacity = 1.0;
     strokeOpacity = 0;
-    strokeColor = "#000000";
+    strokeColor = '#000000';
     strokeWidth = 0.0;
   }
 
@@ -136,7 +136,7 @@ const processSymbolCharacterMarker = (
     strokeOpacity: strokeOpacity,
     strokeWidth: strokeWidth,
     rotate: rotate,
-    kind: "Mark",
+    kind: 'Mark',
     color: fillColor,
     wellKnownName: name,
     size: size,
@@ -146,24 +146,25 @@ const processSymbolCharacterMarker = (
 
 const processSymbolVectorMarker = (layer: any): Marker => {
   if (layer.size) {
-    layer.size = ptToPxProp(layer, "size", 3);
+    layer.size = ptToPxProp(layer, 'size', 3);
   }
   // Default values
-  let fillColor = "#ff0000";
-  let strokeColor = "#000000";
+  let fillColor = '#ff0000';
+  let strokeColor = '#000000';
   let strokeWidth = 1.0;
   let markerSize = 10;
   let strokeOpacity = 1;
-  let wellKnownName = "circle";
+  let wellKnownName = 'circle';
   let maxX: number | null = null;
   let maxY: number | null = null;
 
+  let marker: Marker;
   const markerGraphics =
     layer.markerGraphics !== undefined ? layer.markerGraphics : [];
   if (markerGraphics.length > 0) {
     // TODO: support multiple marker graphics
     const markerGraphic = markerGraphics[0];
-    const marker = processSymbolReference(markerGraphic, {})[0];
+    marker = processSymbolReference(markerGraphic, {})[0];
     const sublayers = markerGraphic.symbol.symbolLayers.filter(
       (sublayer: any) => sublayer.enable
     );
@@ -175,10 +176,10 @@ const processSymbolVectorMarker = (layer: any): Marker => {
         : layer.size !== undefined
           ? layer.size
           : 10;
-    if (markerGraphic.symbol.type === "CIMPointSymbol") {
-      wellKnownName = marker.wellKnownName ?? "";
+    if (markerGraphic.symbol.type === 'CIMPointSymbol') {
+      wellKnownName = marker.wellKnownName ?? '';
     } else if (
-      ["CIMLineSymbol", "CIMPolygonSymbol"].includes(markerGraphic.symbol.type)
+      ['CIMLineSymbol', 'CIMPolygonSymbol'].includes(markerGraphic.symbol.type)
     ) {
       let shape = toWKT(
         markerGraphic.geometry !== undefined
@@ -186,15 +187,15 @@ const processSymbolVectorMarker = (layer: any): Marker => {
           : undefined
       );
       wellKnownName = shape.wellKnownName;
-      maxX = ptToPxProp(shape, "maxX", 0);
-      maxY = ptToPxProp(shape, "maxY", 0);
+      maxX = ptToPxProp(shape, 'maxX', 0);
+      maxY = ptToPxProp(shape, 'maxY', 0);
     }
   }
 
-  let marker: Marker = {
+  marker = {
     opacity: 1.0,
     rotate: 0.0,
-    kind: "Mark",
+    kind: 'Mark',
     color: fillColor,
     wellKnownName: wellKnownName,
     size: markerSize,
@@ -205,40 +206,40 @@ const processSymbolVectorMarker = (layer: any): Marker => {
     Z: 0,
   };
   if (maxX !== null) {
-    marker["maxX"] = maxX;
+    marker.maxX = maxX;
   }
   if (maxY !== null) {
-    marker["maxY"] = maxY;
+    marker.maxY = maxY;
   }
 
   const markerPlacement =
-    layer.markerPlacement != undefined &&
+    layer.markerPlacement !== undefined &&
     layer.markerPlacement.placementTemplate !== undefined
       ? layer.markerPlacement.placementTemplate
       : undefined;
   // Conversion of dash arrays is made on a case-by-case basis
   if (JSON.stringify(markerPlacement) === JSON.stringify([12, 3])) {
-    marker["outlineDasharray"] = "4 0 4 7";
-    marker["size"] = 6;
-    marker["perpendicularOffset"] = -3.5;
+    marker.outlineDasharray = '4 0 4 7';
+    marker.size = 6;
+    marker.perpendicularOffset = -3.5;
   } else if (JSON.stringify(markerPlacement) === JSON.stringify([15])) {
-    marker["outlineDasharray"] = "0 5 9 1";
-    marker["size"] = 10;
+    marker.outlineDasharray = '0 5 9 1';
+    marker.size = 10;
   }
 
   return marker;
 };
 
 const processSymbolHatchFill = (layer: any): { [key: string]: any } => {
-    let rotation = layer.rotation || 0;
-    let symbolLayers = layer.lineSymbol.symbolLayers;
-    let [color, width, opacity] = extractStroke(symbolLayers);
+  let rotation = layer.rotation || 0;
+  let symbolLayers = layer.lineSymbol.symbolLayers;
+  let [color, width, opacity] = extractStroke(symbolLayers);
 
   // Use symbol and not rotation because rotation crops the line.
   let wellKnowName = hatchMarkerForAngle(rotation);
   if (rotation % 45) {
     WARNINGS.push(
-      "Rotation value different than a multiple of 45° is not possible. The nearest value is taken instead."
+      'Rotation value different than a multiple of 45° is not possible. The nearest value is taken instead.'
     );
   }
 
@@ -250,11 +251,11 @@ const processSymbolHatchFill = (layer: any): { [key: string]: any } => {
     : rawSeparation * 2;
 
   let fill: Fill = {
-    kind: "Fill",
+    kind: 'Fill',
     opacity: 1.0,
     graphicFill: [
       {
-        kind: "Mark",
+        kind: 'Mark',
         color: color,
         wellKnownName: wellKnowName,
         size: separation,
@@ -268,7 +269,7 @@ const processSymbolHatchFill = (layer: any): { [key: string]: any } => {
   };
 
   let effects = extractEffect(symbolLayers[0]);
-  if ("dasharray" in effects) {
+  if ('dasharray' in effects) {
     fill.graphicFill[0].outlineDasharray = effects.dasharray;
 
     // In case of dash array, the size must be at least as long as the dash pattern sum.
@@ -279,15 +280,15 @@ const processSymbolHatchFill = (layer: any): { [key: string]: any } => {
         // To keep the "original size" given by the separation value, we play with a negative margin.
         let negativeMargin = ((neededSize - separation) / 2) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
-          fill["graphicFillMargin"] = [negativeMargin, 0, negativeMargin, 0];
+          fill.graphicFillMargin = [negativeMargin, 0, negativeMargin, 0];
         } else {
-          fill["graphicFillMargin"] = [0, negativeMargin, 0, negativeMargin];
+          fill.graphicFillMargin = [0, negativeMargin, 0, negativeMargin];
         }
       } else {
         // In case of tilted lines, the trick with the margin is not possible without cropping the pattern.
         neededSize = separation;
         WARNINGS.push(
-          "Unable to keep the original size of CIMHatchFill for line with rotation"
+          'Unable to keep the original size of CIMHatchFill for line with rotation'
         );
       }
       fill.graphicFill[0].size = neededSize;
@@ -317,14 +318,14 @@ const processSymbolPicture = (layer: any): { [key: string]: any } => {
   //     }
   // }
 
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  let size = ptToPxProp(layer, 'height', ptToPxProp(layer, 'size', 0));
   return {
     opacity: 1.0,
     rotate: 0.0,
-    kind: "Icon",
+    kind: 'Icon',
     color: null,
     // image: url,
-    image: "http://FIXME",
+    image: 'http://FIXME',
     size: size,
     Z: 0,
   };
@@ -332,7 +333,7 @@ const processSymbolPicture = (layer: any): { [key: string]: any } => {
 
 const extractEffect = (layer: Record<string, any>): Record<string, any> => {
   let effects: Record<string, any> = {};
-  if ("effects" in layer) {
+  if ('effects' in layer) {
     layer.effects.forEach((effect: any) => {
       effects = { ...effects, ...processEffect(effect) };
     });
@@ -345,7 +346,7 @@ const processEffect = (effect: Record<string, any>): Record<string, any> => {
     return Math.ceil(ptToPx(v));
   };
 
-  if (effect.type === "CIMGeometricEffectDashes") {
+  if (effect.type === 'CIMGeometricEffectDashes') {
     let dasharrayValues = effect.dashTemplate?.map(ptToPxAndCeil) || [];
     if (dasharrayValues.length > 1) {
       return {
@@ -353,7 +354,7 @@ const processEffect = (effect: Record<string, any>): Record<string, any> => {
         dasharray: dasharrayValues, // TODO was a string, can be simplified now
       };
     }
-  } else if (effect.type === "CIMGeometricEffectOffset") {
+  } else if (effect.type === 'CIMGeometricEffectOffset') {
     return {
       offset: ptToPxAndCeil(effect.offset || 0) * -1,
     };
@@ -362,11 +363,11 @@ const processEffect = (effect: Record<string, any>): Record<string, any> => {
 };
 
 const getStraightHatchMarker = (): any => {
-  return ["shape://horline", "shape://vertline"];
+  return ['shape://horline', 'shape://vertline'];
 };
 
 const getTiltedHatchMarker = (): any => {
-  return ["shape://slash", "shape://backslash"];
+  return ['shape://slash', 'shape://backslash'];
 };
 
 const hatchMarkerForAngle = (angle: number): any => {
@@ -383,8 +384,8 @@ const hatchMarkerForAngle = (angle: number): any => {
 };
 
 const extractOffset = (symbolLayer: any): null | [number, number] => {
-  let offsetX = ptToPxProp(symbolLayer, "offsetX", 0) * OFFSET_FACTOR;
-  let offsetY = ptToPxProp(symbolLayer, "offsetY", 0) * OFFSET_FACTOR * -1;
+  let offsetX = ptToPxProp(symbolLayer, 'offsetX', 0) * OFFSET_FACTOR;
+  let offsetY = ptToPxProp(symbolLayer, 'offsetY', 0) * OFFSET_FACTOR * -1;
 
   if (offsetX === 0 && offsetY !== 0) {
     return null;

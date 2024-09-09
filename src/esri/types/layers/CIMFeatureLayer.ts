@@ -1,8 +1,8 @@
-import { CIMLayerAction } from "../CIMLayerAction";
-import { CIMLayerDefinition } from "./CIMLayerDefinition";
-import { CIMRenderer } from "../renderers/CIMRenderer";
-import { CIMLabelClass } from "../labeling/CIMLabelClass";
-import { CIMSymbolReference } from "../labeling/CIMSymbolReference";
+import { CIMLayerAction } from '../CIMLayerAction';
+import { CIMLayerDefinition } from './CIMLayerDefinition';
+import { CIMRenderer } from '../renderers/CIMRenderer';
+import { CIMLabelClass } from '../labeling/CIMLabelClass';
+import { CIMSymbolReference } from '../labeling/CIMSymbolReference';
 
 type CIMDataConnection = {};
 type CIMSymbolLayerMasking = {};
@@ -51,7 +51,8 @@ export type CIMFeatureLayer = CIMLayerDefinition & {
    */
   labelVisibility?: boolean;
   /**
-   * Gets or sets the masked symbol layers. Each SymbolLayerMasking gives the symbol layers that are masked by that masking layer.
+   * Gets or sets the masked symbol layers. Each SymbolLayerMasking gives the symbol
+   * layers that are masked by that masking layer.
    */
   maskedSymbolLayers?: CIMSymbolLayerMasking[] | null;
   /**
@@ -183,7 +184,8 @@ export type CIMFeatureLayer = CIMLayerDefinition & {
    */
   featureElevationExpressionInfo?: null | CIMExpressionInfo;
   /**
-   * Gets or sets the per-feature blending mode which allows features in a layer to blend against other features in the same layer that have already drawn.
+   * Gets or sets the per-feature blending mode which allows features in a layer to blend against
+   * other features in the same layer that have already drawn.
    */
   featureBlendingMode?: BlendingMode;
   /**
@@ -263,7 +265,8 @@ export type CIMFeatureLayer = CIMLayerDefinition & {
    */
   charts?: CIMChart[] | null;
   /**
-   * Gets or sets a value indicating whether or not this layer should be included in the search. This property is honored only by layers that support search.
+   * Gets or sets a value indicating whether or not this layer should be included in the search.
+   * This property is honored only by layers that support search.
    */
   searchable?: boolean;
   /**
@@ -279,11 +282,14 @@ export type CIMFeatureLayer = CIMLayerDefinition & {
    */
   showMapTips?: boolean;
   /**
-   * Gets or sets the custom properties of the layer. Custom properties are limited to key / value pairs of strings and developers are fully responsible for stored content.
+   * Gets or sets the custom properties of the layer. Custom properties are limited to key / value pairs
+   * of strings and developers are fully responsible for stored content.
    */
   customProperties?: CIMStringMap[] | null;
   /**
-   * Gets or sets an identifier that will be used to identify the layer in a web map. This value is present if the layer originated in a web map and facilitates matching the layer back to its origin when updating the web map.
+   * Gets or sets an identifier that will be used to identify the layer in a web map. This value is present
+   * if the layer originated in a web map and facilitates matching the layer back to its origin when
+   * updating the web map.
    */
   webMapLayerID?: null | string;
   /**
@@ -312,7 +318,8 @@ export type CIMFeatureLayer = CIMLayerDefinition & {
    */
   metadataURI?: null | string;
   /**
-   * Gets or sets a value indicating whether the CIM definition accesses metadata from its data source (the default behavior), or if it has its own metadata stored in the project.
+   * Gets or sets a value indicating whether the CIM definition accesses metadata from its data source
+   * (the default behavior), or if it has its own metadata stored in the project.
    */
   useSourceMetadata?: boolean;
   /**

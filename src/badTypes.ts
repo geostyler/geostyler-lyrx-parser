@@ -4,9 +4,8 @@ export type Fill = Record<string, any>;
 export type Marker = Record<string, any>;
 
 export interface Options {
-    toLowerCase?: boolean;
-
     [key: string]: any;
+    toLowerCase?: boolean;
 }
 
 export interface Rule {
@@ -14,43 +13,6 @@ export interface Rule {
     symbolizers?: Symbolizer[];
     scaleDenominator?: any;
     filter?: any[] | any;
-}
-
-interface TextSymbol {
-    symbol: {
-        symbolLayers: any[];
-    };
-    fontFamilyName?: string;
-    height?: number;
-    haloSize?: number;
-    haloSymbol?: {
-        symbolLayers: any[];
-    };
-}
-
-export interface LabelClass {
-    textSymbol: {
-        symbol: TextSymbol;
-    };
-    expression: string;
-    expressionEngine: string;
-    maplexLabelPlacementProperties?: {
-        rotationProperties?: {
-            rotationField?: string;
-        };
-        featureType?: string;
-        primaryOffset?: number;
-        pointPlacementMethod?: string;
-        thinDuplicateLabels?: boolean;
-    };
-    standardLabelPlacementProperties?: {
-        featureType?: string;
-        pointPlacementMethod?: string;
-        numLabelsOption?: string;
-    };
-    minimumScale?: number;
-    maximumScale?: number;
-    whereClause?: string;
 }
 
 export interface Symbolizer {
@@ -72,10 +34,10 @@ export interface Symbolizer {
     group?: boolean;
     wellKnownName?: string;
     opacity?: number;
-    graphicStroke?: any
-    graphicStrokeInterval?: any
-    graphicStrokeOffset?: any
-    graphicFill?: any
-    graphicFillMargin?: any
-    Z?: number
+    graphicStroke?: any;
+    graphicStrokeInterval?: any;
+    graphicStrokeOffset?: any;
+    graphicFill?: any;
+    graphicFillMargin?: any;
+    Z?: number;
 }

@@ -92,7 +92,7 @@ const formatPolygonSymbolizer = (
   markerPlacement: MarkerPlacement
 ): Symbolizer | null => {
   const markerPlacementType = markerPlacement.type;
-  if (markerPlacementType == 'CIMMarkerPlacementInsidePolygon') {
+  if (markerPlacementType === 'CIMMarkerPlacementInsidePolygon') {
     const margin = processMarkerPlacementInsidePolygon(
       symbolizer,
       markerPlacement
@@ -106,7 +106,7 @@ const formatPolygonSymbolizer = (
       Z: 0,
     };
   }
-  if (markerPlacementType == 'CIMMarkerPlacementAlongLineSameSize') {
+  if (markerPlacementType === 'CIMMarkerPlacementAlongLineSameSize') {
     return {
       kind: 'Line',
       opacity: 1.0,
