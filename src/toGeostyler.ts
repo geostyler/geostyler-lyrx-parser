@@ -1,17 +1,8 @@
-import { Rule as FIXMERULE, Style } from 'geostyler-style';
-import {
-  convertExpression,
-  convertWhereClause,
-  processRotationExpression,
-} from './expressions';
-import { Options, Rule, Symbolizer } from './badTypes';
-import {
-  extractFillColor,
-  extractFontWeight,
-  ptToPxProp,
-  WARNINGS,
-} from './toGeostylerUtils';
-import { processSymbolReference } from './processSymbolReference';
+import {Rule as FIXMERULE, Style} from 'geostyler-style';
+import {convertExpression, convertWhereClause, processRotationExpression,} from './expressions';
+import {Options, Rule, Symbolizer} from './badTypes';
+import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from './toGeostylerUtils';
+import {processSymbolReference} from './processSymbolReference';
 import {
   CIMFeatureLayer,
   CIMLabelClass,
@@ -20,7 +11,7 @@ import {
   LabelExpressionEngine,
   LabelFeatureType,
 } from './esri/types';
-import { CIMTextSymbol } from './esri/types/symbols';
+import {CIMTextSymbol} from './esri/types/symbols';
 
 const usedIcons: string[] = [];
 
@@ -41,6 +32,11 @@ const processLayer = (
     rules: [],
   };
 
+  options = {
+    ...{ toLowerCase: true, replaceesri: false},
+    ...options,
+  };
+
   if (layer.type === 'CIMFeatureLayer') {
     style.rules = processFeatureLayer(layer, options);
   } else if (layer.type === 'CIMRasterLayer') {
@@ -54,7 +50,7 @@ const processFeatureLayer = (
   layer: CIMFeatureLayer,
   options: Options = {}
 ): FIXMERULE[] => {
-  const toLowerCase = options.toLowerCase || false;
+  const toLowerCase = !!options.toLowerCase;
   const renderer = layer.renderer!;
   const rules: Rule[] = [];
 
@@ -117,7 +113,7 @@ const processClassBreaksRenderer = (
   const symbolsAscending: Symbolizer[][] = [];
   const field = renderer.field;
   let lastbound: number | null = null;
-  const toLowerCase = options.toLowerCase || false;
+  const toLowerCase = !!options.toLowerCase;
   const rotation = getSymbolRotationFromVisualVariables(renderer, toLowerCase);
 
   for (const classbreak of renderer.breaks || []) {
@@ -176,10 +172,10 @@ const processClassBreaksRenderer = (
 
 const processLabelClass = (
   labelClass: CIMLabelClass,
-  toLowerCase: boolean = false
+  toLowerCase: boolean,
 ): Rule => {
   // todo ConvertTextSymbol:
-  if (labelClass.textSymbol?.symbol?.type != 'CIMTextSymbol') {
+  if (labelClass.textSymbol?.symbol?.type !== 'CIMTextSymbol') {
     return { name: '', symbolizers: [] };
   }
 
@@ -407,8 +403,11 @@ const getSymbolRotationFromVisualVariables = (
 const processScaleDenominator = (
   minimumScale?: number,
   maximumScale?: number
-): { [key: string]: number } => {
-  let scaleDenominator: { [key: string]: number } = {};
+): { [key: string]: number } | null => {
+  if (minimumScale === undefined && maximumScale === undefined) {
+    return null;
+  }
+  const scaleDenominator: { [key: string]: number } = {};
   if (minimumScale !== undefined) {
     scaleDenominator.max = minimumScale;
   }

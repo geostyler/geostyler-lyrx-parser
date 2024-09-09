@@ -1,5 +1,5 @@
 export enum LabelFeatureType {
-    Point,
-    Line,
-    Polygon
+    Point = 'Point' ,
+    Line = 'Line',
+    Polygon = 'Polygon'
 }
