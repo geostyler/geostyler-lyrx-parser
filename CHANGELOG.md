@@ -1,3 +1,15 @@
+## [1.0.1](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.0...v1.0.1) (2024-09-13)
+
+
+### Bug Fixes
+
+* eslint cmd ([4fecc3b](https://github.com/geostyler/geostyler-lyrx-parser/commit/4fecc3bd596479741268f2b727831b8f809188d6))
+* eslint warnings (almost all) ([4eaa324](https://github.com/geostyler/geostyler-lyrx-parser/commit/4eaa3240dc0cbbe916a324476e8580a651b52f08))
+* filter in geostyler style ([1124b5b](https://github.com/geostyler/geostyler-lyrx-parser/commit/1124b5b779e94126b8fb5313e26f3d876d8a6d19))
+* text label expression ([881a4f1](https://github.com/geostyler/geostyler-lyrx-parser/commit/881a4f14c1ec7f312ae280843cae08342914abc2))
+* use geostyler filter for where clauses ([c841b4b](https://github.com/geostyler/geostyler-lyrx-parser/commit/c841b4b3e35456d0d6f71baf483ceda94a728311))
+* various fix for the to-geostyler part ([8531a2d](https://github.com/geostyler/geostyler-lyrx-parser/commit/8531a2d6be405f05a6e8f7a1bb4711f3af53aadf))
+
 ## 1.0.0 (2024-06-26)
 
 
