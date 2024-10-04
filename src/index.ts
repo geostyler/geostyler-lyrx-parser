@@ -5,8 +5,8 @@ import {
   UnsupportedProperties,
   WriteStyleResult
 } from 'geostyler-style';
-import { convert } from './toGeostyler';
-import { CIMLayerDocument } from './esri/types/CIMLayerDocument';
+import { convert } from './toGeostyler.ts';
+import { CIMLayerDocument } from './esri/types/CIMLayerDocument.ts';
 
 /**
  * This parser can be used with the GeoStyler.

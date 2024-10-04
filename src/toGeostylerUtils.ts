@@ -1,5 +1,5 @@
-import {ptToPx} from './constants';
-import {processColor, processOpacity} from './processUtils';
+import {ptToPx} from './constants.ts';
+import {processColor, processOpacity} from './processUtils.ts';
 
 export const WARNINGS: string[] = [];
 

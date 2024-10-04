@@ -1,7 +1,7 @@
-import { CIMObject } from '../CIMObject';
-import { CIMMaplexLabelPlacementProperties } from './CIMMaplexLabelPlacementProperties';
-import { CIMStandardLabelPlacementProperties } from './CIMStandardLabelPlacementProperties';
-import { CIMSymbolReference } from './CIMSymbolReference';
+import { CIMObject } from '../CIMObject.ts';
+import { CIMMaplexLabelPlacementProperties } from './CIMMaplexLabelPlacementProperties.ts';
+import { CIMStandardLabelPlacementProperties } from './CIMStandardLabelPlacementProperties.ts';
+import { CIMSymbolReference } from './CIMSymbolReference.ts';
 
 type FeaturesToLabel = {};
 

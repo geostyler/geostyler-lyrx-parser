@@ -1,3 +1,3 @@
-export * from './CIMLabelClass';
-export * from './CIMSymbolReference';
-export * from './LabelFeatureType';
+export * from './CIMLabelClass.ts';
+export * from './CIMSymbolReference.ts';
+export * from './LabelFeatureType.ts';

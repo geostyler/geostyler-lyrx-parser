@@ -1,6 +1,6 @@
 import { expect, it, describe, beforeAll } from 'vitest';
 import fs from 'fs';
-import { LyrxParser } from './LyrxParser';
+import { LyrxParser } from './index.ts';
 import {ReadStyleResult, Rule, TextSymbolizer} from 'geostyler-style';
 
 describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {

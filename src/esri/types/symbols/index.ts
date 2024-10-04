@@ -1,3 +1,3 @@
 
-export * from './CIMSymbol';
-export * from './CIMTextSymbol';
+export * from './CIMSymbol.ts';
+export * from './CIMTextSymbol.ts';

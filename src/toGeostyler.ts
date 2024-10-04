@@ -1,8 +1,8 @@
 import {Rule as FIXMERULE, Style} from 'geostyler-style';
-import {convertExpression, convertWhereClause, getSimpleFilter, processRotationExpression,} from './expressions';
-import {Options, Rule, Symbolizer} from './badTypes';
-import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from './toGeostylerUtils';
-import {processSymbolReference} from './processSymbolReference';
+import {convertExpression, convertWhereClause, getSimpleFilter, processRotationExpression,} from './expressions.ts';
+import {Options, Rule, Symbolizer} from './badTypes.ts';
+import {extractFillColor, extractFontWeight, ptToPxProp, WARNINGS,} from './toGeostylerUtils.ts';
+import {processSymbolReference} from './processSymbolReference.ts';
 import {
   CIMFeatureLayer,
   CIMLabelClass,
@@ -10,8 +10,8 @@ import {
   CIMLayerDocument,
   LabelExpressionEngine,
   LabelFeatureType,
-} from './esri/types';
-import {CIMTextSymbol} from './esri/types/symbols';
+} from './esri/types/index.ts';
+import {CIMTextSymbol} from './esri/types/symbols/index.ts';
 
 const usedIcons: string[] = [];
 

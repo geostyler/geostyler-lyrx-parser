@@ -1,9 +1,9 @@
-import { CIMObject } from '../CIMObject';
+import { CIMObject } from '../CIMObject.ts';
 import {
   MaplexLabelRotationType,
   MaplexRotationAlignmentType,
   CIMExpressionInfo
-} from './CIMMaplexLabelPlacementProperties';
+} from './CIMMaplexLabelPlacementProperties.ts';
 
 /**
  * Represents Maplex rotation properties.
