@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
   "type": "module",
-  "main": "dist/LyrxParser.js",
+  "module": "dist/index.js",
   "files": [
     "dist"
   ],
