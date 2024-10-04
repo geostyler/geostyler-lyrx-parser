@@ -83,7 +83,7 @@ const formatLineSymbolizer = (symbolizer: Symbolizer): Symbolizer => {
     graphicStroke: [symbolizer],
     graphicStrokeInterval: ptToPxProp(symbolizer, 'size', 0) * 2, // TODO
     graphicStrokeOffset: 0.0,
-    Z: 0,
+
   };
 };
 
@@ -103,7 +103,6 @@ const formatPolygonSymbolizer = (
       perpendicularOffset: 0.0,
       graphicFill: [symbolizer],
       graphicFillMargin: margin,
-      Z: 0,
     };
   }
   if (markerPlacementType === 'CIMMarkerPlacementAlongLineSameSize') {
@@ -113,7 +112,6 @@ const formatPolygonSymbolizer = (
       size: ptToPxProp(symbolizer, 'size', 10),
       perpendicularOffset: ptToPxProp(symbolizer, 'perpendicularOffset', 0.0),
       graphicStroke: [symbolizer],
-      Z: 0,
     };
   }
   return null;
