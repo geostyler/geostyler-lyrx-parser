@@ -3,20 +3,20 @@ import {
   MarkerPlacementAngle,
   MarkerPlacementPosition,
   POLYGON_FILL_RESIZE_FACTOR,
-} from './constants';
+} from './constants.ts';
 import {
   esriFontToStandardSymbols,
   extractFillColor,
   extractFillOpacity,
   extractStroke,
   ptToPxProp, toHex,
-} from './toGeostylerUtils';
+} from './toGeostylerUtils.ts';
 import {
   MarkerPlacement,
   Options,
   Symbolizer,
-} from './badTypes';
-import { processSymbolLayer } from './processSymbolLayer';
+} from './badTypes.ts';
+import { processSymbolLayer } from './processSymbolLayer.ts';
 
 export const processSymbolReference = (
   symbolref: any,

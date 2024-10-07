@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "allowJs": false,
     "baseUrl": ".",
     "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "inlineSources": true,
+    "isolatedModules": true,
     "lib": ["ES2022", "es6", "dom"],
     "module": "Preserve",
     "moduleResolution": "Bundler",
+    "emitDeclarationOnly": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,

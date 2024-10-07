@@ -1,5 +1,5 @@
 
-export * from './CIMLayerDocument';
-export * from './labeling';
-export * from './layers';
-export * from './renderers';
+export * from './CIMLayerDocument.ts';
+export * from './labeling/index.ts';
+export * from './layers/index.ts';
+export * from './renderers/index.ts';

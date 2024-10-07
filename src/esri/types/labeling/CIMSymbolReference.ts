@@ -1,4 +1,4 @@
-import { CIMSymbol } from '../symbols';
+import { CIMSymbol } from '../symbols/index.ts';
 
 type CIMPrimitiveOverride = {};
 type CIMScaleDependentSizeVariation = {};

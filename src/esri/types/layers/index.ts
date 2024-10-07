@@ -1,4 +1,4 @@
 
-export * from './CIMLayerDefinition';
-export * from './CIMFeatureLayer';
-export * from './CIMRasterLayer';
+export * from './CIMLayerDefinition.ts';
+export * from './CIMFeatureLayer.ts';
+export * from './CIMRasterLayer.ts';

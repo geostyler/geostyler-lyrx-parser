@@ -1,3 +1,3 @@
-import { CIMObject } from '../CIMObject';
+import { CIMObject } from '../CIMObject.ts';
 
 export type CIMSymbol = CIMObject & {};

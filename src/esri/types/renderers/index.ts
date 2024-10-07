@@ -1,2 +1,2 @@
-export * from './CIMRenderer';
-export * from './CIMUniqueValueRenderer';
+export * from './CIMRenderer.ts';
+export * from './CIMUniqueValueRenderer.ts';

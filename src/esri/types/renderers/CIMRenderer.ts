@@ -1,4 +1,4 @@
-import { CIMObject } from '../CIMObject';
+import { CIMObject } from '../CIMObject.ts';
 
 type Group = {};
 type SymbolReference = {};

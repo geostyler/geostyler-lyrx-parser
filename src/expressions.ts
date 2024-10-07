@@ -1,4 +1,4 @@
-import { LabelExpressionEngine } from './esri/types';
+import { LabelExpressionEngine } from './esri/types/index.ts';
 import {ComparisonOperator, Filter} from 'geostyler-style';
 
 export const getSimpleFilter = (
