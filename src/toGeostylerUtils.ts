@@ -1,5 +1,6 @@
-import {ptToPx} from './constants.ts';
-import {processColor, processOpacity} from './processUtils.ts';
+import { ptToPx } from './constants.ts';
+import { processColor, processOpacity } from './processUtils.ts';
+import { WellKnownName } from 'geostyler-style';
 
 export const WARNINGS: string[] = [];
 
@@ -7,8 +8,8 @@ export const toHex = (value: number): string => {
   return `0x${value.toString(16)}`;
 };
 
-export const esriFontToStandardSymbols = (charIndex: number): string => {
-  const mapping: { [index: number]: string } = {
+export const esriFontToStandardSymbols = (charIndex: number): WellKnownName => {
+  const mapping: { [index: number]: WellKnownName } = {
     33: 'circle',
     34: 'square',
     35: 'triangle',

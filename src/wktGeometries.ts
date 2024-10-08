@@ -1,18 +1,20 @@
+import {WellKnownName} from 'geostyler-style';
+
 type Geometry = {
     rings?: number[][][];
     paths?: number[][][];
     curveRings?: { a?: number[][]; c?: number[][] }[][];
 };
 
-export const toWKT = (geometry: Geometry): { wellKnownName: string; maxX?: number; maxY?: number } => {
-  const defaultMarker = {wellKnownName: 'circle'};
+export const toWKT = (geometry: Geometry): { wellKnownName: WellKnownName; maxX?: number; maxY?: number } => {
+  const defaultMarker = {wellKnownName: 'circle' as WellKnownName};
 
   if (geometry.rings) {
     let [rings] = geometry.rings;
     rings = heightNormalized(rings);
     let coordinates = rings.map(j => j.join(' ')).join(', ');
     return {
-      wellKnownName: `wkt://POLYGON((${coordinates}))`,
+      wellKnownName: `wkt://POLYGON((${coordinates}))` as WellKnownName,
       maxX: Math.max(...rings.map(coord => coord[0])),
       maxY: Math.max(...rings.map(coord => coord[1])),
     };
@@ -20,7 +22,7 @@ export const toWKT = (geometry: Geometry): { wellKnownName: string; maxX?: numbe
 
   const path = geometry?.paths?.[0];
   if (path && path[0][0] === 2 && path[0][1] === 0 && path[1][0] -2 && path[1][1] === 0) {
-    return {wellKnownName: 'wkt://MULTILINESTRING((0 2, 0 0))'};
+    return {wellKnownName: 'wkt://MULTILINESTRING((0 2, 0 0))' as WellKnownName};
   }
 
   if (geometry.curveRings) {
@@ -33,7 +35,7 @@ export const toWKT = (geometry: Geometry): { wellKnownName: string; maxX?: numbe
     if (endPoint !== startPoint) {return defaultMarker;}
     const radius = distanceBetweenPoints(startPoint as number[], centerPoint);
     return {
-      wellKnownName: 'circle',
+      wellKnownName: 'circle' as WellKnownName,
       maxX: radius,
       maxY: radius,
     };

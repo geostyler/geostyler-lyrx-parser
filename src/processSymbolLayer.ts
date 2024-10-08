@@ -1,4 +1,4 @@
-import { Fill, Marker, Stroke } from './badTypes.ts';
+import { Fill, Stroke, Symbolizer } from './badTypes.ts';
 import { toWKT } from './wktGeometries.ts';
 import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from './constants.ts';
 import { processColor, processOpacity } from './processUtils.ts';
@@ -11,6 +11,7 @@ import {
   WARNINGS,
 } from './toGeostylerUtils.ts';
 import { processSymbolReference } from './processSymbolReference.ts';
+import { MarkSymbolizer, WellKnownName } from 'geostyler-style';
 // import { writeFileSync, existsSync, mkdirSync } from 'fs';
 // import uuid from 'uuid';
 // import { tmpdir } from 'os';
@@ -89,18 +90,18 @@ const processSymbolSolidFill = (layer: any): any => {
 const processSymbolCharacterMarker = (
   layer: any,
   options: { [key: string]: any }
-): { [key: string]: any } => {
+): MarkSymbolizer => {
   const replaceesri = !!options.replaceesri;
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
   const hexcode = toHex(charindex);
   const size = ptToPxProp(layer, 'size', 12);
 
-  let name: string;
+  let name: WellKnownName;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
     name = esriFontToStandardSymbols(charindex);
   } else {
-    name = `ttf://${fontFamily}#${hexcode}`;
+    name = `ttf://${fontFamily}#${hexcode}` as WellKnownName;
   }
 
   let rotate = layer.rotation === undefined ? 0 : layer.rotation;
@@ -139,12 +140,11 @@ const processSymbolCharacterMarker = (
     kind: 'Mark',
     color: fillColor,
     wellKnownName: name,
-    size: size,
-    Z: 0,
+    radius: size / 2,
   };
 };
 
-const processSymbolVectorMarker = (layer: any): Marker => {
+const processSymbolVectorMarker = (layer: any): MarkSymbolizer => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, 'size', 3);
   }
@@ -154,30 +154,30 @@ const processSymbolVectorMarker = (layer: any): Marker => {
   let strokeWidth = 1.0;
   let markerSize = 10;
   let strokeOpacity = 1;
-  let wellKnownName = 'circle';
+  let wellKnownName: WellKnownName = 'circle';
   let maxX: number | null = null;
   let maxY: number | null = null;
 
-  let marker: Marker;
+  let symbol: Symbolizer;
   const markerGraphics =
     layer.markerGraphics !== undefined ? layer.markerGraphics : [];
   if (markerGraphics.length > 0) {
     // TODO: support multiple marker graphics
     const markerGraphic = markerGraphics[0];
-    marker = processSymbolReference(markerGraphic, {})[0];
+    symbol = processSymbolReference(markerGraphic, {})[0];
     const sublayers = markerGraphic.symbol.symbolLayers.filter(
       (sublayer: any) => sublayer.enable
     );
     fillColor = extractFillColor(sublayers);
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(sublayers);
     markerSize =
-      marker.size !== undefined
-        ? marker.size
+      symbol.size !== undefined
+        ? symbol.size
         : layer.size !== undefined
           ? layer.size
           : 10;
     if (markerGraphic.symbol.type === 'CIMPointSymbol') {
-      wellKnownName = marker.wellKnownName ?? '';
+      wellKnownName = symbol.wellKnownName ?? wellKnownName;
     } else if (
       ['CIMLineSymbol', 'CIMPolygonSymbol'].includes(markerGraphic.symbol.type)
     ) {
@@ -192,18 +192,18 @@ const processSymbolVectorMarker = (layer: any): Marker => {
     }
   }
 
-  marker = {
+  // FIXME marker should support outlineDasharray ?
+  const marker: any = {
     opacity: 1.0,
     rotate: 0.0,
     kind: 'Mark',
     color: fillColor,
     wellKnownName: wellKnownName,
-    size: markerSize,
+    radius: markerSize / 2,
     strokeColor: strokeColor,
     strokeWidth: strokeWidth,
     strokeOpacity: strokeOpacity,
     fillOpacity: 1.0,
-    Z: 0,
   };
   if (maxX !== null) {
     marker.maxX = maxX;
@@ -220,11 +220,11 @@ const processSymbolVectorMarker = (layer: any): Marker => {
   // Conversion of dash arrays is made on a case-by-case basis
   if (JSON.stringify(markerPlacement) === JSON.stringify([12, 3])) {
     marker.outlineDasharray = '4 0 4 7';
-    marker.size = 6;
+    marker.radius = 3;
     marker.perpendicularOffset = -3.5;
   } else if (JSON.stringify(markerPlacement) === JSON.stringify([15])) {
     marker.outlineDasharray = '0 5 9 1';
-    marker.size = 10;
+    marker.radius = 5;
   }
 
   return marker;
@@ -383,12 +383,12 @@ const hatchMarkerForAngle = (angle: number): any => {
   ][quadrant];
 };
 
-const extractOffset = (symbolLayer: any): null | [number, number] => {
+const extractOffset = (symbolLayer: any): undefined | [number, number] => {
   let offsetX = ptToPxProp(symbolLayer, 'offsetX', 0) * OFFSET_FACTOR;
   let offsetY = ptToPxProp(symbolLayer, 'offsetY', 0) * OFFSET_FACTOR * -1;
 
   if (offsetX === 0 && offsetY !== 0) {
-    return null;
+    return undefined;
   }
   return [offsetX, offsetY];
 };
