@@ -1,7 +1,8 @@
+import {WellKnownName} from 'geostyler-style';
+
 export type MarkerPlacement = Record<string, any>;
 export type Stroke = Record<string, any>;
 export type Fill = Record<string, any>;
-export type Marker = Record<string, any>;
 
 export interface Options {
     [key: string]: any;
@@ -32,12 +33,11 @@ export interface Symbolizer {
     haloSize?: number;
     haloOpacity?: number;
     group?: boolean;
-    wellKnownName?: string;
+    wellKnownName?: WellKnownName;
     opacity?: number;
     graphicStroke?: any;
     graphicStrokeInterval?: any;
     graphicStrokeOffset?: any;
     graphicFill?: any;
     graphicFillMargin?: any;
-    Z?: number;
 }
