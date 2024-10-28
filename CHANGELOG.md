@@ -1,3 +1,13 @@
+## [1.0.2](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.1...v1.0.2) (2024-10-28)
+
+### Bug Fixes
+
+* commitlint file name ([e64c5b3](https://github.com/geostyler/geostyler-lyrx-parser/commit/e64c5b3167774966479884405f0d9bccd0aa42d8))
+* **deps:** update dependency geostyler-style to v9.1.0 ([bea774b](https://github.com/geostyler/geostyler-lyrx-parser/commit/bea774bd7d4465a6c898425aaad8a7358ebe188f))
+* eslint config ([143a6b3](https://github.com/geostyler/geostyler-lyrx-parser/commit/143a6b3c9b75533c029cc42ca6d17360f50b8d91))
+* esm only package that works ([e6d6864](https://github.com/geostyler/geostyler-lyrx-parser/commit/e6d68646e580062e27e650d055de8def35f784e8))
+* provide radius on types ([3affdc0](https://github.com/geostyler/geostyler-lyrx-parser/commit/3affdc053a688549f0af73d190d69909cc2d9fce))
+
 ## [1.0.1](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.0...v1.0.1) (2024-09-13)
 
 
