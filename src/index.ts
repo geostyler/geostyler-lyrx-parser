@@ -23,11 +23,11 @@ export class LyrxParser implements StyleParser<CIMLayerDocument> {
   unsupportedProperties: UnsupportedProperties = {};
 
   readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
-    const geostyleStyle =  convert(inputStyle);
+    const geostylerStyle = convert(inputStyle);
     return Promise.resolve({
       output: {
-        name: geostyleStyle[0].name,
-        rules: geostyleStyle[0].rules,
+        name: geostylerStyle[0].name,
+        rules: geostylerStyle[0].rules,
       },
       warnings: [],
       errors: [],

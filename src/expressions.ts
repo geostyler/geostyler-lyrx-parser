@@ -1,10 +1,38 @@
 import { LabelExpressionEngine } from './esri/types/index.ts';
-import {ComparisonOperator, Filter} from 'geostyler-style';
+import {
+  CombinationFilter,
+  ComparisonOperator,
+  Filter,
+  Fproperty,
+  GeoStylerNumberFunction
+} from 'geostyler-style';
+import {WARNINGS} from './toGeostylerUtils.ts';
+
+export const fieldToFProperty = (field: string, toLowerCase: boolean): Fproperty => {
+  return {
+    args: [toLowerCase ? field.toLowerCase() : field],
+    name: 'property',
+  };
+};
+
+export const andFilter = (filters: Filter[]): CombinationFilter => {
+  return ['&&', ...filters];
+};
+
+export const orFilter = (conditions: Filter[]): CombinationFilter => {
+  return ['||', ...conditions];
+};
+
+export const equalFilter = (name: string, val: string, toLowerCase: boolean): Filter => {
+  return getSimpleFilter('==', name, val, toLowerCase);
+};
 
 export const getSimpleFilter = (
   operator: ComparisonOperator,
-  value1: string, value2: string,
-  toLowerCase=true): Filter => {
+  value1: string,
+  value2: string,
+  toLowerCase=true
+): Filter => {
   return [operator, stringToParameter(value1, toLowerCase), stringToParameter(value2, toLowerCase)];
 };
 
@@ -35,66 +63,65 @@ export const convertExpression = (
   return processPropertyName(expression);
 };
 
-
-export const convertWhereClause = (clause: string, toLowerCase: boolean): any => {
+export const convertWhereClause = (clause: string, toLowerCase: boolean): Filter => {
   clause = clause.replace('(', '').replace(')', '');
-  const expression = [];
   if (clause.includes(' AND ')) {
-    expression.push('And');
-    let subexpressions = clause.split(' AND ').map(s => s.trim());
-    expression.push(...subexpressions.map(s => convertWhereClause(s, toLowerCase)));
-    return expression;
+    const subexpressions = clause.split(' AND ').map(s => s.trim());
+    return andFilter(subexpressions.map(s => convertWhereClause(s, toLowerCase)));
   }
   if (clause.includes('=')) {
-    let tokens = clause.split('=').map(t => t.trim());
+    const tokens = clause.split('=').map(t => t.trim());
     return getSimpleFilter('==', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.includes('<>')) {
-    let tokens = clause.split('<>').map(t => t.trim());
+    const tokens = clause.split('<>').map(t => t.trim());
     return getSimpleFilter('!=', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.includes('>')) {
-    let tokens = clause.split('>').map(t => t.trim());
+    const tokens = clause.split('>').map(t => t.trim());
     return getSimpleFilter('>', tokens[0], tokens[1], toLowerCase);
   }
   if (clause.toLowerCase().includes(' in ')) {
     clause = clause.replace(' IN ', ' in ');
-    let tokens = clause.split(' in ');
-    let attribute = tokens[0];
+    const tokens = clause.split(' in ');
+    const attribute = tokens[0];
     let values: string[] = [];
     if (tokens[1].startsWith('() ')) {
       values = tokens[1].substring(3).split(',');
     }
-    let subexpressions = [];
-    for (let v of values) {
-      subexpressions.push([
-        'PropertyIsEqualTo',
-        stringToParameter(attribute, toLowerCase), stringToParameter(v, toLowerCase)
-      ]);
-    }
+    const subexpressions: Filter[] = [];
+    values.forEach(value => {
+      subexpressions.push(
+        getSimpleFilter(
+          '==',
+          `${stringToParameter(attribute, toLowerCase)}`,
+          `${stringToParameter(value, toLowerCase)}`
+        )
+      );
+    });
     if (values.length === 1) {
       return subexpressions[0];
     }
-
-    let accum: any = ['Or', subexpressions[0], subexpressions[1]];
+    let accum: Filter = orFilter([subexpressions[0], subexpressions[1]]);
     for (let subexpression of subexpressions.slice(2)) {
-      accum = ['Or', accum, subexpression];
+      accum = orFilter([accum, subexpression]);
     }
     return accum;
   }
-  return clause;
+  WARNINGS.push(`Clause skipped because it is not supported as filter: ${clause}}`);
+  return ['==', 0, 0];
 };
 
 export const processRotationExpression = (
   expression: string,
   rotationType: string,
-  toLowerCase: boolean): [string, string[], number] | null => {
-  let field = expression.includes('$feature') ? convertArcadeExpression(expression) : processPropertyName(expression);
-  let propertyNameExpression = ['PropertyName', toLowerCase ? field.toLowerCase() : field];
+  toLowerCase: boolean): GeoStylerNumberFunction | null => {
+  const field = expression.includes('$feature') ? convertArcadeExpression(expression) : processPropertyName(expression);
+  const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
   if (rotationType === 'Arithmetic') {
-    return ['Mul', propertyNameExpression, -1];
+    return { args: [fProperty, -1], name: 'mul' };
   } else if (rotationType === 'Geographic') {
-    return ['Sub', propertyNameExpression, 90];
+    return { args: [fProperty, 90], name: 'sub' };
   }
   return null;
 };

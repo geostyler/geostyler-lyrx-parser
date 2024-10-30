@@ -1,10 +1,11 @@
 import { expect, it, describe, beforeAll } from 'vitest';
 import fs from 'fs';
 import { LyrxParser } from './index.ts';
-import {ReadStyleResult, Rule, TextSymbolizer} from 'geostyler-style';
+import {FillSymbolizer, MarkSymbolizer, ReadStyleResult, Rule, TextSymbolizer} from 'geostyler-style';
+import {CIMLayerDocument} from './esri/types';
 
 describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
-  let lyrx: any;
+  let lyrx: CIMLayerDocument;
   let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
@@ -41,14 +42,15 @@ describe('LyrxParser should parse ae_netzbetreiber.lyrx', () => {
     if (!rule) {return;}
     expect(rule.symbolizers).toBeDefined();
     expect(rule.symbolizers.length).toEqual(1);
-    expect(rule.symbolizers[0].kind).toEqual('Fill');
-    expect((rule.symbolizers as any)[0].color).toEqual('#ffffbe');
-    expect((rule.symbolizers as any)[0].fillOpacity).toEqual(1);
+    const symbolizer = rule.symbolizers[0] as FillSymbolizer;
+    expect(symbolizer.kind).toEqual('Fill');
+    expect(symbolizer.color).toEqual('#ffffbe');
+    expect(symbolizer.fillOpacity).toEqual(1);
   });
 });
 
 describe('LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx', () => {
-  let lyrx: any;
+  let lyrx: CIMLayerDocument;
   let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
@@ -71,11 +73,11 @@ describe('LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx', (
     expect(rule).toBeDefined();
     if (!rule) {return;}
     expect(rule.symbolizers).toHaveLength(2);
-    const symbolizer1 = rule.symbolizers[0] as any;
+    const symbolizer1 = rule.symbolizers[0] as FillSymbolizer;
     expect(symbolizer1.kind).toEqual('Fill');
     expect(symbolizer1.color).toEqual('#d1cffc');
     expect(symbolizer1.fillOpacity).toEqual(1);
-    const symbolizer2 = rule.symbolizers[1] as any;
+    const symbolizer2 = rule.symbolizers[1] as FillSymbolizer;
     expect(symbolizer2.kind).toEqual('Fill');
     expect(symbolizer2.outlineWidth).toEqual(0.9333333333333332);
     expect(symbolizer2.outlineOpacity).toEqual(1);
@@ -83,7 +85,7 @@ describe('LyrxParser should parse feature-layer-polygon-simple-renderer.lyrx', (
 });
 
 describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.lyrx', () => {
-  let lyrx: any;
+  let lyrx: CIMLayerDocument;
   let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
@@ -120,14 +122,14 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
     expect(rule).toBeDefined();
     if (!rule) {return;}
     expect(rule.symbolizers).toHaveLength(1);
-    const symbolizer = rule.symbolizers[0] as any;
+    const symbolizer = rule.symbolizers[0] as MarkSymbolizer;
     expect(symbolizer.kind).toEqual('Mark');
     expect(symbolizer.wellKnownName).toEqual('circle');
     expect(symbolizer.opacity).toEqual(1);
     expect(symbolizer.fillOpacity).toEqual(1);
     expect(symbolizer.color).toEqual('#f4f400');
     expect(symbolizer.rotate).toEqual(0);
-    expect(symbolizer.radius).toEqual(2.6666666666666665); // FIXME
+    expect(symbolizer.radius).toEqual(2.6666666666666665);
     expect(symbolizer.strokeColor).toEqual('#000000');
     expect(symbolizer.strokeWidth).toEqual(0.9333333333333332);
     expect(symbolizer.strokeOpacity).toEqual(1);
@@ -135,7 +137,7 @@ describe('LyrxParser should parse feature-layer-point-graduated-colors-renderer.
 });
 
 describe('LyrxParser should parse afu_gwn_02.lyrx', () => {
-  let lyrx: any;
+  let lyrx: CIMLayerDocument;
   let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
@@ -157,7 +159,7 @@ describe('LyrxParser should parse afu_gwn_02.lyrx', () => {
 });
 
 describe('LyrxParser should parse kai_blattpk100_01.lyrx', () => {
-  let lyrx: any;
+  let lyrx: CIMLayerDocument;
   let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
