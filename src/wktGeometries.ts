@@ -1,10 +1,5 @@
 import {WellKnownName} from 'geostyler-style';
-
-type Geometry = {
-    rings?: number[][][];
-    paths?: number[][][];
-    curveRings?: { a?: number[][]; c?: number[][] }[][];
-};
+import {Geometry} from './esri/types';
 
 export const toWKT = (geometry: Geometry): { wellKnownName: WellKnownName; maxX?: number; maxY?: number } => {
   const defaultMarker = {wellKnownName: 'circle' as WellKnownName};
@@ -32,7 +27,9 @@ export const toWKT = (geometry: Geometry): { wellKnownName: WellKnownName; maxX?
     if (!curve) {return defaultMarker;}
     const endPoint = curve[0];
     const centerPoint = curve[1];
-    if (endPoint !== startPoint) {return defaultMarker;}
+    if (endPoint !== startPoint) {
+      return defaultMarker;
+    }
     const radius = distanceBetweenPoints(startPoint as number[], centerPoint);
     return {
       wellKnownName: 'circle' as WellKnownName,

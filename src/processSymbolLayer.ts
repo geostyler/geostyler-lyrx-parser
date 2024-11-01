@@ -181,19 +181,18 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
       } else if (
         ['CIMLineSymbol', 'CIMPolygonSymbol'].includes(markerGraphic.symbol.type)
       ) {
-        // @ts-ignore TODO fix me, it should exist.
         const geometry = markerGraphic.geometry;
-        let shape = toWKT(
-          geometry !== undefined ? geometry : undefined
-        );
-        wellKnownName = shape.wellKnownName;
-        maxX = ptToPxProp(shape, 'maxX', 0);
-        maxY = ptToPxProp(shape, 'maxY', 0);
+        if (geometry) {
+          const shape = toWKT(geometry);
+          wellKnownName = shape.wellKnownName;
+          maxX = ptToPxProp(shape, 'maxX', 0);
+          maxY = ptToPxProp(shape, 'maxY', 0);
+        }
       }
     }
   }
 
-  // FIXME marker should support outlineDasharray ?
+  // TODO marker should support outlineDasharray ?
   const marker: MarkSymbolizer= {
     opacity: 1,
     rotate: 0,
@@ -207,11 +206,11 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
     fillOpacity: 1,
   };
   if (maxX !== null) {
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #62
     marker.maxX = maxX;
   }
   if (maxY !== null) {
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #62
     marker.maxY = maxY;
   }
 
@@ -222,13 +221,13 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
       : undefined;
   // Conversion of dash arrays is made on a case-by-case basis
   if (JSON.stringify(markerPlacement) === JSON.stringify([12, 3])) {
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #63
     marker.outlineDasharray = '4 0 4 7';
     marker.radius = 3;
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #63
     marker.perpendicularOffset = -3.5;
   } else if (JSON.stringify(markerPlacement) === JSON.stringify([15])) {
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #63
     marker.outlineDasharray = '0 5 9 1';
     marker.radius = 5;
   }
@@ -284,7 +283,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
 
   let effects = extractEffect(symbolLayers[0]);
   if ('dasharray' in effects) {
-    // @ts-ignore TODO this should be fixed.
+    // @ts-ignore FIXME see issue #63
     fillSymbolizer.graphicFill!.outlineDasharray = effects.dasharray;
 
     // In case of dash array, the size must be at least as long as the dash pattern sum.
@@ -295,10 +294,10 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
         // To keep the "original size" given by the separation value, we play with a negative margin.
         let negativeMargin = ((neededSize - separation) / 2) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
-          // @ts-ignore TODO this should be fixed.
+          // @ts-ignore FIXME see issue #64
           fillSymbolizer.graphicFillMargin = [negativeMargin, 0, negativeMargin, 0];
         } else {
-          // @ts-ignore TODO this should be fixed.
+          // @ts-ignore FIXME see issue #64
           fillSymbolizer.graphicFillMargin = [0, negativeMargin, 0, negativeMargin];
         }
       } else {

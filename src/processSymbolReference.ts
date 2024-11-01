@@ -111,7 +111,7 @@ const formatLineSymbolizer = (symbolizer: PointSymbolizer): LineSymbolizer => {
     opacity: 1.0,
     perpendicularOffset: 0.0,
     graphicStroke: symbolizer,
-    // @ts-ignore TODO this property should probably be added into geostyler-style.
+    // @ts-ignore FIXME see issue #65
     graphicStrokeInterval: ptToPxProp(symbolizer, 'size', 0) * 2,
     graphicStrokeOffset: 0.0,
 
@@ -132,7 +132,7 @@ const formatPolygonSymbolizer = (
       kind: 'Fill',
       opacity: 1.0,
       graphicFill: symbolizer,
-      // @ts-ignore TODO this property should probably be added into geostyler-style.
+      // @ts-ignore FIXME see issue #64
       graphicFillMargin: margin,
     };
   }
@@ -208,17 +208,17 @@ const processOrientedMarkerAtEndOfLine = (
     strokeColor: strokeColor,
     strokeOpacity: strokeOpacity,
     strokeWidth: strokeWidth,
-    // TODO use markerRotationFnc ? Previous code was:
+    // FIXME see issue #66 use markerRotationFnc ? Previous code was:
     // rotate: ['Add', [markerRotationFnc, ['PropertyName', 'shape']], rotation],
     rotate: { args: [fProperty, rotation], name: 'add' },
     kind: 'Mark',
     color: fillColor,
     wellKnownName: name,
     radius: ptToPxProp(layer, 'size', 10),
-    // TODO Support geometry ?
-    // Geometry: [markerPositionFnc, ['PropertyName', 'shape']],
-    // TODO support inclusion ?
-    // inclusion: 'mapOnly',
+    // @ts-ignore FIXME see issue #66
+    geometry: [markerPositionFnc, ['PropertyName', 'shape']],
+    // @ts-ignore FIXME see issue #66
+    inclusion: 'mapOnly',
   };
 };
 
@@ -234,13 +234,16 @@ const processMarkerPlacementInsidePolygon = (
   const size = Math.round(radius * resizeFactor) || 1;
   symbolizer.radius = size;
 
-  const maxX = size / 2;
-  const maxY = size / 2;
-  // TODO this property should probably be added into geostyler-style.
-  // if (symbolizer?.maxX && symbolizer?.maxY) {
-  //   maxX = Math.floor(symbolizer.maxX * resizeFactor) || 1;
-  //   maxY = Math.floor(symbolizer.maxY * resizeFactor) || 1;
-  // }
+  let maxX = size / 2;
+  let maxY = size / 2;
+  // @ts-ignore FIXME see issue #62
+  const symMaxX = symbolizer?.maxX ?? maxX;
+  // @ts-ignore FIXME see issue #62
+  const symMaxY = symbolizer?.maxY ?? maxY;
+  if (symMaxX && symMaxY) {
+    maxX = Math.floor(symMaxX * resizeFactor) || 1;
+    maxY = Math.floor(symMaxY * resizeFactor) || 1;
+  }
 
   let stepX = ptToPxProp(markerPlacement, 'stepX', 0);
   let stepY = ptToPxProp(markerPlacement, 'stepY', 0);

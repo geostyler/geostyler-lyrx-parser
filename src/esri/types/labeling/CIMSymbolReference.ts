@@ -3,11 +3,19 @@ import { CIMSymbol } from '../symbols/index.ts';
 type CIMPrimitiveOverride = {};
 type CIMScaleDependentSizeVariation = {};
 
+
+export type Geometry = {
+    rings?: number[][][];
+    paths?: number[][][];
+    curveRings?: { a?: number[][]; c?: number[][] }[][];
+};
+
 /**
  * Represents a symbol reference.
  *
  */
 export type CIMSymbolReference = {
+    geometry: Geometry;
     /**
      * Gets or sets the primitive overrides. Typically set by renderers at draw time.
      */

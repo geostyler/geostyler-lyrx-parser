@@ -219,7 +219,7 @@ const processLabelClass = (
   );
   const fontFamily = textSymbol?.fontFamilyName || 'Arial';
   const fontSize = ptToPxProp(textSymbol, 'height', 12, true);
-  // @ts-ignore TODO fix me, cast make no sens.
+  // @ts-ignore FIXME see issue #68
   const color = extractFillColor(textSymbol?.symbol?.symbolLayers ?? []);
   const fontWeight = extractFontWeight(textSymbol);
   const rotationProps =
@@ -254,7 +254,7 @@ const processLabelClass = (
     maplexPlacementType === LabelFeatureType.Line
   ) {
     const primaryOffset = ptToPxProp(textSymbol, 'primaryOffset', 0);
-    // @ts-ignore TODO add it to text symbolizer or fix it with existing definition.
+    // @ts-ignore FIXME see issue #63
     symbolizer.perpendicularOffset = primaryOffset + fontSize;
   } else if (
     maplexPlacementType === LabelFeatureType.Point &&
@@ -281,8 +281,9 @@ const processLabelClass = (
 
   const haloSize = ptToPxProp(textSymbol, 'haloSize', 0);
   if (haloSize && textSymbol.haloSymbol) {
-    // @ts-ignore TODO fix me, cast make no sens.
-    const haloColor = extractFillColor(textSymbol?.haloSymbol?.symbolLayers ?? []);
+    // @ts-ignore FIXME see issue #68
+    const haloColor = extractFillColor(textSymbol?.haloSymbol?.symbolLayers ?? []
+    );
     Object.assign(symbolizer, {
       haloColor: haloColor,
       haloSize: haloSize,
@@ -290,7 +291,7 @@ const processLabelClass = (
     });
   }
 
-  // @ts-ignore TODO add it to text symbolizer or fix it with existing definition.
+  // @ts-ignore FIXME see issue #67
   symbolizer.group =
     labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels ||
     (maplexPlacementType === LabelFeatureType.Polygon &&
