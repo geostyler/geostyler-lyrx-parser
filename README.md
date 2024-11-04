@@ -4,7 +4,6 @@
 
 [GeoStyler](https://github.com/terrestris/geostyler/) Style Parser for ArcGIS Pro layer file format `.lyrx`.
 
-This project is originally based on the GeoCat/bridge-style (MIT license).
 This parser is still in an early stage. It can read Lyrx files and write GeoStyler styler, but it can not write Lyrx files.
 
 This project is originally based on the GeoCat/bridge-style (MIT license).
