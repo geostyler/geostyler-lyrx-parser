@@ -1,8 +1,8 @@
-import { CIMLayerAction } from '../CIMLayerAction.ts';
-import { CIMLayerDefinition } from './CIMLayerDefinition.ts';
-import { CIMLabelClass } from '../labeling/CIMLabelClass.ts';
-import { CIMSymbolReference } from '../labeling/CIMSymbolReference.ts';
-import {CIMRenderer} from '../renderers';
+import { CIMLayerAction } from "../CIMLayerAction.ts";
+import { CIMLayerDefinition } from "./CIMLayerDefinition.ts";
+import { CIMLabelClass } from "../labeling/CIMLabelClass.ts";
+import { CIMSymbolReference } from "../labeling/CIMSymbolReference.ts";
+import { CIMRenderer } from "../renderers";
 
 type CIMDataConnection = {};
 type CIMSymbolLayerMasking = {};

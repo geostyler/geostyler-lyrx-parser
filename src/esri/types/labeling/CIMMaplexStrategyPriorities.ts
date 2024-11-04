@@ -1,4 +1,4 @@
-import { CIMObject } from '../CIMObject.ts';
+import { CIMObject } from "../CIMObject.ts";
 
 /**
  * Represents Maplex strategy priorities.

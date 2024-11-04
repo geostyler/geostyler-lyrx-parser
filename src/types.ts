@@ -1,10 +1,10 @@
 export interface Options {
-    [key: string]: unknown;
-    toLowerCase?: boolean;
+  [key: string]: unknown;
+  toLowerCase?: boolean;
 }
 
 export interface Effect {
-   dasharrayValues?: number[];
-   dasharray?: number[];
-   offset?: number;
+  dasharrayValues?: number[];
+  dasharray?: number[];
+  offset?: number;
 }

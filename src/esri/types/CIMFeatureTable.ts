@@ -1,4 +1,1 @@
-
-export type CIMFeatureTable =  {
-
-};
+export type CIMFeatureTable = {};

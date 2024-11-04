@@ -281,7 +281,7 @@ export type CIMTextSymbol = CIMSymbol & {
    * Gets or sets a value indicating whether or not the symbol should overprint in press printing.
    */
   overprint?: boolean;
-}
+};
 /**
  * Represents a callout.
  */

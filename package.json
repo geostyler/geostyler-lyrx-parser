@@ -27,7 +27,9 @@
   "scripts": {
     "build": "babel src -d dist --source-maps --extensions '.ts' && tsc --declaration",
     "typecheck": " tsc --project tsconfig-typecheck.json",
-    "lint": "eslint -c .eslintrc.cjs src/**/*.ts",
+    "lint": "eslint -c .eslintrc.cjs src/**/*.ts && npm run prettier:check",
+    "prettier:check": "prettier src --write",
+    "prettier": "prettier src --write",
     "prepublishOnly": "npm run build",
     "release": "np --no-yarn",
     "test": "vitest",
@@ -50,6 +52,8 @@
     "conventional-changelog-conventionalcommits": "^8.0.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.40.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.4.5",
     "vitest": "^2.0.0"
   },
