@@ -1,7 +1,5 @@
 import {
   ESRI_SYMBOLS_FONT,
-  MarkerPlacementAngle,
-  MarkerPlacementPosition,
   POLYGON_FILL_RESIZE_FACTOR,
 } from './constants.ts';
 import {
@@ -12,85 +10,118 @@ import {
   ptToPxProp, toHex,
 } from './toGeostylerUtils.ts';
 import {
-  MarkerPlacement,
   Options,
-  Symbolizer,
-} from './badTypes.ts';
+} from './types.ts';
 import { processSymbolLayer } from './processSymbolLayer.ts';
+import {
+  FillSymbolizer,
+  LineSymbolizer,
+  MarkSymbolizer,
+  PointSymbolizer,
+  Symbolizer,
+  WellKnownName
+} from 'geostyler-style';
+import {CIMSymbolReference} from './esri/types/labeling/CIMSymbolReference.ts';
+import {CIMMarkerPlacement, CIMSymbol, SymbolLayer} from './esri/types/symbols';
+import {fieldToFProperty} from './expressions.ts';
 
 export const processSymbolReference = (
-  symbolref: any,
+  symbolref: CIMSymbolReference,
   options: Options
 ): Symbolizer[] => {
   const symbol = symbolref.symbol;
   const symbolizers: Symbolizer[] = [];
-  if (!symbol.symbolLayers) {
+  if (!symbol || !symbol.symbolLayers) {
     return symbolizers;
   }
-
-  for (const layer of symbol.symbolLayers.slice().reverse()) {
-    // drawing order for geostyler is inverse of rule order
+  // Drawing order for geostyler is inverse of rule order.
+  const layers = symbol.symbolLayers.slice().reverse();
+  layers.forEach((layer) => {
+    // Skip not enabled layers.
     if (!layer.enable) {
-      continue;
+      return;
     }
-    let symbolizer = processSymbolLayer(layer, symbol.type, options);
+    // Skip layer without symbolizer.
+    const symbolizer = processSymbolLayer(layer, symbol.type, options);
     if (!symbolizer) {
-      continue;
+      return;
     }
-    if (
-      ['CIMVectorMarker', 'CIMPictureFill', 'CIMCharacterMarker'].includes(
-        layer.type
-      )
-    ) {
-      if (symbol.type === 'CIMLineSymbol') {
-        if (layer.type === 'CIMCharacterMarker') {
-          if (orientedMarkerAtStartOfLine(layer.markerPlacement)) {
-            symbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              'start',
-              options
-            );
-            symbolizers.push(symbolizer);
-          }
-          if (orientedMarkerAtEndOfLine(layer.markerPlacement)) {
-            symbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              'end',
-              options
-            );
-            symbolizers.push(symbolizer);
-          }
-          continue;
-        } else {
-          symbolizer = formatLineSymbolizer(symbolizer);
-        }
-      } else if (symbol.type === 'CIMPolygonSymbol') {
-        const markerPlacement = layer.markerPlacement || {};
-        symbolizer = formatPolygonSymbolizer(symbolizer, markerPlacement);
-      }
+    if ([
+      'CIMVectorMarker',
+      'CIMPictureFill',
+      'CIMCharacterMarker'
+    ].includes(layer.type)) {
+      processSymbolLayerIfCharacterMarker(symbol, layer, symbolizer, options);
     }
     symbolizers.push(symbolizer);
-  }
-
+  });
   return symbolizers;
 };
 
-const formatLineSymbolizer = (symbolizer: Symbolizer): Symbolizer => {
+const processSymbolLayerIfCharacterMarker = (
+  symbol: CIMSymbol,
+  layer: SymbolLayer,
+  symbolizer: Symbolizer,
+  options: Options
+): Symbolizer[] => {
+  const symbolizers: Symbolizer[] = [];
+  if (symbol.type === 'CIMPolygonSymbol') {
+    const markerPlacement = layer.markerPlacement || {};
+    const polygonSymbolizer = formatPolygonSymbolizer(symbolizer as MarkSymbolizer, markerPlacement);
+    if (polygonSymbolizer) {
+      symbolizers.push(polygonSymbolizer);
+    }
+    return symbolizers;
+  }
+  if (symbol.type === 'CIMLineSymbol') {
+    if (layer.type === 'CIMCharacterMarker') {
+      if (orientedMarkerAtStartOfLine(layer.markerPlacement)) {
+        const startSymbolizer = processOrientedMarkerAtEndOfLine(
+          layer,
+          'start',
+          options
+        );
+        if (startSymbolizer) {
+          symbolizers.push(startSymbolizer);
+        }
+      }
+      if (orientedMarkerAtEndOfLine(layer.markerPlacement)) {
+        const endSymbolizer = processOrientedMarkerAtEndOfLine(
+          layer,
+          'end',
+          options
+        );
+        if (endSymbolizer) {
+          symbolizers.push(endSymbolizer);
+        }
+      }
+      return symbolizers;
+    }
+    // Not CIMCharacterMarker
+    const lineSymbolizer = formatLineSymbolizer(symbolizer as PointSymbolizer);
+    symbolizers.push(lineSymbolizer);
+    return symbolizers;
+  }
+  return symbolizers;
+};
+
+const formatLineSymbolizer = (symbolizer: PointSymbolizer): LineSymbolizer => {
   return {
     kind: 'Line',
     opacity: 1.0,
     perpendicularOffset: 0.0,
-    graphicStroke: [symbolizer],
-    graphicStrokeInterval: ptToPxProp(symbolizer, 'size', 0) * 2, // TODO
+    graphicStroke: symbolizer,
+    // @ts-ignore FIXME see issue #65
+    graphicStrokeInterval: ptToPxProp(symbolizer, 'size', 0) * 2,
     graphicStrokeOffset: 0.0,
 
   };
 };
 
 const formatPolygonSymbolizer = (
-  symbolizer: Symbolizer,
-  markerPlacement: MarkerPlacement
-): Symbolizer | null => {
+  symbolizer: MarkSymbolizer,
+  markerPlacement: CIMMarkerPlacement
+): FillSymbolizer | LineSymbolizer | null => {
   const markerPlacementType = markerPlacement.type;
   if (markerPlacementType === 'CIMMarkerPlacementInsidePolygon') {
     const margin = processMarkerPlacementInsidePolygon(
@@ -100,8 +131,8 @@ const formatPolygonSymbolizer = (
     return {
       kind: 'Fill',
       opacity: 1.0,
-      perpendicularOffset: 0.0,
-      graphicFill: [symbolizer],
+      graphicFill: symbolizer,
+      // @ts-ignore FIXME see issue #64
       graphicFillMargin: margin,
     };
   }
@@ -109,28 +140,30 @@ const formatPolygonSymbolizer = (
     return {
       kind: 'Line',
       opacity: 1.0,
-      size: ptToPxProp(symbolizer, 'size', 10),
+      width: ptToPxProp(symbolizer, 'size', 10),
       perpendicularOffset: ptToPxProp(symbolizer, 'perpendicularOffset', 0.0),
-      graphicStroke: [symbolizer],
+      graphicStroke: symbolizer,
     };
   }
   return null;
 };
 
 const processOrientedMarkerAtEndOfLine = (
-  layer: Record<string, any>,
+  layer: SymbolLayer,
   orientedMarker: string,
-  options: Record<string, any>
-): Record<string, any> | undefined => {
-  let markerPositionFnc: string, markerRotationFnc: string, rotation: number;
+  options: Options
+): MarkSymbolizer | undefined => {
+  // let markerPositionFnc: string;
+  // let markerRotationFnc: string;
+  let rotation: number;
 
   if (orientedMarker === 'start') {
-    markerPositionFnc = MarkerPlacementPosition.START;
-    markerRotationFnc = MarkerPlacementAngle.START;
+    // markerPositionFnc = MarkerPlacementPosition.START;
+    // markerRotationFnc = MarkerPlacementAngle.START;
     rotation = layer?.rotation ?? 180;
   } else if (orientedMarker === 'end') {
-    markerPositionFnc = MarkerPlacementPosition.END;
-    markerRotationFnc = MarkerPlacementAngle.END;
+    // markerPositionFnc = MarkerPlacementPosition.END;
+    // markerRotationFnc = MarkerPlacementAngle.END;
     rotation = layer?.rotation ?? 0;
   } else {
     return undefined;
@@ -141,11 +174,11 @@ const processOrientedMarkerAtEndOfLine = (
   const charindex = layer.characterIndex;
   const hexcode = toHex(charindex);
 
-  let name;
+  let name: WellKnownName;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
     name = esriFontToStandardSymbols(charindex);
   } else {
-    name = `ttf://${fontFamily}#${hexcode}`;
+    name = `ttf://${fontFamily}#${hexcode}` as WellKnownName;
   }
 
   let symbolLayers,
@@ -156,7 +189,7 @@ const processOrientedMarkerAtEndOfLine = (
     strokeOpacity;
 
   try {
-    symbolLayers = layer.symbol.symbolLayers;
+    symbolLayers = layer.symbol.symbolLayers ?? [];
     fillColor = extractFillColor(symbolLayers);
     fillOpacity = extractFillOpacity(symbolLayers);
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
@@ -168,39 +201,48 @@ const processOrientedMarkerAtEndOfLine = (
     strokeWidth = 0.0;
   }
 
+  const fProperty = fieldToFProperty('shape', true);
   return {
     opacity: 1.0,
     fillOpacity: fillOpacity,
     strokeColor: strokeColor,
     strokeOpacity: strokeOpacity,
     strokeWidth: strokeWidth,
-    rotate: ['Add', [markerRotationFnc, ['PropertyName', 'shape']], rotation],
+    // FIXME see issue #66 use markerRotationFnc ? Previous code was:
+    // rotate: ['Add', [markerRotationFnc, ['PropertyName', 'shape']], rotation],
+    rotate: { args: [fProperty, rotation], name: 'add' },
     kind: 'Mark',
     color: fillColor,
     wellKnownName: name,
-    size: ptToPxProp(layer, 'size', 10),
-    Z: 0,
-    Geometry: [markerPositionFnc, ['PropertyName', 'shape']],
+    radius: ptToPxProp(layer, 'size', 10),
+    // @ts-ignore FIXME see issue #66
+    geometry: [markerPositionFnc, ['PropertyName', 'shape']],
+    // @ts-ignore FIXME see issue #66
     inclusion: 'mapOnly',
   };
 };
 
 const processMarkerPlacementInsidePolygon = (
-  symbolizer: Record<string, any>,
-  markerPlacement: Record<string, any>
+  symbolizer: MarkSymbolizer,
+  markerPlacement: CIMMarkerPlacement
 ): number[] => {
-  let resizeFactor = symbolizer?.wellKnownName?.startsWith('wkt://POLYGON')
+  const resizeFactor = symbolizer?.wellKnownName?.startsWith('wkt://POLYGON')
     ? 1
     : POLYGON_FILL_RESIZE_FACTOR;
 
-  let size = Math.round((symbolizer?.size ?? 0) * resizeFactor) || 1;
-  symbolizer.size = size;
+  const radius = typeof symbolizer.radius === 'number' ? symbolizer.radius : 0;
+  const size = Math.round(radius * resizeFactor) || 1;
+  symbolizer.radius = size;
 
-  let maxX = size / 2,
-    maxY = size / 2;
-  if (symbolizer?.maxX && symbolizer?.maxY) {
-    maxX = Math.floor(symbolizer.maxX * resizeFactor) || 1;
-    maxY = Math.floor(symbolizer.maxY * resizeFactor) || 1;
+  let maxX = size / 2;
+  let maxY = size / 2;
+  // @ts-ignore FIXME see issue #62
+  const symMaxX = symbolizer?.maxX ?? maxX;
+  // @ts-ignore FIXME see issue #62
+  const symMaxY = symbolizer?.maxY ?? maxY;
+  if (symMaxX && symMaxY) {
+    maxX = Math.floor(symMaxX * resizeFactor) || 1;
+    maxY = Math.floor(symMaxY * resizeFactor) || 1;
   }
 
   let stepX = ptToPxProp(markerPlacement, 'stepX', 0);
@@ -214,18 +256,18 @@ const processMarkerPlacementInsidePolygon = (
     stepY += maxY * 2;
   }
 
-  let offsetX = ptToPxProp(markerPlacement, 'offsetX', 0);
-  let offsetY = ptToPxProp(markerPlacement, 'offsetY', 0);
+  const offsetX = ptToPxProp(markerPlacement, 'offsetX', 0);
+  const offsetY = ptToPxProp(markerPlacement, 'offsetY', 0);
 
-  let right = Math.round(stepX / 2 - maxX - offsetX);
-  let left = Math.round(stepX / 2 - maxX + offsetX);
-  let top = Math.round(stepY / 2 - maxY - offsetY);
-  let bottom = Math.round(stepY / 2 - maxY + offsetY);
+  const right = Math.round(stepX / 2 - maxX - offsetX);
+  const left = Math.round(stepX / 2 - maxX + offsetX);
+  const top = Math.round(stepY / 2 - maxY - offsetY);
+  const bottom = Math.round(stepY / 2 - maxY + offsetY);
 
   return [top, right, bottom, left];
 };
 
-const orientedMarkerAtStartOfLine = (markerPlacement: any): boolean => {
+const orientedMarkerAtStartOfLine = (markerPlacement: CIMMarkerPlacement): boolean => {
   if (markerPlacement?.angleToLine) {
     if (
       markerPlacement.type === 'CIMMarkerPlacementAtRatioPositions' &&
@@ -244,7 +286,7 @@ const orientedMarkerAtStartOfLine = (markerPlacement: any): boolean => {
 };
 
 const orientedMarkerAtEndOfLine = (
-  markerPlacement: MarkerPlacement
+  markerPlacement: CIMMarkerPlacement
 ): boolean => {
   if (markerPlacement?.angleToLine) {
     if (

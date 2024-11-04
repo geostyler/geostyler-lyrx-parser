@@ -1,15 +1,17 @@
-export const processOpacity = (color: { values: number[] } | null): number => {
-  if (color === null) {
+import {CIMColor, CIMColorType} from './esri/types/symbols';
+
+export const processOpacity = (color: CIMColor | null): number => {
+  if (color === null || !color.values) {
     return 0;
   }
   return color.values[color.values.length - 1] / 100;
 };
 
-export const processColor = (color: any): string => {
+export const processColor = (color: CIMColorType): string => {
   if (color === null) {
     return '#000000';
   }
-  let values = color.values;
+  let values = color.values ?? [0, 0, 0];
   if (color.type === 'CIMRGBColor') {
     return rgbaToHex(values);
   } else if (color.type === 'CIMCMYKColor') {
