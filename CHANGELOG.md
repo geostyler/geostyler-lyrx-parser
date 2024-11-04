@@ -1,3 +1,17 @@
+## [1.1.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.2...v1.1.0) (2024-11-04)
+
+### Features
+
+* better readme (and featuring types) ([eb9781a](https://github.com/geostyler/geostyler-lyrx-parser/commit/eb9781aaff4a19f6fa2adf2a8c07cfe18135687c))
+
+### Bug Fixes
+
+* add prettier ([a88b888](https://github.com/geostyler/geostyler-lyrx-parser/commit/a88b8885ad0f1fdda859785bcaa7a393806127ab))
+* better readme ([7ff500b](https://github.com/geostyler/geostyler-lyrx-parser/commit/7ff500b1d629b1f80f6372211c4e26b2f02bec7a))
+* improve readme ([abae290](https://github.com/geostyler/geostyler-lyrx-parser/commit/abae2900bb80cddc5d26fc3ed391258218c758ca))
+* reference legacy issues ([2c6a239](https://github.com/geostyler/geostyler-lyrx-parser/commit/2c6a23965fd88c3b091c27f4eda57738c5661dbf))
+* typing ([311485a](https://github.com/geostyler/geostyler-lyrx-parser/commit/311485a199012c401ebd4d00d16886026deedae8))
+
 ## [1.0.2](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.1...v1.0.2) (2024-10-28)
 
 ### Bug Fixes
