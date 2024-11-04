@@ -1,4 +1,3 @@
-
 export type CIMObject = {
-    type: string;
+  type: string;
 };

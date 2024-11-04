@@ -1,4 +1,4 @@
-import {CIMColor, CIMColorType} from './esri/types/symbols';
+import { CIMColor, CIMColorType } from "./esri/types/symbols";
 
 export const processOpacity = (color: CIMColor | null): number => {
   if (color === null || !color.values) {
@@ -9,26 +9,26 @@ export const processOpacity = (color: CIMColor | null): number => {
 
 export const processColor = (color: CIMColorType): string => {
   if (color === null) {
-    return '#000000';
+    return "#000000";
   }
   let values = color.values ?? [0, 0, 0];
-  if (color.type === 'CIMRGBColor') {
+  if (color.type === "CIMRGBColor") {
     return rgbaToHex(values);
-  } else if (color.type === 'CIMCMYKColor') {
+  } else if (color.type === "CIMCMYKColor") {
     return rgbaToHex(cmyk2Rgb(values));
-  } else if (color.type === 'CIMHSVColor') {
+  } else if (color.type === "CIMHSVColor") {
     return rgbaToHex(hsv2rgb(values));
-  } else if (color.type === 'CIMGrayColor') {
+  } else if (color.type === "CIMGrayColor") {
     return rgbaToHex(hsv2rgb(values));
   } else {
-    return '#000000';
+    return "#000000";
   }
 };
 
 const rgbaToHex = (rgba: number[]): string => {
   // eslint-disable-next-line no-bitwise
-  const value = (1<<24)+(rgba[0]<<16)+(rgba[1]<<8)+rgba[2];
-  return (`#${value.toString(16).slice(1).split('.')[0]}`);
+  const value = (1 << 24) + (rgba[0] << 16) + (rgba[1] << 8) + rgba[2];
+  return `#${value.toString(16).slice(1).split(".")[0]}`;
 };
 
 const cmyk2Rgb = (cmykArray: number[]): [number, number, number] => {
@@ -55,7 +55,7 @@ const hsv2rgb = (hsvArray: number[]): [number, number, number] => {
   }
 
   let i = Math.floor(h * 6.0);
-  let f = (h * 6.0) - i;
+  let f = h * 6.0 - i;
   let p = 255 * (v * (1.0 - s));
   let q = 255 * (v * (1.0 - s * f));
   let t = 255 * (v * (1.0 - s * (1.0 - f)));
@@ -64,11 +64,23 @@ const hsv2rgb = (hsvArray: number[]): [number, number, number] => {
 
   i %= 6;
 
-  if (i === 0) {return [v, t, p];}
-  if (i === 1) {return [q, v, p];}
-  if (i === 2) {return [p, v, t];}
-  if (i === 3) {return [p, q, v];}
-  if (i === 4) {return [t, p, v];}
-  if (i === 5) {return [v, p, q];}
+  if (i === 0) {
+    return [v, t, p];
+  }
+  if (i === 1) {
+    return [q, v, p];
+  }
+  if (i === 2) {
+    return [p, v, t];
+  }
+  if (i === 3) {
+    return [p, q, v];
+  }
+  if (i === 4) {
+    return [t, p, v];
+  }
+  if (i === 5) {
+    return [v, p, q];
+  }
   return [-1, -1, -1];
 };

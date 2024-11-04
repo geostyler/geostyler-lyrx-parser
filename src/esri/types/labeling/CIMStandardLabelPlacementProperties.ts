@@ -116,7 +116,7 @@ export type CIMStandardLabelPlacementProperties = CIMObject & {
    * Gets or sets a value indicating whether or not to allow overlapping labels.
    */
   allowOverlappingLabels?: boolean;
-}
+};
 /**
  * Represents standard label engine line label position.
  *

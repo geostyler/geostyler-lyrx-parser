@@ -1,7 +1,6 @@
-import { CIMLayerDefinition } from './layers/CIMLayerDefinition.ts';
-
+import { CIMLayerDefinition } from "./layers/CIMLayerDefinition.ts";
 
 export type CIMLayerDocument = {
-    name: string;
-    layerDefinitions: CIMLayerDefinition[];
+  name: string;
+  layerDefinitions: CIMLayerDefinition[];
 };

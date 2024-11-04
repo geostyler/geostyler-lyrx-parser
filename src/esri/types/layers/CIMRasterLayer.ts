@@ -1,5 +1,3 @@
-import { CIMLayerDefinition } from './CIMLayerDefinition.ts';
+import { CIMLayerDefinition } from "./CIMLayerDefinition.ts";
 
-export type CIMRasterLayer = CIMLayerDefinition & {
-
-};
+export type CIMRasterLayer = CIMLayerDefinition & {};

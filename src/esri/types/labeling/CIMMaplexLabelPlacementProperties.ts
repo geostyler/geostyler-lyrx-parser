@@ -515,7 +515,7 @@ export type CIMMaplexLabelPlacementProperties = CIMObject & {
    * Gets or sets the unit of the inset value for perimeter polygon anchor points.
    */
   polygonAnchorPointPerimeterInsetUnit?: MaplexUnit;
-}
+};
 /**
  * Represents the properties required for authoring an Arcade expression.
  */
@@ -536,7 +536,7 @@ export type CIMExpressionInfo = {
    * Gets or sets the ReturnType of the expression.
    */
   returnType?: ExpressionReturnType;
-}
+};
 /**
  * Represents Maplex label stacking properties.
  *
@@ -566,7 +566,7 @@ export type CIMMaplexLabelStackingProperties = CIMObject & {
    * Gets or sets a value indicating whether leading and trailing stacking separators are trimmed from the label string.
    */
   trimStackingSeparators?: boolean;
-}
+};
 /**
  * Represents a Maplex stacking separator.
  *

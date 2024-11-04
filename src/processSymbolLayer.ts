@@ -1,24 +1,25 @@
-import {Effect, Options} from './types.ts';
-import { toWKT } from './wktGeometries.ts';
-import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from './constants.ts';
-import { processColor, processOpacity } from './processUtils.ts';
+import { Effect, Options } from "./types.ts";
+import { toWKT } from "./wktGeometries.ts";
+import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from "./constants.ts";
+import { processColor, processOpacity } from "./processUtils.ts";
 import {
   esriFontToStandardSymbols,
   extractFillColor,
   extractFillOpacity,
   extractStroke,
-  ptToPxProp, toHex,
+  ptToPxProp,
+  toHex,
   WARNINGS,
-} from './toGeostylerUtils.ts';
-import { processSymbolReference } from './processSymbolReference.ts';
+} from "./toGeostylerUtils.ts";
+import { processSymbolReference } from "./processSymbolReference.ts";
 import {
   FillSymbolizer,
   LineSymbolizer,
   MarkSymbolizer,
   Symbolizer,
-  WellKnownName
-} from 'geostyler-style';
-import {CIMEffect, SymbolLayer} from './esri/types/symbols';
+  WellKnownName,
+} from "geostyler-style";
+import { CIMEffect, SymbolLayer } from "./esri/types/symbols";
 // import { writeFileSync, existsSync, mkdirSync } from 'fs';
 // import uuid from 'uuid';
 // import { tmpdir } from 'os';
@@ -27,38 +28,41 @@ import {CIMEffect, SymbolLayer} from './esri/types/symbols';
 export const processSymbolLayer = (
   layer: SymbolLayer,
   symboltype: string,
-  options: Options
+  options: Options,
 ): Symbolizer | undefined => {
   let layerType: string = layer.type;
   switch (layerType) {
-    case 'CIMSolidStroke':
+    case "CIMSolidStroke":
       return processSymbolSolidStroke(layer, symboltype);
-    case 'CIMSolidFill':
+    case "CIMSolidFill":
       return processSymbolSolidFill(layer);
-    case 'CIMCharacterMarker':
+    case "CIMCharacterMarker":
       return processSymbolCharacterMarker(layer, options);
-    case 'CIMVectorMarker':
+    case "CIMVectorMarker":
       return processSymbolVectorMarker(layer);
-    case 'CIMHatchFill':
+    case "CIMHatchFill":
       return processSymbolHatchFill(layer);
-    case 'CIMPictureFill':
-    case 'CIMPictureMarker':
+    case "CIMPictureFill":
+    case "CIMPictureMarker":
       return processSymbolPicture(layer);
     default:
       return;
   }
 };
 
-const processSymbolSolidStroke = (layer: SymbolLayer, symboltype: string): Symbolizer => {
+const processSymbolSolidStroke = (
+  layer: SymbolLayer,
+  symboltype: string,
+): Symbolizer => {
   const effects = extractEffect(layer);
-  if (symboltype === 'CIMPolygonSymbol') {
+  if (symboltype === "CIMPolygonSymbol") {
     const fillSymbolizer: FillSymbolizer = {
-      kind: 'Fill',
+      kind: "Fill",
       outlineColor: processColor(layer.color),
       outlineOpacity: processOpacity(layer.color),
-      outlineWidth: ptToPxProp(layer, 'width', 0),
+      outlineWidth: ptToPxProp(layer, "width", 0),
     };
-    if ('dasharray' in effects) {
+    if ("dasharray" in effects) {
       fillSymbolizer.outlineDasharray = effects.dasharray;
     }
     return fillSymbolizer;
@@ -66,30 +70,36 @@ const processSymbolSolidStroke = (layer: SymbolLayer, symboltype: string): Symbo
   const cap = layer.capStyle.toLowerCase();
   const join = layer.joinStyle.toLowerCase();
   const stroke: LineSymbolizer = {
-    kind: 'Line',
+    kind: "Line",
     color: processColor(layer.color),
     opacity: processOpacity(layer.color),
-    width: ptToPxProp(layer, 'width', 0),
+    width: ptToPxProp(layer, "width", 0),
     perpendicularOffset: 0,
-    cap: ['butt', 'round', 'square'].includes(cap) ? cap as ('butt' | 'round' | 'square'): undefined,
-    join: ['round', 'bevel', 'miter'].includes(join) ? join as ('round' | 'bevel' | 'miter') : undefined
+    cap: ["butt", "round", "square"].includes(cap)
+      ? (cap as "butt" | "round" | "square")
+      : undefined,
+    join: ["round", "bevel", "miter"].includes(join)
+      ? (join as "round" | "bevel" | "miter")
+      : undefined,
   };
-  if ('dasharray' in effects) {
+  if ("dasharray" in effects) {
     stroke.dasharray = effects.dasharray;
   }
-  if ('offset' in effects) {
+  if ("offset" in effects) {
     stroke.perpendicularOffset = effects.offset;
   }
   return stroke;
 };
 
-const processSymbolSolidFill = (layer: SymbolLayer): FillSymbolizer | undefined => {
+const processSymbolSolidFill = (
+  layer: SymbolLayer,
+): FillSymbolizer | undefined => {
   let color = layer.color;
   if (color === undefined) {
     return;
   }
   return {
-    kind: 'Fill',
+    kind: "Fill",
     opacity: processOpacity(color),
     color: processColor(color),
     fillOpacity: 1.0,
@@ -98,13 +108,13 @@ const processSymbolSolidFill = (layer: SymbolLayer): FillSymbolizer | undefined 
 
 const processSymbolCharacterMarker = (
   layer: SymbolLayer,
-  options: Options
+  options: Options,
 ): MarkSymbolizer => {
   const replaceesri = !!options.replaceesri;
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
   const hexcode = toHex(charindex);
-  const size = ptToPxProp(layer, 'size', 12);
+  const size = ptToPxProp(layer, "size", 12);
 
   let name: WellKnownName;
   if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
@@ -120,9 +130,9 @@ const processSymbolCharacterMarker = (
     rotate *= -1;
   }
 
-  let fillColor = '#000000';
+  let fillColor = "#000000";
   let fillOpacity = 1;
-  let strokeColor = '#000000';
+  let strokeColor = "#000000";
   let strokeWidth = 0;
   let strokeOpacity = 0;
   const symbolLayers = layer.symbol.symbolLayers;
@@ -140,7 +150,7 @@ const processSymbolCharacterMarker = (
     strokeOpacity: strokeOpacity,
     strokeWidth: strokeWidth,
     rotate: rotate,
-    kind: 'Mark',
+    kind: "Mark",
     color: fillColor,
     wellKnownName: name,
     radius: size / 2,
@@ -149,15 +159,15 @@ const processSymbolCharacterMarker = (
 
 const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
   if (layer.size) {
-    layer.size = ptToPxProp(layer, 'size', 3);
+    layer.size = ptToPxProp(layer, "size", 3);
   }
   // Default values
-  let fillColor = '#ff0000';
-  let strokeColor = '#000000';
+  let fillColor = "#ff0000";
+  let strokeColor = "#000000";
   let strokeWidth = 1.0;
   let markerSize = 10;
   let strokeOpacity = 1;
-  let wellKnownName: WellKnownName = 'circle';
+  let wellKnownName: WellKnownName = "circle";
   let maxX: number | null = null;
   let maxY: number | null = null;
 
@@ -170,33 +180,36 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
     if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
       symbol = processSymbolReference(markerGraphic, {})[0] as MarkSymbolizer;
       const subLayers = markerGraphic.symbol.symbolLayers.filter(
-        (sublayer: SymbolLayer) => sublayer.enable
+        (sublayer: SymbolLayer) => sublayer.enable,
       );
       fillColor = extractFillColor(subLayers);
       [strokeColor, strokeWidth, strokeOpacity] = extractStroke(subLayers);
       const layerSize = layer.size !== undefined ? layer.size : 10;
-      markerSize = typeof symbol.radius === 'number' ? symbol.radius : layerSize;
-      if (markerGraphic.symbol.type === 'CIMPointSymbol') {
+      markerSize =
+        typeof symbol.radius === "number" ? symbol.radius : layerSize;
+      if (markerGraphic.symbol.type === "CIMPointSymbol") {
         wellKnownName = symbol.wellKnownName ?? wellKnownName;
       } else if (
-        ['CIMLineSymbol', 'CIMPolygonSymbol'].includes(markerGraphic.symbol.type)
+        ["CIMLineSymbol", "CIMPolygonSymbol"].includes(
+          markerGraphic.symbol.type,
+        )
       ) {
         const geometry = markerGraphic.geometry;
         if (geometry) {
           const shape = toWKT(geometry);
           wellKnownName = shape.wellKnownName;
-          maxX = ptToPxProp(shape, 'maxX', 0);
-          maxY = ptToPxProp(shape, 'maxY', 0);
+          maxX = ptToPxProp(shape, "maxX", 0);
+          maxY = ptToPxProp(shape, "maxY", 0);
         }
       }
     }
   }
 
   // TODO marker should support outlineDasharray ?
-  const marker: MarkSymbolizer= {
+  const marker: MarkSymbolizer = {
     opacity: 1,
     rotate: 0,
-    kind: 'Mark',
+    kind: "Mark",
     color: fillColor,
     wellKnownName: wellKnownName,
     radius: markerSize / 2,
@@ -222,13 +235,13 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
   // Conversion of dash arrays is made on a case-by-case basis
   if (JSON.stringify(markerPlacement) === JSON.stringify([12, 3])) {
     // @ts-ignore FIXME see issue #63
-    marker.outlineDasharray = '4 0 4 7';
+    marker.outlineDasharray = "4 0 4 7";
     marker.radius = 3;
     // @ts-ignore FIXME see issue #63
     marker.perpendicularOffset = -3.5;
   } else if (JSON.stringify(markerPlacement) === JSON.stringify([15])) {
     // @ts-ignore FIXME see issue #63
-    marker.outlineDasharray = '0 5 9 1';
+    marker.outlineDasharray = "0 5 9 1";
     marker.radius = 5;
   }
 
@@ -238,7 +251,7 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
 const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   const rotation = layer.rotation || 0;
   const symbolLayers = layer.lineSymbol.symbolLayers;
-  let color = '#000000';
+  let color = "#000000";
   let width = 0;
   let opacity = 0;
   if (symbolLayers) {
@@ -249,7 +262,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   let wellKnowName = hatchMarkerForAngle(rotation);
   if (rotation % 45) {
     WARNINGS.push(
-      'Rotation value different than a multiple of 45° is not possible. The nearest value is taken instead.'
+      "Rotation value different than a multiple of 45° is not possible. The nearest value is taken instead.",
     );
   }
 
@@ -261,7 +274,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
     : rawSeparation * 2;
 
   const markSymbolizer: MarkSymbolizer = {
-    kind: 'Mark',
+    kind: "Mark",
     color: color,
     wellKnownName: wellKnowName,
     radius: separation,
@@ -272,7 +285,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   };
 
   const fillSymbolizer: FillSymbolizer = {
-    kind: 'Fill',
+    kind: "Fill",
     opacity: 1.0,
     graphicFill: markSymbolizer,
   };
@@ -282,7 +295,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   }
 
   let effects = extractEffect(symbolLayers[0]);
-  if ('dasharray' in effects) {
+  if ("dasharray" in effects) {
     // @ts-ignore FIXME see issue #63
     fillSymbolizer.graphicFill!.outlineDasharray = effects.dasharray;
 
@@ -295,16 +308,26 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
         let negativeMargin = ((neededSize - separation) / 2) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
           // @ts-ignore FIXME see issue #64
-          fillSymbolizer.graphicFillMargin = [negativeMargin, 0, negativeMargin, 0];
+          fillSymbolizer.graphicFillMargin = [
+            negativeMargin,
+            0,
+            negativeMargin,
+            0,
+          ];
         } else {
           // @ts-ignore FIXME see issue #64
-          fillSymbolizer.graphicFillMargin = [0, negativeMargin, 0, negativeMargin];
+          fillSymbolizer.graphicFillMargin = [
+            0,
+            negativeMargin,
+            0,
+            negativeMargin,
+          ];
         }
       } else {
         // In case of tilted lines, the trick with the margin is not possible without cropping the pattern.
         neededSize = separation;
         WARNINGS.push(
-          'Unable to keep the original size of CIMHatchFill for line with rotation'
+          "Unable to keep the original size of CIMHatchFill for line with rotation",
         );
       }
       markSymbolizer.radius = neededSize;
@@ -334,21 +357,21 @@ const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
   //     }
   // }
 
-  let size = ptToPxProp(layer, 'height', ptToPxProp(layer, 'size', 0));
+  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
   return {
     opacity: 1.0,
     rotate: 0.0,
-    kind: 'Icon',
+    kind: "Icon",
     color: undefined,
     // image: url,
-    image: 'http://FIXME',
+    image: "http://FIXME",
     size: size,
   };
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {
   let effects: Effect = {};
-  if ('effects' in layer) {
+  if ("effects" in layer) {
     layer.effects.forEach((effect: CIMEffect) => {
       effects = { ...effects, ...processEffect(effect) };
     });
@@ -361,7 +384,7 @@ const processEffect = (effect: CIMEffect): Effect => {
     return Math.ceil(ptToPx(v));
   };
 
-  if (effect.type === 'CIMGeometricEffectDashes') {
+  if (effect.type === "CIMGeometricEffectDashes") {
     let dasharrayValues = effect.dashTemplate?.map(ptToPxAndCeil) || [];
     if (dasharrayValues.length > 1) {
       return {
@@ -369,7 +392,7 @@ const processEffect = (effect: CIMEffect): Effect => {
         dasharray: dasharrayValues, // TODO was a string, can be simplified now
       };
     }
-  } else if (effect.type === 'CIMGeometricEffectOffset') {
+  } else if (effect.type === "CIMGeometricEffectOffset") {
     return {
       offset: ptToPxAndCeil(effect.offset || 0) * -1,
     };
@@ -378,11 +401,11 @@ const processEffect = (effect: CIMEffect): Effect => {
 };
 
 const getStraightHatchMarker = (): WellKnownName[] => {
-  return ['shape://horline', 'shape://vertline'];
+  return ["shape://horline", "shape://vertline"];
 };
 
 const getTiltedHatchMarker = (): WellKnownName[] => {
-  return ['shape://slash', 'shape://backslash'];
+  return ["shape://slash", "shape://backslash"];
 };
 
 const hatchMarkerForAngle = (angle: number): WellKnownName => {
@@ -398,9 +421,11 @@ const hatchMarkerForAngle = (angle: number): WellKnownName => {
   ][quadrant];
 };
 
-const extractOffset = (symbolLayer: SymbolLayer): undefined | [number, number] => {
-  let offsetX = ptToPxProp(symbolLayer, 'offsetX', 0) * OFFSET_FACTOR;
-  let offsetY = ptToPxProp(symbolLayer, 'offsetY', 0) * OFFSET_FACTOR * -1;
+const extractOffset = (
+  symbolLayer: SymbolLayer,
+): undefined | [number, number] => {
+  let offsetX = ptToPxProp(symbolLayer, "offsetX", 0) * OFFSET_FACTOR;
+  let offsetY = ptToPxProp(symbolLayer, "offsetY", 0) * OFFSET_FACTOR * -1;
 
   if (offsetX === 0 && offsetY !== 0) {
     return undefined;

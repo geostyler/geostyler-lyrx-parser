@@ -3,10 +3,10 @@ import {
   Style,
   StyleParser,
   UnsupportedProperties,
-  WriteStyleResult
-} from 'geostyler-style';
-import { convert } from './toGeostyler.ts';
-import { CIMLayerDocument } from './esri/types/CIMLayerDocument.ts';
+  WriteStyleResult,
+} from "geostyler-style";
+import { convert } from "./toGeostyler.ts";
+import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
 
 /**
  * This parser can be used with the GeoStyler.
@@ -17,8 +17,8 @@ import { CIMLayerDocument } from './esri/types/CIMLayerDocument.ts';
  * @implements StyleParser
  */
 export class LyrxParser implements StyleParser<CIMLayerDocument> {
-  static title = 'ArcGIS Pro lyrx parser';
-  title = 'ArcGIS Pro lyrx parser';
+  static title = "ArcGIS Pro lyrx parser";
+  title = "ArcGIS Pro lyrx parser";
 
   unsupportedProperties: UnsupportedProperties = {};
 

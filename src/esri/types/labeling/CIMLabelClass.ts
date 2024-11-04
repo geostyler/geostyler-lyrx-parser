@@ -1,15 +1,15 @@
-import { CIMObject } from '../CIMObject.ts';
-import { CIMMaplexLabelPlacementProperties } from './CIMMaplexLabelPlacementProperties.ts';
-import { CIMStandardLabelPlacementProperties } from './CIMStandardLabelPlacementProperties.ts';
-import { CIMSymbolReference } from './CIMSymbolReference.ts';
+import { CIMObject } from "../CIMObject.ts";
+import { CIMMaplexLabelPlacementProperties } from "./CIMMaplexLabelPlacementProperties.ts";
+import { CIMStandardLabelPlacementProperties } from "./CIMStandardLabelPlacementProperties.ts";
+import { CIMSymbolReference } from "./CIMSymbolReference.ts";
 
 type FeaturesToLabel = {};
 
 export enum LabelExpressionEngine {
-  VBScript = 'VBScript',
-  JScript = 'JScript',
-  Python = 'Python',
-  Arcade = 'Arcade',
+  VBScript = "VBScript",
+  JScript = "JScript",
+  Python = "Python",
+  Arcade = "Arcade",
 }
 
 /**
