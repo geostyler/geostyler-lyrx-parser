@@ -1,13 +1,10 @@
 module.exports = {
-  extends: [
-    '@terrestris/eslint-config-typescript',
-    'prettier'
-  ],
+  extends: ["@terrestris/eslint-config-typescript", "prettier"],
   rules: {
-    'no-shadow': 'off',
-    '@typescript-eslint/no-shadow': ['error'],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     camelcase: [
-      'off',
+      "off",
       {
         ignoreImports: true,
       },

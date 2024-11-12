@@ -46,19 +46,30 @@ export const processSymbolReference = (
     if (!symbolizer) {
       return;
     }
+    const layerSymbolizers = [symbolizer];
     if (
       ["CIMVectorMarker", "CIMPictureFill", "CIMCharacterMarker"].includes(
         layer.type,
       )
     ) {
-      processSymbolLayerIfCharacterMarker(symbol, layer, symbolizer, options);
+      const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+        symbol,
+        layer,
+        symbolizer,
+        options,
+      );
+      if (symbolizerWithSubSymbolizer.length) {
+        // Replace symbolizer by a more complete one.
+        layerSymbolizers.length = 0;
+        layerSymbolizers.push(...symbolizerWithSubSymbolizer);
+      }
     }
-    symbolizers.push(symbolizer);
+    symbolizers.push(...layerSymbolizers);
   });
   return symbolizers;
 };
 
-const processSymbolLayerIfCharacterMarker = (
+const processSymbolLayerWithSubSymbol = (
   symbol: CIMSymbol,
   layer: SymbolLayer,
   symbolizer: Symbolizer,
