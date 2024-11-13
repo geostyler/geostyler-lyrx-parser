@@ -174,12 +174,12 @@ const stringToParameter = (s: string, toLowerCase: boolean): string | null => {
     // Removes quote around and returns.
     return s.substring(1).substring(0, s.length - 2);
   }
-  // Lowercase if it's wanted and alphabetical only.
-  if (toLowerCase && s.match(/^[A-Z]*$/i)) {
-    s = s.toLowerCase();
-  }
   if (s === "<Null>") {
     return null;
+  }
+  // Lowercase if it's wanted and (first letter) alphabetical then alphanumerical.
+  if (toLowerCase && s.match(/^[A-zÀ-ú_-][[A-zÀ-ú0-9-_]*$/)) {
+    s = s.toLowerCase();
   }
   // Returns as is.
   return s;
