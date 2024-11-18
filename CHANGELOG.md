@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.0...v1.1.1) (2024-11-18)
+
+### Bug Fixes
+
+* less restrictive string to parameter ([0c32556](https://github.com/geostyler/geostyler-lyrx-parser/commit/0c3255699fdc554ceda47c2f4e18b714c02ba621))
+* missing graphic-fill ([2b8e5e1](https://github.com/geostyler/geostyler-lyrx-parser/commit/2b8e5e1d0fc10e8fa959a855352e9f1206a9353d))
+
 ## [1.1.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.0.2...v1.1.0) (2024-11-04)
 
 ### Features
