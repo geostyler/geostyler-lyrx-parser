@@ -307,16 +307,14 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
         // To keep the "original size" given by the separation value, we play with a negative margin.
         let negativeMargin = ((neededSize - separation) / 2) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
-          // @ts-ignore FIXME see issue #64
-          fillSymbolizer.graphicFillMargin = [
+          fillSymbolizer.graphicFillPadding = [
             negativeMargin,
             0,
             negativeMargin,
             0,
           ];
         } else {
-          // @ts-ignore FIXME see issue #64
-          fillSymbolizer.graphicFillMargin = [
+          fillSymbolizer.graphicFillPadding = [
             0,
             negativeMargin,
             0,
