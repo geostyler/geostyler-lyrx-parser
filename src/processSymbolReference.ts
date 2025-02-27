@@ -10,6 +10,7 @@ import {
 import { Options } from "./types.ts";
 import { processSymbolLayer } from "./processSymbolLayer.ts";
 import {
+  Expression,
   FillSymbolizer,
   LineSymbolizer,
   MarkSymbolizer,
@@ -137,7 +138,7 @@ const formatPolygonSymbolizer = (
 ): FillSymbolizer | LineSymbolizer | null => {
   const markerPlacementType = markerPlacement.type;
   if (markerPlacementType === "CIMMarkerPlacementInsidePolygon") {
-    const margin = processMarkerPlacementInsidePolygon(
+    const padding = processMarkerPlacementInsidePolygon(
       symbolizer,
       markerPlacement,
     );
@@ -145,8 +146,7 @@ const formatPolygonSymbolizer = (
       kind: "Fill",
       opacity: 1.0,
       graphicFill: symbolizer,
-      // @ts-ignore FIXME see issue #64
-      graphicFillMargin: margin,
+      graphicFillPadding: padding,
     };
   }
   if (markerPlacementType === "CIMMarkerPlacementAlongLineSameSize") {
@@ -229,7 +229,8 @@ const processOrientedMarkerAtEndOfLine = (
     wellKnownName: name,
     radius: ptToPxProp(layer, "size", 10),
     // @ts-ignore FIXME see issue #66
-    geometry: [markerPositionFnc, ["PropertyName", "shape"]],
+    geometry: [null, ["PropertyName", "shape"]],
+    //geometry: [markerPositionFnc, ["PropertyName", "shape"]],
     // @ts-ignore FIXME see issue #66
     inclusion: "mapOnly",
   };
@@ -238,7 +239,12 @@ const processOrientedMarkerAtEndOfLine = (
 const processMarkerPlacementInsidePolygon = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
-): number[] => {
+): [
+  Expression<number>,
+  Expression<number>,
+  Expression<number>,
+  Expression<number>,
+] => {
   const resizeFactor = symbolizer?.wellKnownName?.startsWith("wkt://POLYGON")
     ? 1
     : POLYGON_FILL_RESIZE_FACTOR;
