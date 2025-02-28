@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.1...v1.1.2) (2025-02-28)
+
+### Bug Fixes
+
+* add graphic fill padding on fill symbolizer ([fdcc393](https://github.com/geostyler/geostyler-lyrx-parser/commit/fdcc39378a9b3f73bef5f0f86fc0827891a959be))
+* **deps:** update dependency geostyler-style to v9.2.0 ([c2e1d4f](https://github.com/geostyler/geostyler-lyrx-parser/commit/c2e1d4fc5c7a2058827a2837540c043e37d8df85))
+
 ## [1.1.1](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.0...v1.1.1) (2024-11-18)
 
 ### Bug Fixes
