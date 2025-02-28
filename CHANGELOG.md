@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.2...v1.1.3) (2025-02-28)
+
+### Bug Fixes
+
+* **deps:** update dependency geostyler-style to v10 ([0086995](https://github.com/geostyler/geostyler-lyrx-parser/commit/0086995cce78f1a12a413ea62bb9c69dee67db3c))
+
 ## [1.1.2](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.1...v1.1.2) (2025-02-28)
 
 ### Bug Fixes
