@@ -43,7 +43,7 @@ export const getSimpleFilter = (
   return [
     operator,
     stringToParameter(value1, toLowerCase),
-    stringToParameter(value2, toLowerCase),
+    stringToParameter(value2, false),
   ];
 };
 
