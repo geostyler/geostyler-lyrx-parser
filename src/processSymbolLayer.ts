@@ -100,9 +100,8 @@ const processSymbolSolidFill = (
   }
   return {
     kind: "Fill",
-    opacity: processOpacity(color),
     color: processColor(color),
-    fillOpacity: 1.0,
+    fillOpacity: color.values?.[3] !== undefined ? color.values[3] / 100 : 1.0,
   };
 };
 
@@ -286,7 +285,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
 
   const fillSymbolizer: FillSymbolizer = {
     kind: "Fill",
-    opacity: 1.0,
+    fillOpacity: 1.0,
     graphicFill: markSymbolizer,
   };
 
