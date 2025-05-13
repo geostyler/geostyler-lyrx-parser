@@ -101,7 +101,7 @@ const processSymbolSolidFill = (
   return {
     kind: "Fill",
     color: processColor(color),
-    fillOpacity: color.values?.[3] !== undefined ? color.values[3] / 100 : 1.0,
+    fillOpacity: processOpacity(color),
   };
 };
 
