@@ -19,7 +19,7 @@ export const processColor = (color: CIMColorType): string => {
   } else if (color.type === "CIMHSVColor") {
     return rgbaToHex(hsv2rgb(values));
   } else if (color.type === "CIMGrayColor") {
-    return rgbaToHex(hsv2rgb(values));
+    return rgbaToHex(grayToRgb(values));
   } else {
     return "#000000";
   }
@@ -83,4 +83,11 @@ const hsv2rgb = (hsvArray: number[]): [number, number, number] => {
     return [v, p, q];
   }
   return [-1, -1, -1];
+};
+
+const grayToRgb = (grayValues: number[]): [number, number, number] => {
+  const gray = grayValues[0];
+  const normalizedGray = gray > 1 ? gray : gray * 255;
+
+  return [normalizedGray, normalizedGray, normalizedGray];
 };
