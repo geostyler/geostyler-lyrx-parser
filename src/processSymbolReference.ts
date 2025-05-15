@@ -230,7 +230,7 @@ const processOrientedMarkerAtEndOfLine = (
     radius: ptToPxProp(layer, "size", 10),
     // @ts-ignore FIXME see issue #66
     geometry: [null, ["PropertyName", "shape"]],
-    //geometry: [markerPositionFnc, ["PropertyName", "shape"]],
+    // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
     // @ts-ignore FIXME see issue #66
     inclusion: "mapOnly",
   };
