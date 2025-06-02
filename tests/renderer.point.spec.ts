@@ -86,10 +86,8 @@ describe("Parse unique value point renderer", () => {
 
       const symbolizer = rule.symbolizers[0] as MarkSymbolizer;
 
-      // Color per dictionary
       expect(symbolizer.color).toBe(expectedColors[rule.name]);
 
-      // Shared checks
       expect(symbolizer.kind).toBe("Mark");
       expect(symbolizer.wellKnownName).toBe("circle");
       expect(symbolizer.radius).toBeCloseTo(2.6666, 3);
@@ -97,6 +95,51 @@ describe("Parse unique value point renderer", () => {
       expect(symbolizer.strokeWidth).toBeCloseTo(0.9333, 4);
       expect(symbolizer.strokeOpacity).toBe(1);
       expect(symbolizer.fillOpacity).toBe(1);
+    }
+  });
+});
+
+describe("Parse graduated values point renderer", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  const expectedColors: Record<string, string> = {
+    "1 - 2": "#f4f400",
+    "3 - 18": "#f4b700",
+    "19 - 35": "#f47a00",
+    "36 - 62": "#f43d00",
+    "63 - 164": "#f40000",
+  };
+
+  beforeAll(async () => {
+    const lyrxParser = new LyrxParser();
+    const lyrx: CIMLayerDocument = JSON.parse(
+      fs.readFileSync(
+        "./tests/testdata/point/fc_point_graduated_colors.lyrx",
+        "utf8",
+      ),
+    );
+    geostylerStyle = await lyrxParser.readStyle(lyrx);
+  });
+
+  it("should produce the expected rules with correct colors and structure", () => {
+    const rules = geostylerStyle.output?.rules ?? [];
+    const actualNames = rules.map((r) => r.name);
+    expect(actualNames.sort()).toEqual(Object.keys(expectedColors).sort());
+
+    for (const rule of rules) {
+      expect(rule.name in expectedColors).toBe(true);
+      const symbolizer = rule.symbolizers[0] as MarkSymbolizer;
+
+      expect(symbolizer.color).toBe(expectedColors[rule.name]);
+
+      expect(symbolizer.kind).toBe("Mark");
+      expect(symbolizer.wellKnownName).toBe("circle");
+      expect(symbolizer.radius).toBeCloseTo(2.6666, 3);
+      expect(symbolizer.strokeColor).toBe("#000000");
+      expect(symbolizer.strokeWidth).toBeCloseTo(0.9333, 4);
+      expect(symbolizer.strokeOpacity).toBe(1);
+      expect(symbolizer.fillOpacity).toBe(1);
+      expect(rule.filter).toBeDefined();
     }
   });
 });
