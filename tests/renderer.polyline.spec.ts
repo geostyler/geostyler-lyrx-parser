@@ -1,11 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import { LyrxParser } from "../src/index.ts";
 import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
-import {
-  LineSymbolizer,
-  MarkSymbolizer,
-  ReadStyleResult,
-} from "geostyler-style";
+import { LineSymbolizer, ReadStyleResult } from "geostyler-style";
 import fs from "fs";
 
 describe("Parse simple polyline renderer", () => {
@@ -77,7 +73,6 @@ describe("Parse unique value polyline renderer", () => {
       ),
     );
     geostylerStyle = await lyrxParser.readStyle(lyrx);
-    console.log(JSON.stringify(geostylerStyle, null, 2));
   });
 
   it("should have the expected rules with correct colors", () => {
@@ -124,7 +119,6 @@ describe("Parse graduated values polyline renderer", () => {
       ),
     );
     geostylerStyle = await lyrxParser.readStyle(lyrx);
-    console.log(JSON.stringify(geostylerStyle, null, 2));
   });
 
   it("should produce the expected rules with correct colors and structure", () => {
