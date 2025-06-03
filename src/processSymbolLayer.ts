@@ -226,24 +226,6 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
     marker.maxY = maxY;
   }
 
-  const markerPlacement =
-    layer.markerPlacement !== undefined &&
-    layer.markerPlacement.placementTemplate !== undefined
-      ? layer.markerPlacement.placementTemplate
-      : undefined;
-  // Conversion of dash arrays is made on a case-by-case basis
-  if (JSON.stringify(markerPlacement) === JSON.stringify([12, 3])) {
-    // @ts-ignore FIXME see issue #63
-    marker.outlineDasharray = "4 0 4 7";
-    marker.radius = 3;
-    // @ts-ignore FIXME see issue #63
-    marker.perpendicularOffset = -3.5;
-  } else if (JSON.stringify(markerPlacement) === JSON.stringify([15])) {
-    // @ts-ignore FIXME see issue #63
-    marker.outlineDasharray = "0 5 9 1";
-    marker.radius = 5;
-  }
-
   return marker;
 };
 
