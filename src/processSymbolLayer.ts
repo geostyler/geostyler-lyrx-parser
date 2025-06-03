@@ -123,6 +123,8 @@ const processSymbolCharacterMarker = (
   }
 
   let rotate = layer.rotation === undefined ? 0 : layer.rotation;
+
+  // Rotation direction is by default counterclockwise in lyrx (clockwise in SLD)
   let rotateClockwise =
     layer.rotateClockwise === undefined ? false : layer.rotateClockwise;
   if (!rotateClockwise && rotate !== 0) {
@@ -403,6 +405,7 @@ const hatchMarkerForAngle = (angle: number): WellKnownName => {
 const extractOffset = (
   symbolLayer: SymbolLayer,
 ): undefined | [number, number] => {
+  // Arcgis looks to apply a strange factor.
   let offsetX = ptToPxProp(symbolLayer, "offsetX", 0) * OFFSET_FACTOR;
   let offsetY = ptToPxProp(symbolLayer, "offsetY", 0) * OFFSET_FACTOR * -1;
 

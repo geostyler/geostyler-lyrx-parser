@@ -248,6 +248,8 @@ const processOrientedMarkerAtEndOfLine = (
     geometry: [null, ["PropertyName", "shape"]],
     // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
     // @ts-ignore FIXME see issue #66
+    // Functions "endPoint" and "endAngle" are not supported in the legend in GeoServer,
+    // so we include this symbol only on the map and not in the legend
     inclusion: "mapOnly",
   };
 };
@@ -261,14 +263,21 @@ const processMarkerPlacementInsidePolygon = (
   Expression<number>,
   Expression<number>,
 ] => {
+  // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
+  // We use an empirical factor to account for this, which works in most cases (but not all)
   const resizeFactor = symbolizer?.wellKnownName?.startsWith("wkt://POLYGON")
     ? 1
     : POLYGON_FILL_RESIZE_FACTOR;
 
   const radius = typeof symbolizer.radius === "number" ? symbolizer.radius : 0;
+
+  // Size is already in pixel.
+  // Avoid null values and force them to 1 px
   const size = Math.round(radius * resizeFactor) || 1;
   symbolizer.radius = size;
 
+  // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
+  // ArcGIS stepX, stepY, offsetX, offsetY
   let maxX = size / 2;
   let maxY = size / 2;
   // @ts-ignore FIXME see issue #62
