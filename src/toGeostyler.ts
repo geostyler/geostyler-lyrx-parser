@@ -265,6 +265,7 @@ const processLabelClass = (
     stdPlacementType === LabelFeatureType.Line &&
     maplexPlacementType === LabelFeatureType.Line
   ) {
+    // We use this as a flag to later indicate the it is a line label when converting to SLD
     const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
     // @ts-ignore FIXME see issue #63
     symbolizer.perpendicularOffset = primaryOffset + fontSize;
@@ -305,6 +306,7 @@ const processLabelClass = (
   }
 
   // @ts-ignore FIXME see issue #67
+  // Grouping labels if thinDuplicateLabels is true, or in case of polygons, if numLabelsOption is OneLabelPerName
   symbolizer.group =
     labelClass.maplexLabelPlacementProperties?.thinDuplicateLabels ||
     (maplexPlacementType === LabelFeatureType.Polygon &&
