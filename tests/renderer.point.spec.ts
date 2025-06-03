@@ -7,7 +7,7 @@ describe("Parse simple point renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/point/fc_point_simple.lyrx",
+      "./tests/testdata/point/point_simple.lyrx",
     );
   });
 
@@ -59,7 +59,7 @@ describe("Parse unique value point renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/point/fc_point_unique_values.lyrx",
+      "./tests/testdata/point/point_unique_values.lyrx",
     );
   });
 
@@ -101,7 +101,7 @@ describe("Parse graduated values point renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/point/fc_point_graduated_colors.lyrx",
+      "./tests/testdata/point/point_graduated_colors.lyrx",
     );
   });
 

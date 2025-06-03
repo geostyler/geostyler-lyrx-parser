@@ -7,7 +7,7 @@ describe("Parse simple polyline renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polyline/fc_polyline_simple.lyrx",
+      "./tests/testdata/polyline/polyline_simple.lyrx",
     );
   });
 
@@ -41,7 +41,7 @@ describe("Parse unique value polyline renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polyline/fc_polyline_unique_values.lyrx",
+      "./tests/testdata/polyline/polyline_unique_values.lyrx",
     );
   });
 
@@ -89,7 +89,7 @@ describe("Parse graduated values polyline renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polyline/fc_polyline_graduated_colors.lyrx",
+      "./tests/testdata/polyline/polyline_graduated_colors.lyrx",
     );
   });
 

@@ -7,7 +7,7 @@ describe("Parse simple polygon renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polygon/fc_polygon_simple.lyrx",
+      "./tests/testdata/polygon/polygon_simple.lyrx",
     );
   });
 
@@ -51,7 +51,7 @@ describe("Parse unique value polygon renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polygon/fc_polygon_unique_values.lyrx",
+      "./tests/testdata/polygon/polygon_unique_values.lyrx",
     );
   });
   const expectedLegendValues = {
@@ -118,7 +118,7 @@ describe("Parse graduated values polygon renderer", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/polygon/fc_polygon_graduated_colors.lyrx",
+      "./tests/testdata/polygon/polygon_graduated_colors.lyrx",
     );
   });
 

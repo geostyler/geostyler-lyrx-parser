@@ -7,7 +7,7 @@ describe("Parse lyrx with sql expression", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/labeling/fc_with_sql_expression.lyrx",
+      "./tests/testdata/labeling/layer_with_sql_expression.lyrx",
     );
   });
 
@@ -23,7 +23,7 @@ describe("Parse lyrx with vbscript label classes", () => {
 
   beforeAll(async () => {
     geostylerStyle = await loadGeostylerStyle(
-      "./tests/testdata/labeling/fc_with_vbscript_label_classes.lyrx",
+      "./tests/testdata/labeling/layer_with_vbscript_label_classes.lyrx",
     );
   });
 
