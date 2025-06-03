@@ -8,5 +8,7 @@ export async function loadGeostylerStyle(
 ): Promise<ReadStyleResult> {
   const lyrxParser = new LyrxParser();
   const lyrx: CIMLayerDocument = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  return await lyrxParser.readStyle(lyrx);
+  let style = await lyrxParser.readStyle(lyrx);
+  console.log(JSON.stringify(style, null, 2));
+  return style;
 }

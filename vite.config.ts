@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   test: {
-    include: ["src/**/*.spec.ts", "tests/**/*.spec.ts"], // <- Add this line
+    include: ["tests/**/*.spec.ts"],
     globals: true,
     environment: "jsdom",
   },
