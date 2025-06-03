@@ -1,0 +1,12 @@
+import fs from "fs";
+import { LyrxParser } from "../src/index.ts";
+import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
+import { ReadStyleResult } from "geostyler-style";
+
+export async function loadGeostylerStyle(
+  filePath: string,
+): Promise<ReadStyleResult> {
+  const lyrxParser = new LyrxParser();
+  const lyrx: CIMLayerDocument = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return await lyrxParser.readStyle(lyrx);
+}

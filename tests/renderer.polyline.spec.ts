@@ -1,24 +1,14 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { LyrxParser } from "../src/index.ts";
-import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
 import { LineSymbolizer, ReadStyleResult } from "geostyler-style";
-import fs from "fs";
+import { loadGeostylerStyle } from "./testUtils.ts";
 
 describe("Parse simple polyline renderer", () => {
-  let lyrx: CIMLayerDocument;
-  let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
-    lyrxParser = new LyrxParser();
-    lyrx = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polyline/fc_polyline_simple.lyrx",
-        "utf8",
-      ),
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polyline/fc_polyline_simple.lyrx",
     );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
-    console.log(JSON.stringify(geostylerStyle, null, 2));
   });
 
   it("should parse a valid style object", () => {
@@ -49,6 +39,12 @@ describe("Parse simple polyline renderer", () => {
 describe("Parse unique value polyline renderer", () => {
   let geostylerStyle: ReadStyleResult;
 
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polyline/fc_polyline_unique_values.lyrx",
+    );
+  });
+
   const expectedColors: Record<string, string> = {
     "0": "#bed9fe",
     "1": "#f1fdb4",
@@ -63,17 +59,6 @@ describe("Parse unique value polyline renderer", () => {
     "10": "#c9f4fe",
     "11": "#dbcefe",
   };
-
-  beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polyline/fc_polyline_unique_values.lyrx",
-        "utf8",
-      ),
-    );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
-  });
 
   it("should have the expected rules with correct colors", () => {
     const rules = geostylerStyle.output?.rules ?? [];
@@ -102,6 +87,12 @@ describe("Parse unique value polyline renderer", () => {
 describe("Parse graduated values polyline renderer", () => {
   let geostylerStyle: ReadStyleResult;
 
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polyline/fc_polyline_graduated_colors.lyrx",
+    );
+  });
+
   const expectedColors: Record<string, string> = {
     "1 - 54": "#f4f400",
     "55 - 88": "#f4b700",
@@ -109,17 +100,6 @@ describe("Parse graduated values polyline renderer", () => {
     "123 - 321": "#f43d00",
     "322 - 729": "#f40000",
   };
-
-  beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polyline/fc_polyline_graduated_colors.lyrx",
-        "utf8",
-      ),
-    );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
-  });
 
   it("should produce the expected rules with correct colors and structure", () => {
     const rules = geostylerStyle.output?.rules ?? [];

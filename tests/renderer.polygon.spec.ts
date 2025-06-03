@@ -1,23 +1,14 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { LyrxParser } from "../src/index.ts";
-import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
 import { FillSymbolizer, ReadStyleResult } from "geostyler-style";
-import fs from "fs";
+import { loadGeostylerStyle } from "./testUtils.ts";
 
 describe("Parse simple polygon renderer", () => {
-  let lyrx: CIMLayerDocument;
-  let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
-    lyrxParser = new LyrxParser();
-    lyrx = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polygon/fc_polygon_simple.lyrx",
-        "utf8",
-      ),
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/fc_polygon_simple.lyrx",
     );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
   it("should parse a valid style object", () => {
@@ -58,6 +49,11 @@ describe("Parse simple polygon renderer", () => {
 describe("Parse unique value polygon renderer", () => {
   let geostylerStyle: ReadStyleResult;
 
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/fc_polygon_unique_values.lyrx",
+    );
+  });
   const expectedLegendValues = {
     I: {
       filter: "ES_I",
@@ -80,17 +76,6 @@ describe("Parse unique value polygon renderer", () => {
       color: "#fcf4b2",
     },
   };
-
-  beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polygon/fc_polygon_unique_values.lyrx",
-        "utf8",
-      ),
-    );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
-  });
 
   it("should have the expected rules with correct symbolizer properties", () => {
     const rules = geostylerStyle.output?.rules ?? [];
@@ -131,6 +116,12 @@ describe("Parse unique value polygon renderer", () => {
 describe("Parse graduated values polygon renderer", () => {
   let geostylerStyle: ReadStyleResult;
 
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/fc_polygon_graduated_colors.lyrx",
+    );
+  });
+
   const expectedLegendValues: Record<string, { color: string }> = {
     "0 - 27": { color: "#f4f400" },
     "28 - 72": { color: "#f4b700" },
@@ -138,17 +129,6 @@ describe("Parse graduated values polygon renderer", () => {
     "121 - 173": { color: "#f43d00" },
     "174 - 236": { color: "#f40000" },
   };
-
-  beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/polygon/fc_polygon_graduated_colors.lyrx",
-        "utf8",
-      ),
-    );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
-  });
 
   it("should produce the expected rules with correct colors and structure", () => {
     const rules = geostylerStyle.output?.rules ?? [];

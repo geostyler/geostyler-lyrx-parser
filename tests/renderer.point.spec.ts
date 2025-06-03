@@ -1,20 +1,14 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { LyrxParser } from "../src/index.ts";
-import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
 import { MarkSymbolizer, ReadStyleResult } from "geostyler-style";
-import fs from "fs";
+import { loadGeostylerStyle } from "./testUtils.ts";
 
 describe("Parse simple point renderer", () => {
-  let lyrx: CIMLayerDocument;
-  let lyrxParser: LyrxParser;
   let geostylerStyle: ReadStyleResult;
 
   beforeAll(async () => {
-    lyrxParser = new LyrxParser();
-    lyrx = JSON.parse(
-      fs.readFileSync("./tests/testdata/point/fc_point_simple.lyrx", "utf8"),
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/point/fc_point_simple.lyrx",
     );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
   it("should parse a valid style object", () => {
@@ -64,14 +58,9 @@ describe("Parse unique value point renderer", () => {
   };
 
   beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/point/fc_point_unique_values.lyrx",
-        "utf8",
-      ),
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/point/fc_point_unique_values.lyrx",
     );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
   it("should have the expected rules with correct colors", () => {
@@ -111,14 +100,9 @@ describe("Parse graduated values point renderer", () => {
   };
 
   beforeAll(async () => {
-    const lyrxParser = new LyrxParser();
-    const lyrx: CIMLayerDocument = JSON.parse(
-      fs.readFileSync(
-        "./tests/testdata/point/fc_point_graduated_colors.lyrx",
-        "utf8",
-      ),
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/point/fc_point_graduated_colors.lyrx",
     );
-    geostylerStyle = await lyrxParser.readStyle(lyrx);
   });
 
   it("should produce the expected rules with correct colors and structure", () => {
