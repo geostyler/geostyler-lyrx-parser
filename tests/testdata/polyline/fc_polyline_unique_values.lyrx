@@ -39,7 +39,7 @@
         "editable" : true,
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
-          "workspaceConnectionString" : "ENCRYPTED_PASSWORD_UTF8=00022e6841547761664d326b44637850497533417a726d5852716a4661756a714f716549685758704c50434e6f426f3d2a00;ENCRYPTED_PASSWORD=00022e6866676f6876365461363854727559617371633273383679475035386b43476532313150697255702f576b553d2a00;SERVER=host.docker.internal;INSTANCE=sde:sqlserver:host.docker.internal;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=host.docker.internal;DATABASE=AGIS_312_Local;USER=agistools;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS",
+          "workspaceConnectionString" : "",
           "workspaceFactory" : "SDE",
           "dataset" : "AGIS.aw_fischlinie",
           "datasetType" : "esriDTFeatureClass"
