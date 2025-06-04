@@ -56,22 +56,7 @@ export const processSymbolLayer = (
     case "CIMSolidFill":
       return wrap(processSymbolSolidFill(layer));
     case "CIMCharacterMarker":
-      const characterMarkerSymbol = processSymbolCharacterMarker(
-        layer,
-        options,
-      );
-      if (characterMarkerSymbol) {
-        const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
-          symbol,
-          layer,
-          characterMarkerSymbol,
-          options,
-        );
-        if (symbolizerWithSubSymbolizer.length) {
-          return symbolizerWithSubSymbolizer;
-        }
-      }
-      return wrap(characterMarkerSymbol);
+      return processSymbolCharacterMarker(layer, symbol, options);
     case "CIMVectorMarker":
       return processSymbolVectorMarker(layer, symbol, options);
     case "CIMHatchFill":
@@ -483,8 +468,9 @@ const processSymbolSolidFill = (
 
 const processSymbolCharacterMarker = (
   layer: SymbolLayer,
+  symbol: CIMSymbol,
   options: Options,
-): MarkSymbolizer => {
+): Symbolizer[] => {
   const replaceesri = !!options.replaceesri;
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
@@ -519,7 +505,7 @@ const processSymbolCharacterMarker = (
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
   }
 
-  return {
+  const symbolCharacterMaker = {
     opacity: 1.0,
     offset: extractOffset(layer),
     fillOpacity: fillOpacity,
@@ -531,7 +517,19 @@ const processSymbolCharacterMarker = (
     color: fillColor,
     wellKnownName: name,
     radius: size / 2,
-  };
+  } as Symbolizer;
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    symbol,
+    layer,
+    symbolCharacterMaker,
+    options,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
+  }
+
+  return [symbolCharacterMaker];
 };
 
 const processSymbolVectorMarker = (
