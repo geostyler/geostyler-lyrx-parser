@@ -295,7 +295,6 @@ const processLabelClass = (
   const haloSize = ptToPxProp(textSymbol, "haloSize", 0);
   if (haloSize && textSymbol.haloSymbol) {
     const haloColor = extractFillColor(
-      // @ts-ignore FIXME see issue #68
       textSymbol?.haloSymbol?.symbolLayers ?? [],
     );
     Object.assign(symbolizer, {
