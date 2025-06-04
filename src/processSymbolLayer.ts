@@ -62,8 +62,7 @@ export const processSymbolLayer = (
     case "CIMHatchFill":
       return wrap(processSymbolHatchFill(layer));
     case "CIMPictureFill":
-      return processSymbolPicture(layer);
-
+      return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
       return wrap(processSymbolMarker(layer));
     default:
