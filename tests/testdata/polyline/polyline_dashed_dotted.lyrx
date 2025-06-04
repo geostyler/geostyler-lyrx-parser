@@ -162,7 +162,7 @@
         },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
-          "workspaceConnectionString" : "AUTHENTICATION_MODE=DBMS;DATABASE=AGIS_312_Prod;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=\"sqlA-AGIS-312-Prod.ads.ktag.ch;ENCRYPT=yes\";ENCRYPTED_PASSWORD=00022e68533458784d69344a58694d362b426a6a5961356e4d39643669753947364e54413535324677712b73504c673d2a00;INSTANCE=\"sde:sqlserver:sqlA-AGIS-312-Prod.ads.ktag.ch;ENCRYPT=yes\";SERVER=SqlServer;USER=agistools",
+          "workspaceConnectionString" : "",
           "workspaceFactory" : "SDE",
           "dataset" : "AGIS.are_rp11elekleitung",
           "datasetType" : "esriDTFeatureClass"
