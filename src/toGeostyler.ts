@@ -230,7 +230,7 @@ const processLabelClass = (
   );
   const fontFamily = textSymbol?.fontFamilyName || "Arial";
   const fontSize = ptToPxProp(textSymbol, "height", 12, true);
-  // @ts-ignore FIXME see issue #68
+
   const color = extractFillColor(textSymbol?.symbol?.symbolLayers ?? []);
   const fontWeight = extractFontWeight(textSymbol);
   const rotationProps =

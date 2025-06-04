@@ -127,3 +127,101 @@ describe("Parse graduated values point renderer", () => {
     }
   });
 });
+
+describe("Parse point renderer with unique value character marker symbols", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/point/point_unique_values_CIMCharacterMarkers.lyrx",
+    );
+  });
+
+  const expectedLegendValues: Record<
+    string,
+    { symbols: { wellKnownName: string; color: string }[] }
+  > = {
+    "Ohne Sanierung": {
+      symbols: [
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x25",
+          color: "#00ff00",
+        },
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x55",
+          color: "#000000",
+        },
+      ],
+    },
+    "Teilweise saniert": {
+      symbols: [
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x25",
+          color: "#00ff00",
+        },
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x5b",
+          color: "#000000",
+        },
+      ],
+    },
+    "Sanierung abgeschlossen": {
+      symbols: [
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x25",
+          color: "#00ff00",
+        },
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x61",
+          color: "#000000",
+        },
+      ],
+    },
+    "Ohne Information": {
+      symbols: [
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x25",
+          color: "#ff0000",
+        },
+        {
+          wellKnownName: "ttf://ESRI Geometric Symbols#0x55",
+          color: "#000000",
+        },
+      ],
+    },
+  };
+
+  it("should produce the expected rules with correct symbolizers and structure", () => {
+    const rules = geostylerStyle.output?.rules ?? [];
+    const actualNames = rules.map((r) => r.name);
+    expect(actualNames.sort()).toEqual(
+      Object.keys(expectedLegendValues).sort(),
+    );
+
+    for (const rule of rules) {
+      expect(rule.name in expectedLegendValues).toBe(true);
+
+      const expectedSymbols = expectedLegendValues[rule.name].symbols;
+      const actualSymbols = rule.symbolizers as MarkSymbolizer[];
+
+      expect(actualSymbols.length).toBe(expectedSymbols.length);
+
+      for (let i = 0; i < expectedSymbols.length; i++) {
+        const actual = actualSymbols[i];
+        const expected = expectedSymbols[i];
+
+        expect(actual.kind).toBe("Mark");
+        expect(actual.wellKnownName).toBe(expected.wellKnownName);
+        expect(actual.color).toBe(expected.color.toLowerCase());
+
+        expect(actual.strokeColor).toBe("#000000");
+        expect(actual.strokeWidth).toBeCloseTo(0);
+        expect(actual.strokeOpacity).toBeCloseTo(0);
+        expect(actual.fillOpacity).toBeCloseTo(1);
+        expect(actual.radius).toBeCloseTo(10.6666, 3);
+      }
+
+      expect(rule.filter).toBeDefined();
+    }
+  });
+});
