@@ -5,7 +5,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-import { CIMSymbol } from "./CIMSymbol";
+import { CIMSymbol, SymbolLayer } from "./CIMSymbol";
 
 /**
  * Block progressions.
@@ -320,7 +320,7 @@ export interface CIMPolygonSymbol {
   /**
    * Gets or sets the symbol layers. Symbol layers are the components that make up a symbol. A symbol layer is represented by a stroke, fill, marker, or procedural symbol layer.
    */
-  symbolLayers?: CIMSymbolLayer[] | null;
+  symbolLayers?: SymbolLayer[] | null;
   /**
    * Gets or sets the representative image of the symbol as a base64 encoded string.
    */
@@ -338,36 +338,6 @@ export interface CIMGeometricEffect {
    * Gets or sets the primitive name.
    */
   primitiveName?: null | string;
-}
-/**
- * Represents a symbol layer. Symbol layers are the components that make up a symbol. A symbol layer is represented by a stroke, fill, marker, or procedural symbol layer.
- *
- */
-export interface CIMSymbolLayer {
-  /**
-   * Gets or sets whether the geometric effects that are applied to the symbol layer. Effects dynamically alter the feature geometry when the symbology is applied. Multiple effects applied to a symbol layer are rendered sequentially.
-   */
-  effects?: CIMGeometricEffect[] | null;
-  /**
-   * Gets or sets a value indicating whether the symbol layer is visible. The symbol layer draws only when enabled. Currently, an invisible layer is not considered in any transformations when in a 3D context.
-   */
-  enable?: boolean;
-  /**
-   * Gets or sets the internal name of the symbol layer used for symbol level drawing.
-   */
-  name?: null | string;
-  /**
-   * Gets or sets a value indicating whether the color set at the basic properties level is applied to the symbol layer. If the symbol layer is color locked then changes made to the color in the basic properties will not be applied to the symbol layer.
-   */
-  colorLocked?: boolean;
-  /**
-   * Gets or sets the primitive name.
-   */
-  primitiveName?: null | string;
-  /**
-   * Gets or sets a value indicating whether or not the symbol layer should overprint in press printing.
-   */
-  overprint?: boolean;
 }
 /**
  * Supports colors in the CIM model by providing low level access to properties common amongst all color types.

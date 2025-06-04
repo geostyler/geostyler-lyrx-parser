@@ -230,7 +230,7 @@ const processLabelClass = (
   );
   const fontFamily = textSymbol?.fontFamilyName || "Arial";
   const fontSize = ptToPxProp(textSymbol, "height", 12, true);
-  // @ts-ignore FIXME see issue #68
+
   const color = extractFillColor(textSymbol?.symbol?.symbolLayers ?? []);
   const fontWeight = extractFontWeight(textSymbol);
   const rotationProps =
@@ -295,7 +295,6 @@ const processLabelClass = (
   const haloSize = ptToPxProp(textSymbol, "haloSize", 0);
   if (haloSize && textSymbol.haloSymbol) {
     const haloColor = extractFillColor(
-      // @ts-ignore FIXME see issue #68
       textSymbol?.haloSymbol?.symbolLayers ?? [],
     );
     Object.assign(symbolizer, {
