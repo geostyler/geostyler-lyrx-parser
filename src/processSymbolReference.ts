@@ -350,7 +350,7 @@ const orientedMarkerAtEndOfLine = (
   return false;
 };
 
-const processMarkerPlacementAlongLine= (markerPlacement: CIMMarkerPlacement, size: number): number[] => {
+const processMarkerPlacementAlongLine = (markerPlacement: CIMMarkerPlacement, size: number): number[] => {
   const placementTemplate = markerPlacement?.placementTemplate;
 
   if (!placementTemplate || !placementTemplate.length) {
@@ -369,7 +369,7 @@ const processMarkerPlacementAlongLine= (markerPlacement: CIMMarkerPlacement, siz
       return Math.ceil(ptToPx(v));
     };
     // We must calculate the dasharray length the same way as for the CIMGeometricEffectDashes
-    let dasharrayValues = placementTemplate?.map(ptToPxAndCeil) || [];
+    const dasharrayValues = placementTemplate?.map(ptToPxAndCeil) || [];
     const totalDasharray = dasharrayValues.reduce((sum, value) => sum + value, 0);
     // The length of the markers is the templateLength. For the whole pattern we need to caluculate the appropriate spacing. 
     const spacing = totalDasharray - templateLength;
