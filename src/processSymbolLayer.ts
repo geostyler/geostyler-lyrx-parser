@@ -62,21 +62,10 @@ export const processSymbolLayer = (
     case "CIMHatchFill":
       return wrap(processSymbolHatchFill(layer));
     case "CIMPictureFill":
-      const pictureFillSymbol = processSymbolPicture(layer);
-      if (pictureFillSymbol) {
-        const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
-          symbol,
-          layer,
-          pictureFillSymbol,
-          options,
-        );
-        if (symbolizerWithSubSymbolizer.length) {
-          return symbolizerWithSubSymbolizer;
-        }
-      }
-      return wrap(pictureFillSymbol);
+      return processSymbolPicture(layer);
+
     case "CIMPictureMarker":
-      return wrap(processSymbolPicture(layer));
+      return wrap(processSymbolMarker(layer));
     default:
       return;
   }
@@ -699,7 +688,11 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   return fillSymbolizer;
 };
 
-const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
+const processSymbolPicture = (
+  layer: SymbolLayer,
+  cimSymbol: CIMSymbol,
+  options: Options,
+): Symbolizer[] => {
   // let url = layer.url;
   // if (!existsSync(url)) {
   //     let tokens = url.split(';');
@@ -720,6 +713,30 @@ const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
   //     }
   // }
 
+  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  const picureFillSymbolizer: Symbolizer = {
+    opacity: 1.0,
+    rotate: 0.0,
+    kind: "Icon",
+    color: undefined,
+    // image: url,
+    image: "http://FIXME",
+    size: size,
+  };
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    cimSymbol,
+    layer,
+    picureFillSymbolizer,
+    options,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
+  }
+  return [picureFillSymbolizer];
+};
+
+const processSymbolMarker = (layer: SymbolLayer): Symbolizer => {
   let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
   return {
     opacity: 1.0,
