@@ -73,19 +73,7 @@ export const processSymbolLayer = (
       }
       return wrap(characterMarkerSymbol);
     case "CIMVectorMarker":
-      let vectorMarkerSymbol = processSymbolVectorMarker(layer);
-      if (vectorMarkerSymbol) {
-        const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
-          symbol,
-          layer,
-          vectorMarkerSymbol,
-          options,
-        );
-        if (symbolizerWithSubSymbolizer.length) {
-          return symbolizerWithSubSymbolizer;
-        }
-      }
-      return wrap(vectorMarkerSymbol);
+      return processSymbolVectorMarker(layer, symbol, options);
     case "CIMHatchFill":
       return wrap(processSymbolHatchFill(layer));
     case "CIMPictureFill":
@@ -114,6 +102,8 @@ const processSymbolLayerWithSubSymbol = (
   layer: SymbolLayer,
   symbolizer: Symbolizer,
   options: Options,
+  maxX: number | null = null,
+  maxY: number | null = null,
 ): Symbolizer[] => {
   const symbolizers: Symbolizer[] = [];
   if (symbol.type === "CIMPolygonSymbol") {
@@ -121,6 +111,8 @@ const processSymbolLayerWithSubSymbol = (
     const polygonSymbolizer = formatPolygonSymbolizer(
       symbolizer as MarkSymbolizer,
       markerPlacement,
+      maxX,
+      maxY,
     );
     if (polygonSymbolizer) {
       symbolizers.push(polygonSymbolizer);
@@ -230,12 +222,16 @@ const processMarkerPlacementAlongLine = (
 const formatPolygonSymbolizer = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
+  maxX: number | null = null,
+  maxY: number | null = null,
 ): FillSymbolizer | LineSymbolizer | null => {
   const markerPlacementType = markerPlacement.type;
   if (markerPlacementType === "CIMMarkerPlacementInsidePolygon") {
     const padding = processMarkerPlacementInsidePolygon(
       symbolizer,
       markerPlacement,
+      maxX,
+      maxY,
     );
     return {
       kind: "Fill",
@@ -336,6 +332,8 @@ const processOrientedMarkerAtEndOfLine = (
 const processMarkerPlacementInsidePolygon = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
+  symMaxX: number | null = null,
+  symMaxY: number | null = null,
 ): [
   Expression<number>,
   Expression<number>,
@@ -359,10 +357,9 @@ const processMarkerPlacementInsidePolygon = (
   // ArcGIS stepX, stepY, offsetX, offsetY
   let maxX = size / 2;
   let maxY = size / 2;
-  // @ts-ignore FIXME see issue #62
-  const symMaxX = symbolizer?.maxX ?? maxX;
-  // @ts-ignore FIXME see issue #62
-  const symMaxY = symbolizer?.maxY ?? maxY;
+
+  symMaxX = symMaxX ?? maxX;
+  symMaxY = symMaxY ?? maxY;
   if (symMaxX && symMaxY) {
     maxX = Math.floor(symMaxX * resizeFactor) || 1;
     maxY = Math.floor(symMaxY * resizeFactor) || 1;
@@ -537,7 +534,11 @@ const processSymbolCharacterMarker = (
   };
 };
 
-const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
+const processSymbolVectorMarker = (
+  layer: SymbolLayer,
+  cimSymbol: CIMSymbol,
+  options: Options,
+): Symbolizer[] => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, "size", 3);
   }
@@ -598,15 +599,20 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
     strokeOpacity: strokeOpacity,
     fillOpacity: 1,
   };
-  if (maxX !== null) {
-    marker.maxX = maxX;
-  }
-  if (maxY !== null) {
-    // @ts-ignore FIXME see issue #62
-    marker.maxY = maxY;
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    cimSymbol,
+    layer,
+    marker,
+    options,
+    maxX,
+    maxY,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
   }
 
-  return marker;
+  return [marker];
 };
 
 const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
