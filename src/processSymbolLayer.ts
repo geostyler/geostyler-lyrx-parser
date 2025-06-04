@@ -45,26 +45,21 @@ export const processSymbolLayer = (
 ): Symbolizer[] | undefined => {
   let layerType: string = layer.type;
 
-  const wrap = (item?: Symbolizer): Symbolizer[] | undefined => {
-    if (!item) return undefined;
-    return [item];
-  };
-
   switch (layerType) {
     case "CIMSolidStroke":
-      return wrap(processSymbolSolidStroke(layer, symbol.type));
+      return processSymbolSolidStroke(layer, symbol.type);
     case "CIMSolidFill":
-      return wrap(processSymbolSolidFill(layer));
+      return processSymbolSolidFill(layer);
     case "CIMCharacterMarker":
       return processSymbolCharacterMarker(layer, symbol, options);
     case "CIMVectorMarker":
       return processSymbolVectorMarker(layer, symbol, options);
     case "CIMHatchFill":
-      return wrap(processSymbolHatchFill(layer));
+      return processSymbolHatchFill(layer);
     case "CIMPictureFill":
       return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
-      return wrap(processSymbolMarker(layer));
+      return processSymbolMarker(layer);
     default:
       return;
   }
@@ -402,7 +397,7 @@ const orientedMarkerAtEndOfLine = (
 const processSymbolSolidStroke = (
   layer: SymbolLayer,
   symboltype: string,
-): Symbolizer => {
+): Symbolizer[] => {
   const effects = extractEffect(layer);
   if (symboltype === "CIMPolygonSymbol") {
     const fillSymbolizer: FillSymbolizer = {
@@ -414,7 +409,7 @@ const processSymbolSolidStroke = (
     if ("dasharray" in effects) {
       fillSymbolizer.outlineDasharray = effects.dasharray;
     }
-    return fillSymbolizer;
+    return [fillSymbolizer];
   }
   const cap = layer.capStyle.toLowerCase();
   const join = layer.joinStyle.toLowerCase();
@@ -437,21 +432,23 @@ const processSymbolSolidStroke = (
   if ("offset" in effects) {
     stroke.perpendicularOffset = effects.offset;
   }
-  return stroke;
+  return [stroke];
 };
 
 const processSymbolSolidFill = (
   layer: SymbolLayer,
-): FillSymbolizer | undefined => {
+): Symbolizer[] | undefined => {
   let color = layer.color;
   if (color === undefined) {
     return;
   }
-  return {
-    kind: "Fill",
-    color: processColor(color),
-    fillOpacity: processOpacity(color),
-  };
+  return [
+    {
+      kind: "Fill",
+      color: processColor(color),
+      fillOpacity: processOpacity(color),
+    } as Symbolizer,
+  ];
 };
 
 const processSymbolCharacterMarker = (
@@ -601,7 +598,7 @@ const processSymbolVectorMarker = (
   return [marker];
 };
 
-const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
+const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   const rotation = layer.rotation || 0;
   const symbolLayers = layer.lineSymbol.symbolLayers;
   let color = "#000000";
@@ -644,7 +641,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   };
 
   if (!symbolLayers) {
-    return fillSymbolizer;
+    return [fillSymbolizer];
   }
 
   let effects = extractEffect(symbolLayers[0]);
@@ -684,7 +681,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
       markSymbolizer.radius = neededSize;
     }
   }
-  return fillSymbolizer;
+  return [fillSymbolizer];
 };
 
 const processSymbolPicture = (
@@ -735,17 +732,19 @@ const processSymbolPicture = (
   return [picureFillSymbolizer];
 };
 
-const processSymbolMarker = (layer: SymbolLayer): Symbolizer => {
+const processSymbolMarker = (layer: SymbolLayer): Symbolizer[] => {
   let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  return {
-    opacity: 1.0,
-    rotate: 0.0,
-    kind: "Icon",
-    color: undefined,
-    // image: url,
-    image: "http://FIXME",
-    size: size,
-  };
+  return [
+    {
+      opacity: 1.0,
+      rotate: 0.0,
+      kind: "Icon",
+      color: undefined,
+      // image: url,
+      image: "http://FIXME",
+      size: size,
+    } as Symbolizer,
+  ];
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {
