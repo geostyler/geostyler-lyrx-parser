@@ -25,6 +25,7 @@ import {
   SymbolLayer,
 } from "./esri/types/symbols";
 import { fieldToFProperty } from "./expressions.ts";
+import { ptToPx } from "./constants.ts";
 
 export const processSymbolReference = (
   symbolref: CIMSymbolReference,
@@ -110,17 +111,32 @@ const processSymbolLayerWithSubSymbol = (
           symbolizers.push(endSymbolizer);
         }
       }
+      const lineSymbolizer = formatLineSymbolizer(symbolizer as PointSymbolizer, layer as SymbolLayer);
+      symbolizers.push(lineSymbolizer);
       return symbolizers;
     }
     // Not CIMCharacterMarker
-    const lineSymbolizer = formatLineSymbolizer(symbolizer as PointSymbolizer);
+    const lineSymbolizer = formatLineSymbolizer(symbolizer as PointSymbolizer, layer as SymbolLayer);
     symbolizers.push(lineSymbolizer);
     return symbolizers;
   }
   return symbolizers;
 };
 
-const formatLineSymbolizer = (symbolizer: PointSymbolizer): LineSymbolizer => {
+const formatLineSymbolizer = (symbolizer: PointSymbolizer,  layer: SymbolLayer): LineSymbolizer => {
+  const markerPlacement = layer.markerPlacement;
+  if (layer.markerPlacement.type === "CIMMarkerPlacementAlongLineSameSize") {
+    const size = ptToPxProp(layer, "size", 10);
+    const template = processMarkerPlacementAlongLine(markerPlacement, size);
+    return {
+      kind: "Line",
+      opacity: 1.0,
+      width: size,
+      perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
+      graphicStroke: symbolizer,
+      dasharray: template,
+    };
+  }
   return {
     kind: "Line",
     opacity: 1.0,
@@ -333,3 +349,31 @@ const orientedMarkerAtEndOfLine = (
   }
   return false;
 };
+
+const processMarkerPlacementAlongLine = (markerPlacement: CIMMarkerPlacement, size: number): number[] => {
+  const placementTemplate = markerPlacement?.placementTemplate;
+
+  if (!placementTemplate || !placementTemplate.length) {
+    return [];
+  }
+  if (placementTemplate.length === 1) {
+    // The markers are placed with the same distance.
+    const distance = ptToPx(placementTemplate[0]);
+    // The distance must be larger than the size of the marker and we add a default spacing of 1, which is not necessary in lyrx
+    return distance >= size + 1 ? [distance, 1] : [size + 1, 1]; 
+  }
+  else {
+    // The markers are placed with different distances.
+    const templateLength = placementTemplate.length * size;
+    let ptToPxAndCeil = (v: number) => {
+      return Math.ceil(ptToPx(v));
+    };
+    // We must calculate the dasharray length the same way as for the CIMGeometricEffectDashes
+    const dasharrayValues = placementTemplate?.map(ptToPxAndCeil) || [];
+    const totalDasharray = dasharrayValues.reduce((sum, value) => sum + value, 0);
+    // The length of the markers is the templateLength. For the whole pattern we need to caluculate the appropriate spacing. 
+    const spacing = totalDasharray - templateLength;
+    return [templateLength, spacing];
+  }
+}
+
