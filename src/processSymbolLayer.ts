@@ -6,7 +6,11 @@ import {
   POLYGON_FILL_RESIZE_FACTOR,
   ptToPx,
 } from "./constants.ts";
-import { processColor, processOpacity } from "./processUtils.ts";
+import {
+  angleIn360Degrees,
+  processColor,
+  processOpacity,
+} from "./processUtils.ts";
 import {
   esriFontToStandardSymbols,
   extractFillColor,
@@ -787,9 +791,10 @@ const getTiltedHatchMarker = (): WellKnownName[] => {
 };
 
 const hatchMarkerForAngle = (angle: number): WellKnownName => {
+  const angle360 = angleIn360Degrees(angle);
   const straightHatchMarkers = getStraightHatchMarker();
   const tiltedHatchMarkers = getTiltedHatchMarker();
-  const quadrant = Math.floor(((angle + 22.5) % 180) / 45.0);
+  const quadrant = Math.floor(((angle360 + 22.5) % 180) / 45.0);
 
   return [
     straightHatchMarkers[0],
