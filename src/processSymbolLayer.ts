@@ -269,11 +269,12 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
 
   // Geoserver acts weird with tilted lines. Empirically, that's the best result so far:
   // Takes the double of the raw separation value. Line and dash lines are treated equally and are looking good.
+  // For the straight hatch markers, we need to divide the value by 2 because in the sldParser it will be multiplied by 2.
   let rawSeparation = layer.separation || 0;
   let separation = getStraightHatchMarker().includes(wellKnowName)
-    ? ptToPx(rawSeparation)
-    : rawSeparation * 2;
-
+    ? ptToPx(rawSeparation) / 2
+    : rawSeparation;
+  console.log("separation", separation, "wellKnowName", wellKnowName);
   const markSymbolizer: MarkSymbolizer = {
     kind: "Mark",
     color: color,
@@ -307,6 +308,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
       if (getStraightHatchMarker().includes(wellKnowName)) {
         // To keep the "original size" given by the separation value, we play with a negative margin.
         let negativeMargin = ((neededSize - separation) / 2) * -1;
+        console.log("neededSize", neededSize, "negativeMargin", negativeMargin, "separation", separation);
         if (wellKnowName === getStraightHatchMarker()[0]) {
           fillSymbolizer.graphicFillPadding = [
             negativeMargin,
@@ -329,6 +331,8 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
           "Unable to keep the original size of CIMHatchFill for line with rotation",
         );
       }
+      // Because it will be multiplied by 2 in the sldParser, we need to divide it by 2.
+      neededSize = Math.ceil(neededSize / 2);
       markSymbolizer.radius = neededSize;
     }
   }

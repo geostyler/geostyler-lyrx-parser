@@ -47,6 +47,7 @@ export const processSymbolReference = (
     if (!symbolizer) {
       return;
     }
+    console.log("symbolizer", symbolizer);
     const layerSymbolizers = [symbolizer];
     if (
       ["CIMVectorMarker", "CIMPictureFill", "CIMCharacterMarker"].includes(
