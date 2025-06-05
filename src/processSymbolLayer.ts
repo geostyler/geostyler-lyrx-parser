@@ -622,7 +622,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   // Geoserver acts weird with tilted lines. Empirically, that's the best result so far:
   // Takes the double of the raw separation value. Line and dash lines are treated equally and are looking good.
-  // For the straight hatch markers, we need to divide the value by 2 because in the sldParser it will be multiplied by 2.
+   // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
   let rawSeparation = layer.separation || 0;
   let separation = getStraightHatchMarker().includes(wellKnowName)
     ? ptToPx(rawSeparation) / 2
