@@ -139,6 +139,23 @@ const formatLineSymbolizer = (
   if (layer.markerPlacement.type === "CIMMarkerPlacementAlongLineSameSize") {
     const size = ptToPxProp(layer, "size", 10);
     const template = processMarkerPlacementAlongLine(markerPlacement, size);
+    if (symbolizer.kind === "Mark") {
+      const marker = symbolizer as MarkSymbolizer;
+      if (!marker?.wellKnownName?.startsWith("wkt://") && marker.strokeWidth === 0) {
+        // If the marker has a known shape with strokeWidth of 0, we don't want to render it because Geoserver still draws a line.
+        symbolizer.strokeWidth = undefined;
+        symbolizer.strokeColor = undefined;
+        symbolizer.strokeOpacity = undefined;
+        return {
+          kind: "Line",
+          opacity: 1.0,
+          width: size,
+          perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
+          graphicStroke: symbolizer,
+          dasharray: template,
+        };
+      } 
+    }
     return {
       kind: "Line",
       opacity: 1.0,
