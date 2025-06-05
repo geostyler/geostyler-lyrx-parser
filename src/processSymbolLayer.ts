@@ -681,7 +681,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
           "Unable to keep the original size of CIMHatchFill for line with rotation",
         );
       }
-      // Because it will be multiplied by 2 in the sldParser, we need to divide it by 2.
       markSymbolizer.radius = neededSize;
     }
   }
