@@ -1,7 +1,16 @@
 import { Effect, Options } from "./types.ts";
 import { toWKT } from "./wktGeometries.ts";
-import { ESRI_SYMBOLS_FONT, OFFSET_FACTOR, ptToPx } from "./constants.ts";
-import { processColor, processOpacity } from "./processUtils.ts";
+import {
+  ESRI_SYMBOLS_FONT,
+  OFFSET_FACTOR,
+  POLYGON_FILL_RESIZE_FACTOR,
+  ptToPx,
+} from "./constants.ts";
+import {
+  angleIn360Degrees,
+  processColor,
+  processOpacity,
+} from "./processUtils.ts";
 import {
   esriFontToStandardSymbols,
   extractFillColor,
@@ -13,13 +22,21 @@ import {
 } from "./toGeostylerUtils.ts";
 import { processSymbolReference } from "./processSymbolReference.ts";
 import {
+  Expression,
   FillSymbolizer,
   LineSymbolizer,
   MarkSymbolizer,
+  PointSymbolizer,
   Symbolizer,
   WellKnownName,
 } from "geostyler-style";
-import { CIMEffect, SymbolLayer } from "./esri/types/symbols";
+import {
+  CIMEffect,
+  CIMMarkerPlacement,
+  CIMSymbol,
+  SymbolLayer,
+} from "./esri/types/symbols";
+import { fieldToFProperty } from "./expressions.ts";
 // import { writeFileSync, existsSync, mkdirSync } from 'fs';
 // import uuid from 'uuid';
 // import { tmpdir } from 'os';
@@ -27,33 +44,364 @@ import { CIMEffect, SymbolLayer } from "./esri/types/symbols";
 
 export const processSymbolLayer = (
   layer: SymbolLayer,
-  symboltype: string,
+  symbol: CIMSymbol,
   options: Options,
-): Symbolizer | undefined => {
+): Symbolizer[] | undefined => {
   let layerType: string = layer.type;
+
   switch (layerType) {
     case "CIMSolidStroke":
-      return processSymbolSolidStroke(layer, symboltype);
+      return processSymbolSolidStroke(layer, symbol.type);
     case "CIMSolidFill":
       return processSymbolSolidFill(layer);
     case "CIMCharacterMarker":
-      return processSymbolCharacterMarker(layer, options);
+      return processSymbolCharacterMarker(layer, symbol, options);
     case "CIMVectorMarker":
-      return processSymbolVectorMarker(layer);
+      return processSymbolVectorMarker(layer, symbol, options);
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
+      return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
-      return processSymbolPicture(layer);
+      return processSymbolMarker(layer);
     default:
       return;
   }
 };
 
+const processSymbolLayerWithSubSymbol = (
+  symbol: CIMSymbol,
+  layer: SymbolLayer,
+  symbolizer: Symbolizer,
+  options: Options,
+  maxX: number | null = null,
+  maxY: number | null = null,
+): Symbolizer[] => {
+  const symbolizers: Symbolizer[] = [];
+  if (symbol.type === "CIMPolygonSymbol") {
+    const markerPlacement = layer.markerPlacement || {};
+    const polygonSymbolizer = formatPolygonSymbolizer(
+      symbolizer as MarkSymbolizer,
+      markerPlacement,
+      maxX,
+      maxY,
+    );
+    if (polygonSymbolizer) {
+      symbolizers.push(polygonSymbolizer);
+    }
+    return symbolizers;
+  }
+  if (symbol.type === "CIMLineSymbol") {
+    if (layer.type === "CIMCharacterMarker") {
+      if (orientedMarkerAtStartOfLine(layer.markerPlacement)) {
+        const startSymbolizer = processOrientedMarkerAtEndOfLine(
+          layer,
+          "start",
+          options,
+        );
+        if (startSymbolizer) {
+          symbolizers.push(startSymbolizer);
+        }
+      }
+      if (orientedMarkerAtEndOfLine(layer.markerPlacement)) {
+        const endSymbolizer = processOrientedMarkerAtEndOfLine(
+          layer,
+          "end",
+          options,
+        );
+        if (endSymbolizer) {
+          symbolizers.push(endSymbolizer);
+        }
+      }
+      const lineSymbolizer = formatLineSymbolizer(
+        symbolizer as PointSymbolizer,
+        layer as SymbolLayer,
+      );
+      symbolizers.push(lineSymbolizer);
+      return symbolizers;
+    }
+    // Not CIMCharacterMarker
+    const lineSymbolizer = formatLineSymbolizer(
+      symbolizer as PointSymbolizer,
+      layer as SymbolLayer,
+    );
+    symbolizers.push(lineSymbolizer);
+    return symbolizers;
+  }
+  return symbolizers;
+};
+
+const formatLineSymbolizer = (
+  symbolizer: PointSymbolizer,
+  layer: SymbolLayer,
+): LineSymbolizer => {
+  const markerPlacement = layer.markerPlacement;
+  if (layer.markerPlacement.type === "CIMMarkerPlacementAlongLineSameSize") {
+    const size = ptToPxProp(layer, "size", 10);
+    const template = processMarkerPlacementAlongLine(markerPlacement, size);
+    return {
+      kind: "Line",
+      opacity: 1.0,
+      width: size,
+      perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
+      graphicStroke: symbolizer,
+      dasharray: template,
+    };
+  }
+  return {
+    kind: "Line",
+    opacity: 1.0,
+    perpendicularOffset: 0.0,
+    graphicStroke: symbolizer,
+    // @ts-ignore FIXME see issue #65
+    graphicStrokeInterval: ptToPxProp(symbolizer, "size", 0) * 2,
+    graphicStrokeOffset: 0.0,
+  };
+};
+
+const processMarkerPlacementAlongLine = (
+  markerPlacement: CIMMarkerPlacement,
+  size: number,
+): number[] => {
+  const placementTemplate = markerPlacement?.placementTemplate;
+
+  if (!placementTemplate || !placementTemplate.length) {
+    return [];
+  }
+  if (placementTemplate.length === 1) {
+    // The markers are placed with the same distance.
+    const distance = ptToPx(placementTemplate[0]);
+    // The distance must be larger than the size of the marker and we add a default spacing of 1, which is not necessary in lyrx
+    return distance >= size + 1 ? [distance, 1] : [size + 1, 1];
+  } else {
+    // The markers are placed with different distances.
+    const templateLength = placementTemplate.length * size;
+    let ptToPxAndCeil = (v: number) => {
+      return Math.ceil(ptToPx(v));
+    };
+    // We must calculate the dasharray length the same way as for the CIMGeometricEffectDashes
+    const dasharrayValues = placementTemplate?.map(ptToPxAndCeil) || [];
+    const totalDasharray = dasharrayValues.reduce(
+      (sum, value) => sum + value,
+      0,
+    );
+    // The length of the markers is the templateLength. For the whole pattern we need to caluculate the appropriate spacing.
+    const spacing = totalDasharray - templateLength;
+    return [templateLength, spacing];
+  }
+};
+
+const formatPolygonSymbolizer = (
+  symbolizer: MarkSymbolizer,
+  markerPlacement: CIMMarkerPlacement,
+  maxX: number | null = null,
+  maxY: number | null = null,
+): FillSymbolizer | LineSymbolizer | null => {
+  const markerPlacementType = markerPlacement.type;
+  if (markerPlacementType === "CIMMarkerPlacementInsidePolygon") {
+    const padding = processMarkerPlacementInsidePolygon(
+      symbolizer,
+      markerPlacement,
+      maxX,
+      maxY,
+    );
+    return {
+      kind: "Fill",
+      opacity: 1.0,
+      graphicFill: symbolizer,
+      graphicFillPadding: padding,
+    };
+  }
+  if (markerPlacementType === "CIMMarkerPlacementAlongLineSameSize") {
+    return {
+      kind: "Line",
+      opacity: 1.0,
+      width: ptToPxProp(symbolizer, "size", 10),
+      perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
+      graphicStroke: symbolizer,
+    };
+  }
+  return null;
+};
+
+const processOrientedMarkerAtEndOfLine = (
+  layer: SymbolLayer,
+  orientedMarker: string,
+  options: Options,
+): MarkSymbolizer | undefined => {
+  // let markerPositionFnc: string;
+  // let markerRotationFnc: string;
+  let rotation: number;
+
+  if (orientedMarker === "start") {
+    // markerPositionFnc = MarkerPlacementPosition.START;
+    // markerRotationFnc = MarkerPlacementAngle.START;
+    rotation = layer?.rotation ?? 180;
+  } else if (orientedMarker === "end") {
+    // markerPositionFnc = MarkerPlacementPosition.END;
+    // markerRotationFnc = MarkerPlacementAngle.END;
+    rotation = layer?.rotation ?? 0;
+  } else {
+    return undefined;
+  }
+
+  const replaceesri = !!options?.replaceesri;
+  const fontFamily = layer.fontFamilyName;
+  const charindex = layer.characterIndex;
+  const hexcode = toHex(charindex);
+
+  let name: WellKnownName;
+  if (fontFamily === ESRI_SYMBOLS_FONT && replaceesri) {
+    name = esriFontToStandardSymbols(charindex);
+  } else {
+    name = `ttf://${fontFamily}#${hexcode}` as WellKnownName;
+  }
+
+  let symbolLayers,
+    fillColor,
+    fillOpacity,
+    strokeColor,
+    strokeWidth,
+    strokeOpacity;
+
+  try {
+    symbolLayers = layer.symbol.symbolLayers ?? [];
+    fillColor = extractFillColor(symbolLayers);
+    fillOpacity = extractFillOpacity(symbolLayers);
+    [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
+  } catch (error) {
+    fillColor = "#000000";
+    fillOpacity = 1.0;
+    strokeOpacity = 0.0;
+    strokeColor = "#000000";
+    strokeWidth = 0.0;
+  }
+
+  const fProperty = fieldToFProperty("shape", true);
+  return {
+    opacity: 1.0,
+    fillOpacity: fillOpacity,
+    strokeColor: strokeColor,
+    strokeOpacity: strokeOpacity,
+    strokeWidth: strokeWidth,
+    // FIXME see issue #66 use markerRotationFnc ? Previous code was:
+    // rotate: ['Add', [markerRotationFnc, ['PropertyName', 'shape']], rotation],
+    rotate: { args: [fProperty, rotation], name: "add" },
+    kind: "Mark",
+    color: fillColor,
+    wellKnownName: name,
+    radius: ptToPxProp(layer, "size", 10),
+    // @ts-ignore FIXME see issue #66
+    geometry: [null, ["PropertyName", "shape"]],
+    // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
+    // @ts-ignore FIXME see issue #66
+    // Functions "endPoint" and "endAngle" are not supported in the legend in GeoServer,
+    // so we include this symbol only on the map and not in the legend
+    inclusion: "mapOnly",
+  };
+};
+
+const processMarkerPlacementInsidePolygon = (
+  symbolizer: MarkSymbolizer,
+  markerPlacement: CIMMarkerPlacement,
+  symMaxX: number | null = null,
+  symMaxY: number | null = null,
+): [
+  Expression<number>,
+  Expression<number>,
+  Expression<number>,
+  Expression<number>,
+] => {
+  // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
+  // We use an empirical factor to account for this, which works in most cases (but not all)
+  const resizeFactor = symbolizer?.wellKnownName?.startsWith("wkt://POLYGON")
+    ? 1
+    : POLYGON_FILL_RESIZE_FACTOR;
+
+  const radius = typeof symbolizer.radius === "number" ? symbolizer.radius : 0;
+
+  // Size is already in pixel.
+  // Avoid null values and force them to 1 px
+  const size = Math.round(radius * resizeFactor) || 1;
+  symbolizer.radius = size;
+
+  // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
+  // ArcGIS stepX, stepY, offsetX, offsetY
+  let maxX = size / 2;
+  let maxY = size / 2;
+
+  symMaxX = symMaxX ?? maxX;
+  symMaxY = symMaxY ?? maxY;
+  if (symMaxX && symMaxY) {
+    maxX = Math.floor(symMaxX * resizeFactor) || 1;
+    maxY = Math.floor(symMaxY * resizeFactor) || 1;
+  }
+
+  let stepX = ptToPxProp(markerPlacement, "stepX", 0);
+  let stepY = ptToPxProp(markerPlacement, "stepY", 0);
+
+  if (stepX < maxX) {
+    stepX += maxX * 2;
+  }
+
+  if (stepY < maxY) {
+    stepY += maxY * 2;
+  }
+
+  const offsetX = ptToPxProp(markerPlacement, "offsetX", 0);
+  const offsetY = ptToPxProp(markerPlacement, "offsetY", 0);
+
+  const right = Math.round(stepX / 2 - maxX - offsetX);
+  const left = Math.round(stepX / 2 - maxX + offsetX);
+  const top = Math.round(stepY / 2 - maxY - offsetY);
+  const bottom = Math.round(stepY / 2 - maxY + offsetY);
+
+  return [top, right, bottom, left];
+};
+
+const orientedMarkerAtStartOfLine = (
+  markerPlacement: CIMMarkerPlacement,
+): boolean => {
+  if (markerPlacement?.angleToLine) {
+    if (
+      markerPlacement.type === "CIMMarkerPlacementAtRatioPositions" &&
+      markerPlacement.positionArray[0] === 0 &&
+      markerPlacement.flipFirst
+    ) {
+      return true;
+    } else if (markerPlacement.type === "CIMMarkerPlacementAtExtremities") {
+      return (
+        markerPlacement.extremityPlacement === "Both" ||
+        markerPlacement.extremityPlacement === "JustBegin"
+      );
+    }
+  }
+  return false;
+};
+
+const orientedMarkerAtEndOfLine = (
+  markerPlacement: CIMMarkerPlacement,
+): boolean => {
+  if (markerPlacement?.angleToLine) {
+    if (
+      markerPlacement.type === "CIMMarkerPlacementAtRatioPositions" &&
+      markerPlacement.positionArray[0] === 1
+    ) {
+      return true;
+    } else if (markerPlacement.type === "CIMMarkerPlacementAtExtremities") {
+      return (
+        markerPlacement.extremityPlacement === "Both" ||
+        markerPlacement.extremityPlacement === "JustEnd"
+      );
+    }
+  }
+  return false;
+};
+
 const processSymbolSolidStroke = (
   layer: SymbolLayer,
   symboltype: string,
-): Symbolizer => {
+): Symbolizer[] => {
   const effects = extractEffect(layer);
   if (symboltype === "CIMPolygonSymbol") {
     const fillSymbolizer: FillSymbolizer = {
@@ -65,7 +413,7 @@ const processSymbolSolidStroke = (
     if ("dasharray" in effects) {
       fillSymbolizer.outlineDasharray = effects.dasharray;
     }
-    return fillSymbolizer;
+    return [fillSymbolizer];
   }
   const cap = layer.capStyle.toLowerCase();
   const join = layer.joinStyle.toLowerCase();
@@ -88,27 +436,30 @@ const processSymbolSolidStroke = (
   if ("offset" in effects) {
     stroke.perpendicularOffset = effects.offset;
   }
-  return stroke;
+  return [stroke];
 };
 
 const processSymbolSolidFill = (
   layer: SymbolLayer,
-): FillSymbolizer | undefined => {
+): Symbolizer[] | undefined => {
   let color = layer.color;
   if (color === undefined) {
     return;
   }
-  return {
-    kind: "Fill",
-    color: processColor(color),
-    fillOpacity: processOpacity(color),
-  };
+  return [
+    {
+      kind: "Fill",
+      color: processColor(color),
+      fillOpacity: processOpacity(color),
+    } as Symbolizer,
+  ];
 };
 
 const processSymbolCharacterMarker = (
   layer: SymbolLayer,
+  symbol: CIMSymbol,
   options: Options,
-): MarkSymbolizer => {
+): Symbolizer[] => {
   const replaceesri = !!options.replaceesri;
   const fontFamily = layer.fontFamilyName;
   const charindex = layer.characterIndex;
@@ -143,7 +494,7 @@ const processSymbolCharacterMarker = (
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
   }
 
-  return {
+  const symbolCharacterMaker = {
     opacity: 1.0,
     offset: extractOffset(layer),
     fillOpacity: fillOpacity,
@@ -155,10 +506,26 @@ const processSymbolCharacterMarker = (
     color: fillColor,
     wellKnownName: name,
     radius: size / 2,
-  };
+  } as Symbolizer;
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    symbol,
+    layer,
+    symbolCharacterMaker,
+    options,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
+  }
+
+  return [symbolCharacterMaker];
 };
 
-const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
+const processSymbolVectorMarker = (
+  layer: SymbolLayer,
+  cimSymbol: CIMSymbol,
+  options: Options,
+): Symbolizer[] => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, "size", 3);
   }
@@ -219,19 +586,23 @@ const processSymbolVectorMarker = (layer: SymbolLayer): MarkSymbolizer => {
     strokeOpacity: strokeOpacity,
     fillOpacity: 1,
   };
-  if (maxX !== null) {
-    // @ts-ignore FIXME see issue #62
-    marker.maxX = maxX;
-  }
-  if (maxY !== null) {
-    // @ts-ignore FIXME see issue #62
-    marker.maxY = maxY;
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    cimSymbol,
+    layer,
+    marker,
+    options,
+    maxX,
+    maxY,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
   }
 
-  return marker;
+  return [marker];
 };
 
-const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
+const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   const rotation = layer.rotation || 0;
   const symbolLayers = layer.lineSymbol.symbolLayers;
   let color = "#000000";
@@ -274,7 +645,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   };
 
   if (!symbolLayers) {
-    return fillSymbolizer;
+    return [fillSymbolizer];
   }
 
   let effects = extractEffect(symbolLayers[0]);
@@ -314,10 +685,14 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
       markSymbolizer.radius = neededSize;
     }
   }
-  return fillSymbolizer;
+  return [fillSymbolizer];
 };
 
-const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
+const processSymbolPicture = (
+  layer: SymbolLayer,
+  cimSymbol: CIMSymbol,
+  options: Options,
+): Symbolizer[] => {
   // let url = layer.url;
   // if (!existsSync(url)) {
   //     let tokens = url.split(';');
@@ -339,7 +714,7 @@ const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
   // }
 
   let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  return {
+  const picureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
     rotate: 0.0,
     kind: "Icon",
@@ -348,6 +723,32 @@ const processSymbolPicture = (layer: SymbolLayer): Symbolizer => {
     image: "http://FIXME",
     size: size,
   };
+
+  const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
+    cimSymbol,
+    layer,
+    picureFillSymbolizer,
+    options,
+  );
+  if (symbolizerWithSubSymbolizer.length) {
+    return symbolizerWithSubSymbolizer;
+  }
+  return [picureFillSymbolizer];
+};
+
+const processSymbolMarker = (layer: SymbolLayer): Symbolizer[] => {
+  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  return [
+    {
+      opacity: 1.0,
+      rotate: 0.0,
+      kind: "Icon",
+      color: undefined,
+      // image: url,
+      image: "http://FIXME",
+      size: size,
+    } as Symbolizer,
+  ];
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {
@@ -390,9 +791,10 @@ const getTiltedHatchMarker = (): WellKnownName[] => {
 };
 
 const hatchMarkerForAngle = (angle: number): WellKnownName => {
+  const angle360 = angleIn360Degrees(angle);
   const straightHatchMarkers = getStraightHatchMarker();
   const tiltedHatchMarkers = getTiltedHatchMarker();
-  const quadrant = Math.floor(((angle + 22.5) % 180) / 45.0);
+  const quadrant = Math.floor(((angle360 + 22.5) % 180) / 45.0);
 
   return [
     straightHatchMarkers[0],
