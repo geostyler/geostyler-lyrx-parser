@@ -7,6 +7,10 @@ export const processOpacity = (color: CIMColor | null): number => {
   return color.values[color.values.length - 1] / 100;
 };
 
+export const angleIn360Degrees = (angle: number): number => {
+  return ((angle % 360) + 360) % 360;
+};
+
 export const processColor = (color: CIMColorType): string => {
   if (color === null) {
     return "#000000";
