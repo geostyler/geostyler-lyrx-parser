@@ -622,11 +622,11 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   // Geoserver acts weird with tilted lines. Empirically, that's the best result so far:
   // Takes the double of the raw separation value. Line and dash lines are treated equally and are looking good.
+   // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
   let rawSeparation = layer.separation || 0;
   let separation = getStraightHatchMarker().includes(wellKnowName)
-    ? ptToPx(rawSeparation)
-    : rawSeparation * 2;
-
+    ? ptToPx(rawSeparation) / 2
+    : rawSeparation;
   const markSymbolizer: MarkSymbolizer = {
     kind: "Mark",
     color: color,
@@ -652,7 +652,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   if ("dasharray" in effects) {
     // @ts-ignore FIXME see issue #63
     fillSymbolizer.graphicFill!.outlineDasharray = effects.dasharray;
-
     // In case of dash array, the size must be at least as long as the dash pattern sum.
     if (separation > 0) {
       const dasharrayValues = effects.dasharrayValues as number[];
