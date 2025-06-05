@@ -256,7 +256,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   let separation = getStraightHatchMarker().includes(wellKnowName)
     ? ptToPx(rawSeparation) / 2
     : rawSeparation;
-  console.log("separation", separation, "wellKnowName", wellKnowName);
   const markSymbolizer: MarkSymbolizer = {
     kind: "Mark",
     color: color,
@@ -282,7 +281,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
   if ("dasharray" in effects) {
     // @ts-ignore FIXME see issue #63
     fillSymbolizer.graphicFill!.outlineDasharray = effects.dasharray;
-
     // In case of dash array, the size must be at least as long as the dash pattern sum.
     if (separation > 0) {
       const dasharrayValues = effects.dasharrayValues as number[];
@@ -290,7 +288,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
       if (getStraightHatchMarker().includes(wellKnowName)) {
         // To keep the "original size" given by the separation value, we play with a negative margin.
         let negativeMargin = ((neededSize - separation) / 2) * -1;
-        console.log("neededSize", neededSize, "negativeMargin", negativeMargin, "separation", separation);
         if (wellKnowName === getStraightHatchMarker()[0]) {
           fillSymbolizer.graphicFillPadding = [
             negativeMargin,
@@ -314,7 +311,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer => {
         );
       }
       // Because it will be multiplied by 2 in the sldParser, we need to divide it by 2.
-      neededSize = Math.ceil(neededSize / 2);
       markSymbolizer.radius = neededSize;
     }
   }
