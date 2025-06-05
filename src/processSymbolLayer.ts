@@ -286,10 +286,7 @@ const processOrientedMarkerAtEndOfLine = (
     kind: "Mark",
     color: fillColor,
     wellKnownName: name,
-    radius: ptToPxProp(layer, "size", 10),
-    // @ts-ignore FIXME see issue #66
-    geometry: [null, ["PropertyName", "shape"]],
-    // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
+    radius: ptToPxProp(layer, "size", 10),  
     // @ts-ignore FIXME see issue #66
     // Functions "endPoint" and "endAngle" are not supported in the legend in GeoServer,
     // so we include this symbol only on the map and not in the legend
