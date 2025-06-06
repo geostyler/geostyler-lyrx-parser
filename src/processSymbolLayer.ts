@@ -650,7 +650,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   let effects = extractEffect(symbolLayers[0]);
   if ("dasharray" in effects) {
-    markSymbolizer.strokeDasharray = effects.dasharrayValues;
+    markSymbolizer.strokeDasharray = effects.dasharray;
     // In case of dash array, the size must be at least as long as the dash pattern sum.
     if (separation > 0) {
       const dasharrayValues = effects.dasharrayValues as number[];
