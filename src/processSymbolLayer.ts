@@ -135,45 +135,41 @@ const formatLineSymbolizer = (
   symbolizer: PointSymbolizer,
   layer: SymbolLayer,
 ): LineSymbolizer => {
+  const lineSymbolizer: LineSymbolizer = {
+    kind: "Line",
+    opacity: 1.0,
+    graphicStroke: symbolizer,
+  };
   const markerPlacement = layer.markerPlacement;
   if (layer.markerPlacement.type === "CIMMarkerPlacementAlongLineSameSize") {
     const size = ptToPxProp(layer, "size", 10);
     const template = processMarkerPlacementAlongLine(markerPlacement, size);
     if (symbolizer.kind === "Mark") {
-      const marker = symbolizer as MarkSymbolizer;
-      if (!marker?.wellKnownName?.startsWith("wkt://") && marker.strokeWidth === 0) {
+      if (
+        !symbolizer.wellKnownName.startsWith("wkt://") &&
+        symbolizer.strokeWidth === 0
+      ) {
         // If the marker has a known shape with strokeWidth of 0, we don't want to render it because Geoserver still draws a line.
-        symbolizer.strokeWidth = undefined;
-        symbolizer.strokeColor = undefined;
-        symbolizer.strokeOpacity = undefined;
-        return {
-          kind: "Line",
-          opacity: 1.0,
-          width: size,
-          perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
-          graphicStroke: symbolizer,
-          dasharray: template,
-        };
-      } 
+        delete symbolizer.strokeWidth;
+        delete symbolizer.strokeColor;
+        delete symbolizer.strokeOpacity;
+      }
     }
-    return {
-      kind: "Line",
-      opacity: 1.0,
-      width: size,
-      perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
-      graphicStroke: symbolizer,
-      dasharray: template,
-    };
+    lineSymbolizer.width = size;
+    lineSymbolizer.perpendicularOffset = ptToPxProp(
+      symbolizer,
+      "perpendicularOffset",
+      0.0,
+    );
+    lineSymbolizer.dasharray = template;
+    return lineSymbolizer;
   }
-  return {
-    kind: "Line",
-    opacity: 1.0,
-    perpendicularOffset: 0.0,
-    graphicStroke: symbolizer,
-    // @ts-ignore FIXME see issue #65
-    graphicStrokeInterval: ptToPxProp(symbolizer, "size", 0) * 2,
-    graphicStrokeOffset: 0.0,
-  };
+  lineSymbolizer.perpendicularOffset = 0;
+  // @ts-ignore FIXME see issue #65
+  lineSymbolizer.graphicStrokeInterval = ptToPxProp(symbolizer, "size", 0) * 2;
+  // @ts-ignore FIXME see issue #65
+  lineSymbolizer.graphicStrokeOffset = 0.0;
+  return lineSymbolizer;
 };
 
 const processMarkerPlacementAlongLine = (
@@ -639,7 +635,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   // Geoserver acts weird with tilted lines. Empirically, that's the best result so far:
   // Takes the double of the raw separation value. Line and dash lines are treated equally and are looking good.
-   // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
+  // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
   let rawSeparation = layer.separation || 0;
   let separation = getStraightHatchMarker().includes(wellKnowName)
     ? ptToPx(rawSeparation) / 2
