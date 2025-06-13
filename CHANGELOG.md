@@ -1,3 +1,31 @@
+## [1.2.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.3...v1.2.0) (2025-06-13)
+
+### Features
+
+* support dasharray as mark effect ([b4576cb](https://github.com/geostyler/geostyler-lyrx-parser/commit/b4576cba900e570621a26ba335cb8ce9ce567c50))
+
+### Bug Fixes
+
+* **#103:** no lowerCase in second value of simple filter ([7a34ae3](https://github.com/geostyler/geostyler-lyrx-parser/commit/7a34ae365e8b29fe1cceebf5b7b2f10476113746)), closes [#103](https://github.com/geostyler/geostyler-lyrx-parser/issues/103)
+* **#105:** change opacity to FillOpacity and add value ([f8a8c3e](https://github.com/geostyler/geostyler-lyrx-parser/commit/f8a8c3ef3f4af720f1f21cc53e70f19fa8c285c1)), closes [#105](https://github.com/geostyler/geostyler-lyrx-parser/issues/105)
+* **#105:** use correct function for fillOpacity ([0cf2fa3](https://github.com/geostyler/geostyler-lyrx-parser/commit/0cf2fa30d1f8d2a0092221f15c9a20c882cb7bdf)), closes [#105](https://github.com/geostyler/geostyler-lyrx-parser/issues/105)
+* **#107:** add function grayToRgb ([4e3f2dd](https://github.com/geostyler/geostyler-lyrx-parser/commit/4e3f2dd17141dc57fc2de4a0bf05b419b52e1f49)), closes [#107](https://github.com/geostyler/geostyler-lyrx-parser/issues/107)
+* **#112:** add processMarkerPlacementAlongLine ([dac400a](https://github.com/geostyler/geostyler-lyrx-parser/commit/dac400ac9db259173386922b0ac703e42644146c)), closes [#112](https://github.com/geostyler/geostyler-lyrx-parser/issues/112)
+* **112:** added test for dashed_dotted lyrx ([5ed60e2](https://github.com/geostyler/geostyler-lyrx-parser/commit/5ed60e29f8d55b8aca40fad478b7c1b53dec3858))
+* **112:** remove connection string ([ad370f6](https://github.com/geostyler/geostyler-lyrx-parser/commit/ad370f6b004a53560b9623e181b7963798ceab94))
+* **115:** correct separation and logging to test ([f0aa0cb](https://github.com/geostyler/geostyler-lyrx-parser/commit/f0aa0cb91370d640d9e010f388b9482edde415d7))
+* **115:** remove comment ([fd1ea11](https://github.com/geostyler/geostyler-lyrx-parser/commit/fd1ea1108c1ec8c51b938b8328202758b27cd7d7))
+* **115:** remove comments ([d5571b7](https://github.com/geostyler/geostyler-lyrx-parser/commit/d5571b736a6f1c3285db64e535d674f47267ddfa))
+* **115:** rephrase comment ([a8b6632](https://github.com/geostyler/geostyler-lyrx-parser/commit/a8b6632a93e12501f724a2969897374ea59cd922))
+* **121:** add changed package ([e75f463](https://github.com/geostyler/geostyler-lyrx-parser/commit/e75f4630dc25882bdcfb9671edbb4359ffbae787))
+* **121:** correct size and negativeMargin ([7c9f508](https://github.com/geostyler/geostyler-lyrx-parser/commit/7c9f508d4cc730d261cd3065d3de258a1c4c5b05))
+* **123:** remove stroke when 0 ([5616c42](https://github.com/geostyler/geostyler-lyrx-parser/commit/5616c42781ee5a3d6462ac494b66ba99c7978044))
+* code style for fix 123 ([6900110](https://github.com/geostyler/geostyler-lyrx-parser/commit/690011068a3ca5b453261cd073c8d0089b5c9740))
+* fix type mapping ([692c58c](https://github.com/geostyler/geostyler-lyrx-parser/commit/692c58c7de1b496d57233f44073caa12d99c581e))
+* rotation is now between 360 degree and gets the right symbol ([f676a2f](https://github.com/geostyler/geostyler-lyrx-parser/commit/f676a2f2b7d83e8c41e09ad4a841be339416de1a))
+* upgrade to geostyler 10.2.0 ([c742741](https://github.com/geostyler/geostyler-lyrx-parser/commit/c74274103b502d091fea39b5004923114cc6db82))
+* use geostyler-style 10.3.0 ([67f06f6](https://github.com/geostyler/geostyler-lyrx-parser/commit/67f06f65f24940db2306891f851055df3d8abbd3))
+
 ## [1.1.3](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.2...v1.1.3) (2025-02-28)
 
 ### Bug Fixes
