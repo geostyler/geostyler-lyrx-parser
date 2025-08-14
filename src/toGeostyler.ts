@@ -299,7 +299,7 @@ const processLabelClass = (
     );
     Object.assign(symbolizer, {
       haloColor: haloColor,
-      haloSize: haloSize,
+      haloWidth: haloSize,
       haloOpacity: 1,
     });
   }
