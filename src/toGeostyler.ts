@@ -274,15 +274,15 @@ const processLabelClass = (
     maplexPointPlacementMethod === "AroundPoint"
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
-    symbolizer.offset = [offset, offset];
+    symbolizer.offset = [offset, offset * -1];
   } else if (
     stdPlacementType === LabelFeatureType.Point &&
     stdPointPlacementType === "AroundPoint"
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
-    symbolizer.offset = [offset, offset];
+    symbolizer.offset = [offset, offset * -1];
   } else {
-    symbolizer.offset = [0.0, 0.0];
+    symbolizer.offset = [0.0, 0.0 * -1];
   }
 
   if (rotationField) {
