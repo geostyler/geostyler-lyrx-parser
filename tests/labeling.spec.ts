@@ -80,5 +80,6 @@ describe("Parse layer with halo label symbol", () => {
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
     expect(textSymbolizer.haloColor).toEqual("#ffffff");
+    expect(textSymbolizer.haloWidth).toEqual(4.0);
   });
 });
