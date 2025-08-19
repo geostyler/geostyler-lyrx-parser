@@ -337,7 +337,7 @@ const processMarkerPlacementInsidePolygon = (
   // Avoid null values and force them to 1 px
   const size = Math.round(radius * resizeFactor) || 1;
   symbolizer.radius = size;
- 
+
   // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
   // ArcGIS stepX, stepY, offsetX, offsetY
   let maxX = size / 2;
@@ -672,7 +672,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
         // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
         neededSize = neededSize / 2;
         // To keep the "original size" given by the separation value, we play with a negative margin.
-        let negativeMargin = ((neededSize - separation)) * -1;
+        let negativeMargin = (neededSize - separation) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
           fillSymbolizer.graphicFillPadding = [
             negativeMargin,
