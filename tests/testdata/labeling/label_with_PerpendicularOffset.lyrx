@@ -113,7 +113,7 @@
         },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
-          "workspaceConnectionString" : "noset"
+          "workspaceConnectionString" : "noset",
           "workspaceFactory" : "SDE",
           "dataset" : "AGIS.afu_gwisoh",
           "datasetType" : "esriDTFeatureClass"
