@@ -267,9 +267,9 @@ const processLabelClass = (
   ) {
     symbolizer.placement = "line";
     // We use this as a flag to later indicate the it is a line label when converting to SLD
-    const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
-    // @ts-ignore FIXME see issue #63
-    symbolizer.perpendicularOffset = primaryOffset + fontSize;
+    const primaryOffset = maplexPrimaryOffset != 0 ? maplexPrimaryOffset : ptToPxProp(textSymbol, "primaryOffset", 0);   
+    const textAsLineSymbolizer = symbolizer as any;
+    textAsLineSymbolizer.perpendicularOffset = primaryOffset != 0 ? primaryOffset + fontSize / 2 : 0;
   } else if (
     maplexPlacementType === LabelFeatureType.Point &&
     maplexPointPlacementMethod === "AroundPoint"

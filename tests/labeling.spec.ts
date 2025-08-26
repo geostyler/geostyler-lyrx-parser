@@ -103,6 +103,6 @@ describe("Parse layer with PerpendicularOffset label symbol", () => {
     expect(textSymbolizer.fontWeight).toEqual("bold");
     expect(textSymbolizer.haloColor).toEqual("#ffffff");
     expect(textSymbolizer.placement).toEqual("line");
-    expect((textSymbolizer as any).perpendicularOffset).toEqual(12);
+    expect((textSymbolizer as any).perpendicularOffset).toEqual(10);
   });
 });
