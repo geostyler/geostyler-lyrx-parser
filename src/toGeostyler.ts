@@ -265,6 +265,7 @@ const processLabelClass = (
     stdPlacementType === LabelFeatureType.Line &&
     maplexPlacementType === LabelFeatureType.Line
   ) {
+    symbolizer.placement = "line";
     // We use this as a flag to later indicate the it is a line label when converting to SLD
     const primaryOffset = ptToPxProp(textSymbol, "primaryOffset", 0);
     // @ts-ignore FIXME see issue #63
