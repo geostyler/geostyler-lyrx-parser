@@ -98,7 +98,6 @@ describe("Parse layer with PerpendicularOffset label symbol", () => {
     const rules = geostylerStyle.output!.rules;
     expect(rules.length).toEqual(3);
     const textSymbolizer = rules[2].symbolizers[0] as TextSymbolizer;
-    console.log('textSymbolizer in PerpendicularOffset:', textSymbolizer);
     expect(textSymbolizer.kind).toEqual("Text");
     expect(textSymbolizer.font).contain("Arial");
     expect(textSymbolizer.label).toEqual("{{hoehe}}");
