@@ -220,7 +220,7 @@ const formatPolygonSymbolizer = (
     );
     return {
       kind: "Fill",
-      opacity: 1.0,
+      fillOpacity: 1.0,
       graphicFill: symbolizer,
       graphicFillPadding: padding,
     };

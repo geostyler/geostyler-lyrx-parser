@@ -81,5 +81,31 @@ describe("Parse layer with halo label symbol", () => {
     expect(textSymbolizer.fontWeight).toEqual("normal");
     expect(textSymbolizer.haloColor).toEqual("#ffffff");
     expect(textSymbolizer.offset).toEqual([16, -16]);
+    expect(textSymbolizer.haloWidth).toEqual(4.0);
+  });
+});
+
+describe("Parse layer with PerpendicularOffset label symbol", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/labeling/label_with_PerpendicularOffset.lyrx",
+    );
+  });
+
+  it("should have parse label expression", () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(3);
+    const textSymbolizer = rules[2].symbolizers[0] as TextSymbolizer;
+    console.log('textSymbolizer in PerpendicularOffset:', textSymbolizer);
+    expect(textSymbolizer.kind).toEqual("Text");
+    expect(textSymbolizer.font).contain("Arial");
+    expect(textSymbolizer.label).toEqual("{{hoehe}}");
+    expect(textSymbolizer.color).toEqual("#005ce6");
+    expect(textSymbolizer.fontWeight).toEqual("bold");
+    expect(textSymbolizer.haloColor).toEqual("#ffffff");
+    expect(textSymbolizer.placement).toEqual("line");
+    expect((textSymbolizer as any).perpendicularOffset).toEqual(10);
   });
 });
