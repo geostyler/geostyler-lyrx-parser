@@ -152,7 +152,7 @@
               "center" : 1
             },
             "polygonPlacementMethod" : "CurvedInPolygon",
-            "primaryOffset" : 1,
+            "primaryOffset" : 3,
             "primaryOffsetUnit" : "Point",
             "removeAmbiguousLabels" : "All",
             "removeExtraWhiteSpace" : true,
