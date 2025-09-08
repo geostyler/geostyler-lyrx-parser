@@ -281,7 +281,7 @@ const processLabelClass = (
     const offset = maplexPrimaryOffset + fontSize / 2;
     symbolizer.offset = [offset, offset * -1];
   } else {
-    symbolizer.offset = [0.0, 0.0 * -1];
+    symbolizer.offset = [0, 0];
   }
 
   if (rotationField) {
