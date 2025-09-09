@@ -100,13 +100,13 @@ const processSymbolLayerWithSubSymbol = (
         const processOrientedMarkerAtEndOfLineFn = (
           position: "start" | "end",
         ) => {
-          const symbolizer = processOrientedMarkerAtEndOfLine(
+          const orientedMarkerSymbolizer = processOrientedMarkerAtEndOfLine(
             layer,
             position,
             options,
           );
-          if (symbolizer) {
-            symbolizers.push(symbolizer);
+          if (orientedMarkerSymbolizer) {
+            symbolizers.push(orientedMarkerSymbolizer);
           }
         };
         if (
