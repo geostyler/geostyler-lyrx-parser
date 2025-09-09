@@ -97,43 +97,30 @@ const processSymbolLayerWithSubSymbol = (
         layer.markerPlacement,
       );
       if (orientedMarkerPosition) {
-        switch (orientedMarkerPosition) {
-          case "start":
-            const startSymbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              "start",
-              options,
-            );
-            if (startSymbolizer) {
-              symbolizers.push(startSymbolizer);
-            }
-            break;
-          case "end":
-            const endSymbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              "end",
-              options,
-            );
-            if (endSymbolizer) {
-              symbolizers.push(endSymbolizer);
-            }
-            break;
-          case "both":
-            const startbothSymbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              "start",
-              options,
-            );
-            const endbothSymbolizer = processOrientedMarkerAtEndOfLine(
-              layer,
-              "end",
-              options,
-            );
-            if (startbothSymbolizer && endbothSymbolizer) {
-              symbolizers.push(startbothSymbolizer);
-              symbolizers.push(endbothSymbolizer);
-            }
-            break;
+        const processOrientedMarkerAtEndOfLineFn = (
+          position: "start" | "end",
+        ) => {
+          const symbolizer = processOrientedMarkerAtEndOfLine(
+            layer,
+            position,
+            options,
+          );
+          if (symbolizer) {
+            symbolizers.push(symbolizer);
+          }
+        };
+        if (
+          orientedMarkerPosition === "start" ||
+          orientedMarkerPosition === "both"
+        ) {
+          processOrientedMarkerAtEndOfLineFn("start");
+        }
+
+        if (
+          orientedMarkerPosition === "end" ||
+          orientedMarkerPosition === "both"
+        ) {
+          processOrientedMarkerAtEndOfLineFn("end");
         }
       } else {
         const lineSymbolizer = formatLineSymbolizer(
