@@ -33,6 +33,7 @@ export type SymbolLayer = CIMObject & {
   separation: number;
   size: number;
   symbol: CIMSymbol;
+  url?: string;
 };
 
 export type CIMSymbol = CIMObject & {

@@ -37,10 +37,7 @@ import {
   SymbolLayer,
 } from "./esri/types/symbols";
 import { fieldToFProperty } from "./expressions.ts";
-// import { writeFileSync, existsSync, mkdirSync } from 'fs';
-// import uuid from 'uuid';
-// import { tmpdir } from 'os';
-// import path from 'path';
+import { base64ToFile } from "./base64Tofile.ts";
 
 export const processSymbolLayer = (
   layer: SymbolLayer,
@@ -61,9 +58,8 @@ export const processSymbolLayer = (
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
-      return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
-      return processSymbolMarker(layer);
+      return processSymbolPicture(layer, symbol, options);
     default:
       return;
   }
@@ -337,7 +333,7 @@ const processMarkerPlacementInsidePolygon = (
   // Avoid null values and force them to 1 px
   const size = Math.round(radius * resizeFactor) || 1;
   symbolizer.radius = size;
- 
+
   // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
   // ArcGIS stepX, stepY, offsetX, offsetY
   let maxX = size / 2;
@@ -672,7 +668,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
         // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
         neededSize = neededSize / 2;
         // To keep the "original size" given by the separation value, we play with a negative margin.
-        let negativeMargin = ((neededSize - separation)) * -1;
+        let negativeMargin = (neededSize - separation) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
           fillSymbolizer.graphicFillPadding = [
             negativeMargin,
@@ -706,62 +702,27 @@ const processSymbolPicture = (
   cimSymbol: CIMSymbol,
   options: Options,
 ): Symbolizer[] => {
-  // let url = layer.url;
-  // if (!existsSync(url)) {
-  //     let tokens = url.split(';');
-  //     if (tokens.length === 2) {
-  //         let ext = tokens[0].split('/').pop();
-  //         let data = tokens[1].substring('base64,'.length);
-  //         let tempPath = path.join(
-  //             tmpdir(),
-  //             'bridgestyle',
-  //             uuid.v4().replace('-', ''),
-  //         );
-  //         let iconName = `${uuid.v4()}.${ext}`;
-  //         let iconFile = path.join(tempPath, iconName);
-  //         mkdirSync(tempPath, { recursive: true });
-  //         writeFileSync(iconFile, Buffer.from(data, 'base64'));
-  //         usedIcons.push(iconFile);
-  //         url = iconFile;
-  //     }
-  // }
-
+  const url = base64ToFile(layer.url);
   let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  const picureFillSymbolizer: Symbolizer = {
+  const pictureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
     rotate: 0.0,
     kind: "Icon",
     color: undefined,
-    // image: url,
-    image: "http://FIXME",
+    image: url,
     size: size,
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
     cimSymbol,
     layer,
-    picureFillSymbolizer,
+    pictureFillSymbolizer,
     options,
   );
   if (symbolizerWithSubSymbolizer.length) {
     return symbolizerWithSubSymbolizer;
   }
-  return [picureFillSymbolizer];
-};
-
-const processSymbolMarker = (layer: SymbolLayer): Symbolizer[] => {
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  return [
-    {
-      opacity: 1.0,
-      rotate: 0.0,
-      kind: "Icon",
-      color: undefined,
-      // image: url,
-      image: "http://FIXME",
-      size: size,
-    } as Symbolizer,
-  ];
+  return [pictureFillSymbolizer];
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {

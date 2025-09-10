@@ -7,6 +7,7 @@ import {
 } from "geostyler-style";
 import { convert } from "./toGeostyler.ts";
 import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
+import { tryLoadNeededNodeEnvModules } from "./nodeEnvModules.ts";
 
 /**
  * This parser can be used with the GeoStyler.
@@ -22,7 +23,8 @@ export class LyrxParser implements StyleParser<CIMLayerDocument> {
 
   unsupportedProperties: UnsupportedProperties = {};
 
-  readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+  async readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+    await tryLoadNeededNodeEnvModules();
     const geostylerStyle = convert(inputStyle);
     return Promise.resolve({
       output: {

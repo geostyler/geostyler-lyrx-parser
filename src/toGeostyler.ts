@@ -266,8 +266,10 @@ const processLabelClass = (
     maplexPlacementType === LabelFeatureType.Line
   ) {
     symbolizer.placement = "line";
-    const primaryOffset = maplexPrimaryOffset ?? ptToPxProp(textSymbol, "primaryOffset", 0);
-    symbolizer.perpendicularOffset = primaryOffset !== 0 ? primaryOffset + fontSize / 2 : 0;
+    const primaryOffset =
+      maplexPrimaryOffset ?? ptToPxProp(textSymbol, "primaryOffset", 0);
+    symbolizer.perpendicularOffset =
+      primaryOffset !== 0 ? primaryOffset + fontSize / 2 : 0;
   } else if (
     maplexPlacementType === LabelFeatureType.Point &&
     maplexPointPlacementMethod === "AroundPoint"
