@@ -44,16 +44,17 @@ const writeFile = (base64String: string): string | undefined => {
   if (!base64Info) {
     return undefined;
   }
+  const uuid = nem.exp.randomUUID().replaceAll("-", "");
   const tempPath = nem.exp.path.join(
-    nem.exp.tmpdir(),
-    "geostylerLyrxParser",
-    crypto.randomUUID().replace("-", ""),
+    nem.imagesOutputPath || nem.exp.tmpdir(),
+    nem.imagesOutputFolder,
+    uuid,
   );
-  const iconName = `${crypto.randomUUID()}.${base64Info.extension}`;
+  const iconName = `${uuid}.${base64Info.extension}`;
   const iconFile = nem.exp.path.join(tempPath, iconName);
   nem.exp.mkdirSync(tempPath, { recursive: true });
   nem.exp.writeFileSync(iconFile, Buffer.from(base64Info.data, "base64"));
-  return iconFile;
+  return iconName;
 };
 
 /**

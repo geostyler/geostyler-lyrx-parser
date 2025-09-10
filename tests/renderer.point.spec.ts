@@ -1,6 +1,14 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { MarkSymbolizer, ReadStyleResult } from "geostyler-style";
+import {
+  IconSymbolizer,
+  MarkSymbolizer,
+  ReadStyleResult,
+} from "geostyler-style";
 import { loadGeostylerStyle } from "./testUtils.ts";
+import {
+  nodeEnvModules as nem,
+  tryLoadNeededNodeEnvModules,
+} from "../src/nodeEnvModules";
 
 describe("Parse simple point renderer", () => {
   let geostylerStyle: ReadStyleResult;
@@ -223,5 +231,61 @@ describe("Parse point renderer with unique value character marker symbols", () =
 
       expect(rule.filter).toBeDefined();
     }
+  });
+});
+
+describe("Parse point with CIMPictureMarker", () => {
+  const lyrxFile = "./tests/testdata/point/point_picture_marker.lyrx";
+
+  it("should write images", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    // Test if it is an IconSymbolizer.
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+    const symbolizer = rules?.[0].symbolizers?.[0] as IconSymbolizer;
+    expect(symbolizer.kind).toEqual("Icon");
+    expect(symbolizer.size).toEqual(21.333333333333332);
+    // Test the image name.
+    const fileName = symbolizer.image as string;
+    expect(fileName).toBeDefined();
+    const fileNameSplit = fileName.split(".");
+    expect(fileNameSplit[1]).toEqual("png");
+    // Test if the image was created using the loaded node modules.
+    expect(nem.exp).toBeDefined();
+    const path = nem.exp!.path.join(
+      nem.exp!.tmpdir(),
+      nem.imagesOutputFolder,
+      fileNameSplit[0],
+      fileName,
+    );
+    expect(nem.exp!.existsSync(path)).toBeTruthy();
+  });
+
+  it("should write images to custom path", async () => {
+    // Set a custom path using the loaded node modules.
+    await tryLoadNeededNodeEnvModules();
+    expect(nem.exp).toBeDefined();
+    const basePath = nem.exp!.path.join(
+      nem.exp!.tmpdir(),
+      "__geostyler_test__",
+    );
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile, {
+      imagesOutputPath: basePath,
+    });
+    // Get the fileName
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+    const symbolizer = rules?.[0].symbolizers?.[0] as IconSymbolizer;
+    const fileName = symbolizer.image as string;
+    expect(fileName).toBeDefined();
+    const fileNameSplit = fileName.split(".");
+    // Test if the image was created to the custom basePath using the loaded node modules.
+    const path = nem.exp!.path.join(
+      basePath,
+      nem.imagesOutputFolder,
+      fileNameSplit[0],
+      fileName,
+    );
+    expect(nem.exp!.existsSync(path)).toBeTruthy();
   });
 });
