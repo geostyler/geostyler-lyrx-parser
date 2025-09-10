@@ -3,6 +3,8 @@
  */
 interface NodeEnvModules {
   isNodeEnvironment: boolean;
+  imagesOutputFolder: string;
+  imagesOutputPath?: string;
   exp?: {
     writeFileSync: (path: string, data: string | Buffer) => void;
     existsSync: (path: string) => boolean;
@@ -34,11 +36,11 @@ const loadModule = async (modulePath: string) => {
  */
 export const nodeEnvModules: NodeEnvModules = {
   isNodeEnvironment: false,
+  imagesOutputFolder: "geostyler_lyrx_parser_images",
 };
 
 /**
  * Try to load the needed node modules for the parser to work in a node environment.
- * @param imagesOutputPath
  */
 export const tryLoadNeededNodeEnvModules = async (
   imagesOutputPath?: string,
@@ -50,6 +52,7 @@ export const tryLoadNeededNodeEnvModules = async (
   const { default: path } = await loadModule("path");
   const { writeFileSync, existsSync, mkdirSync } = await loadModule("fs");
   nodeEnvModules.isNodeEnvironment = true;
+  nodeEnvModules.imagesOutputPath = imagesOutputPath;
   nodeEnvModules.exp = {
     writeFileSync,
     existsSync,
