@@ -7,6 +7,14 @@ import {
 } from "geostyler-style";
 import { convert } from "./toGeostyler.ts";
 import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
+import { tryLoadNeededNodeEnvModules } from "./nodeEnvModules.ts";
+
+export type ConstructorParams = {
+  /**
+   * Path to the directory where the base64 symbols (lyrx "url" property) must be written.
+   */
+  imagesOutputPath?: string;
+};
 
 /**
  * This parser can be used with the GeoStyler.
@@ -19,10 +27,15 @@ import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
 export class LyrxParser implements StyleParser<CIMLayerDocument> {
   static title = "ArcGIS Pro lyrx parser";
   title = "ArcGIS Pro lyrx parser";
-
   unsupportedProperties: UnsupportedProperties = {};
+  private options: ConstructorParams;
 
-  readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+  constructor(options?: ConstructorParams) {
+    this.options = options || {};
+  }
+
+  async readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+    await tryLoadNeededNodeEnvModules(this.options.imagesOutputPath);
     const geostylerStyle = convert(inputStyle);
     return Promise.resolve({
       output: {
