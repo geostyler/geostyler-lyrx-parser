@@ -93,31 +93,43 @@ const processSymbolLayerWithSubSymbol = (
   }
   if (symbol.type === "CIMLineSymbol") {
     if (layer.type === "CIMCharacterMarker") {
-      if (orientedMarkerAtStartOfLine(layer.markerPlacement)) {
-        const startSymbolizer = processOrientedMarkerAtEndOfLine(
-          layer,
-          "start",
-          options,
-        );
-        if (startSymbolizer) {
-          symbolizers.push(startSymbolizer);
-        }
-      }
-      if (orientedMarkerAtEndOfLine(layer.markerPlacement)) {
-        const endSymbolizer = processOrientedMarkerAtEndOfLine(
-          layer,
-          "end",
-          options,
-        );
-        if (endSymbolizer) {
-          symbolizers.push(endSymbolizer);
-        }
-      }
-      const lineSymbolizer = formatLineSymbolizer(
-        symbolizer as PointSymbolizer,
-        layer as SymbolLayer,
+      const orientedMarkerPosition = getOrientedMarkerLinePosition(
+        layer.markerPlacement,
       );
-      symbolizers.push(lineSymbolizer);
+      if (orientedMarkerPosition) {
+        const processOrientedMarkerAtEndOfLineFn = (
+          position: "start" | "end",
+        ) => {
+          const orientedMarkerSymbolizer = processOrientedMarkerAtEndOfLine(
+            layer,
+            position,
+            options,
+          );
+          if (orientedMarkerSymbolizer) {
+            symbolizers.push(orientedMarkerSymbolizer);
+          }
+        };
+        if (
+          orientedMarkerPosition === "start" ||
+          orientedMarkerPosition === "both"
+        ) {
+          processOrientedMarkerAtEndOfLineFn("start");
+        }
+
+        if (
+          orientedMarkerPosition === "end" ||
+          orientedMarkerPosition === "both"
+        ) {
+          processOrientedMarkerAtEndOfLineFn("end");
+        }
+      } else {
+        const lineSymbolizer = formatLineSymbolizer(
+          symbolizer as PointSymbolizer,
+          layer as SymbolLayer,
+        );
+        symbolizers.push(lineSymbolizer);
+      }
+
       return symbolizers;
     }
     // Not CIMCharacterMarker
@@ -254,6 +266,10 @@ const processOrientedMarkerAtEndOfLine = (
     // markerPositionFnc = MarkerPlacementPosition.END;
     // markerRotationFnc = MarkerPlacementAngle.END;
     rotation = layer?.rotation ?? 0;
+  } else if (orientedMarker === "both") {
+    // markerPositionFnc = MarkerPlacementPosition.BOTH;
+    // markerRotationFnc = MarkerPlacementAngle.BOTH;
+    rotation = layer?.rotation ?? 90;
   } else {
     return undefined;
   }
@@ -303,7 +319,7 @@ const processOrientedMarkerAtEndOfLine = (
     kind: "Mark",
     color: fillColor,
     wellKnownName: name,
-    radius: ptToPxProp(layer, "size", 10),
+    radius: ptToPxProp(layer, "size", 10) / 2,
     // @ts-ignore FIXME see issue #66
     geometry: [null, ["PropertyName", "shape"]],
     // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
@@ -372,43 +388,30 @@ const processMarkerPlacementInsidePolygon = (
   return [top, right, bottom, left];
 };
 
-const orientedMarkerAtStartOfLine = (
+const getOrientedMarkerLinePosition = (
   markerPlacement: CIMMarkerPlacement,
-): boolean => {
+): "start" | "end" | "both" | undefined => {
   if (markerPlacement?.angleToLine) {
-    if (
-      markerPlacement.type === "CIMMarkerPlacementAtRatioPositions" &&
-      markerPlacement.positionArray[0] === 0 &&
-      markerPlacement.flipFirst
-    ) {
-      return true;
+    if (markerPlacement.type === "CIMMarkerPlacementAtRatioPositions") {
+      if (markerPlacement.positionArray[0] === 0 && markerPlacement.flipFirst) {
+        return "start";
+      }
+      if (markerPlacement.positionArray[0] === 1) {
+        return "end";
+      }
     } else if (markerPlacement.type === "CIMMarkerPlacementAtExtremities") {
-      return (
-        markerPlacement.extremityPlacement === "Both" ||
-        markerPlacement.extremityPlacement === "JustBegin"
-      );
+      if (markerPlacement.extremityPlacement === "Both") {
+        return "both";
+      }
+      if (markerPlacement.extremityPlacement === "JustBegin") {
+        return "start";
+      }
+      if (markerPlacement.extremityPlacement === "JustEnd") {
+        return "end";
+      }
     }
   }
-  return false;
-};
-
-const orientedMarkerAtEndOfLine = (
-  markerPlacement: CIMMarkerPlacement,
-): boolean => {
-  if (markerPlacement?.angleToLine) {
-    if (
-      markerPlacement.type === "CIMMarkerPlacementAtRatioPositions" &&
-      markerPlacement.positionArray[0] === 1
-    ) {
-      return true;
-    } else if (markerPlacement.type === "CIMMarkerPlacementAtExtremities") {
-      return (
-        markerPlacement.extremityPlacement === "Both" ||
-        markerPlacement.extremityPlacement === "JustEnd"
-      );
-    }
-  }
-  return false;
+  return undefined;
 };
 
 const processSymbolSolidStroke = (
@@ -672,7 +675,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
         // For the straight hatch markers, it looks that dividing the value by 2 gives best results.
         neededSize = neededSize / 2;
         // To keep the "original size" given by the separation value, we play with a negative margin.
-        let negativeMargin = ((neededSize - separation)) * -1;
+        let negativeMargin = (neededSize - separation) * -1;
         if (wellKnowName === getStraightHatchMarker()[0]) {
           fillSymbolizer.graphicFillPadding = [
             negativeMargin,

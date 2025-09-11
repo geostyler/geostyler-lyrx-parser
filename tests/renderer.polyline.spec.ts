@@ -197,3 +197,45 @@ describe("Parse dashed and dotted polyline renderer", () => {
     ]);
   });
 });
+
+describe("Parse polyline renderer with markerPlacement at the end", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polyline/polyline_withMarkerPlacement.lyrx",
+    );
+  });
+
+  it("should parse a valid style object", () => {
+    expect(geostylerStyle).toBeDefined();
+    expect(geostylerStyle.output).toBeDefined();
+    expect(geostylerStyle.output?.name).toBe("fc_polyline_withMarkerPlacement");
+  });
+
+  it("should have a single rule", () => {
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+
+  });
+
+  it("should have two correct symbolizers", () => {
+    const symbolizers = geostylerStyle.output?.rules?.[0].symbolizers;
+    expect(symbolizers).toHaveLength(2);
+    const symbolizerLine = geostylerStyle.output?.rules?.[0].symbolizers?.[0] as LineSymbolizer;
+    expect(symbolizerLine).toBeDefined();
+    expect(symbolizerLine?.kind).toBe("Line");
+    expect(symbolizerLine?.color).toBe("#0070ff");
+    expect(symbolizerLine?.opacity).toBe(1);
+    expect(symbolizerLine?.width).toBe(0.5333333333333333);
+    expect(symbolizerLine?.cap).toBe("butt");
+    expect(symbolizerLine?.join).toBe("round");
+
+    const symbolizerMarker = geostylerStyle.output?.rules?.[0].symbolizers?.[1] as MarkSymbolizer;
+    expect(symbolizerMarker).toBeDefined();
+    expect(symbolizerMarker?.kind).toBe("Mark");
+    expect(symbolizerMarker?.wellKnownName).toBe("ttf://ESRI Dimensioning#0x21");
+    expect(symbolizerMarker?.fillOpacity).toBe(1);
+    expect(symbolizerMarker?.radius).toBe(4);
+  });
+});
