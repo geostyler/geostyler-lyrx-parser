@@ -419,28 +419,28 @@ describe("Parse unique value polygon renderer with marker symbols inside", () =>
 
       expect(graphicFills.length).toBe(expected.graphicFill);
 
-      for (let i = 0; i < graphicFills.length; i++) {
+      graphicFills.forEach((graphicFill, i) => {
         const fillSymbolizerWithGraphicFill = rule.symbolizers.filter(
           (s) => (s as FillSymbolizer).graphicFill !== undefined,
         )[i] as FillSymbolizer;
-
-        expect(graphicFills[i]?.kind).toEqual(
-          expected[`graphicFill_${i + 1}`][0].graphicFill.kind,
+        i += 1;
+        expect(graphicFill?.kind).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.kind,
         );
-        expect((graphicFills[i] as any)?.wellKnownName).toEqual(
-          expected[`graphicFill_${i + 1}`][0].graphicFill.wellKnownName,
+        expect((graphicFill as any)?.wellKnownName).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.wellKnownName,
         );
-        expect((graphicFills[i] as any)?.radius).toEqual(
-          expected[`graphicFill_${i + 1}`][0].graphicFill.radius,
+        expect((graphicFill as any)?.radius).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.radius,
         );
-        expect((graphicFills[i] as any)?.respectFrame).toEqual(
-          expected[`graphicFill_${i + 1}`][0].graphicFill.respectFrame,
+        expect((graphicFill as any)?.respectFrame).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.respectFrame,
         );
 
         expect(fillSymbolizerWithGraphicFill.graphicFillPadding).toEqual(
-          expected[`graphicFill_${i + 1}`][0].graphicFillPadding,
+          expected[`graphicFill_${i}`][0].graphicFillPadding,
         );
-      }
+      });
     }
   });
 });

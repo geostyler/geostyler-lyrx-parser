@@ -5,6 +5,7 @@ import {
   ESRI_SPECIAL_FONT,
   OFFSET_FACTOR,
   POLYGON_FILL_RESIZE_FACTOR,
+  ESRI_SPECIAL_FONT_RESIZE_FACTOR,
   ptToPx,
 } from "./constants.ts";
 import {
@@ -341,12 +342,13 @@ const processMarkerPlacementInsidePolygon = (
 ] => {
   const isSpecialFont = ESRI_SPECIAL_FONT.some(font => symbolizer?.wellKnownName?.startsWith(font));
   // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
-  // We use an empirical factor to account for this, which works in most cases (but not for special Fonts)
+  // We use an empirical factor to account for this, which works in most cases. For special Fonts we need to
+  // use another empirical factor when respectFrame is set to false.
   let resizeFactor: number;
   if (respectFrame === true) {
     resizeFactor = isSpecialFont ? 1 : POLYGON_FILL_RESIZE_FACTOR;
   } else {
-    resizeFactor = isSpecialFont ? 1.8 : 1;
+    resizeFactor = isSpecialFont ? ESRI_SPECIAL_FONT_RESIZE_FACTOR : 1;
   }
 
   let stepX = ptToPxProp(markerPlacement, "stepX", 0);
