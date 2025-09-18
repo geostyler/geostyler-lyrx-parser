@@ -39,10 +39,6 @@ import {
   SymbolLayer,
 } from "./esri/types/symbols";
 import { fieldToFProperty } from "./expressions.ts";
-// import { writeFileSync, existsSync, mkdirSync } from 'fs';
-// import uuid from 'uuid';
-// import { tmpdir } from 'os';
-// import path from 'path';
 
 export const processSymbolLayer = (
   layer: SymbolLayer,
@@ -63,9 +59,8 @@ export const processSymbolLayer = (
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
-      return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
-      return processSymbolMarker(layer);
+      return processSymbolPicture(layer, symbol, options);
     default:
       return;
   }
@@ -700,62 +695,25 @@ const processSymbolPicture = (
   cimSymbol: CIMSymbol,
   options: Options,
 ): Symbolizer[] => {
-  // let url = layer.url;
-  // if (!existsSync(url)) {
-  //     let tokens = url.split(';');
-  //     if (tokens.length === 2) {
-  //         let ext = tokens[0].split('/').pop();
-  //         let data = tokens[1].substring('base64,'.length);
-  //         let tempPath = path.join(
-  //             tmpdir(),
-  //             'bridgestyle',
-  //             uuid.v4().replace('-', ''),
-  //         );
-  //         let iconName = `${uuid.v4()}.${ext}`;
-  //         let iconFile = path.join(tempPath, iconName);
-  //         mkdirSync(tempPath, { recursive: true });
-  //         writeFileSync(iconFile, Buffer.from(data, 'base64'));
-  //         usedIcons.push(iconFile);
-  //         url = iconFile;
-  //     }
-  // }
-
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  const picureFillSymbolizer: Symbolizer = {
+  const size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  const pictureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
-    rotate: 0.0,
+    rotate: 0,
     kind: "Icon",
-    color: undefined,
-    // image: url,
-    image: "http://FIXME",
+    image: layer.url,
     size: size,
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
     cimSymbol,
     layer,
-    picureFillSymbolizer,
+    pictureFillSymbolizer,
     options,
   );
   if (symbolizerWithSubSymbolizer.length) {
     return symbolizerWithSubSymbolizer;
   }
-  return [picureFillSymbolizer];
-};
-
-const processSymbolMarker = (layer: SymbolLayer): Symbolizer[] => {
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  return [
-    {
-      opacity: 1.0,
-      rotate: 0.0,
-      kind: "Icon",
-      color: undefined,
-      // image: url,
-      image: "http://FIXME",
-      size: size,
-    } as Symbolizer,
-  ];
+  return [pictureFillSymbolizer];
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {
