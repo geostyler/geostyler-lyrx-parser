@@ -1,5 +1,9 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { MarkSymbolizer, ReadStyleResult } from "geostyler-style";
+import {
+  IconSymbolizer,
+  MarkSymbolizer,
+  ReadStyleResult,
+} from "geostyler-style";
 import { loadGeostylerStyle } from "./testUtils.ts";
 
 describe("Parse simple point renderer", () => {
@@ -223,5 +227,24 @@ describe("Parse point renderer with unique value character marker symbols", () =
 
       expect(rule.filter).toBeDefined();
     }
+  });
+});
+
+describe("Parse point with CIMPictureMarker", () => {
+  const lyrxFile = "./tests/testdata/point/point_picture_marker.lyrx";
+
+  it("should use layer.url as image content", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    // Test if it is an IconSymbolizer.
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+    const symbolizer = rules?.[0].symbolizers?.[0] as IconSymbolizer;
+    expect(symbolizer.kind).toEqual("Icon");
+    expect(symbolizer.size).toEqual(21.333333333333332);
+    // Test the image name.
+    const fileName = symbolizer.image as string;
+    expect(fileName).toBeDefined();
+    expect(fileName.startsWith("data:image/png;base64,iVB"));
+    expect(fileName.endsWith("CYII="));
   });
 });

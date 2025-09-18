@@ -34,6 +34,7 @@ export type SymbolLayer = CIMObject & {
   size: number;
   symbol: CIMSymbol;
   respectFrame: boolean;
+  url?: string;
 };
 
 export type CIMSymbol = CIMObject & {
