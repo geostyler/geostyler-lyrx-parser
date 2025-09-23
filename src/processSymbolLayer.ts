@@ -345,7 +345,7 @@ const processMarkerPlacementInsidePolygon = (
   // We use an empirical factor to account for this, which works in most cases. For special Fonts we need to
   // use another empirical factor when respectFrame is set to false.
   let resizeFactor: number;
-  if (respectFrame === true) {
+  if (respectFrame) {
     resizeFactor = isSpecialFont ? 1 : POLYGON_FILL_RESIZE_FACTOR;
   } else {
     resizeFactor = isSpecialFont ? ESRI_SPECIAL_FONT_RESIZE_FACTOR : 1;
@@ -489,7 +489,7 @@ const processSymbolCharacterMarker = (
   let strokeColor = "#000000";
   let strokeWidth = 0;
   let strokeOpacity = 0;
-  let respectFrame = layer.respectFrame === true;
+  let respectFrame = layer.respectFrame;
   const symbolLayers = layer.symbol.symbolLayers;
   if (symbolLayers) {
     fillColor = extractFillColor(symbolLayers);
