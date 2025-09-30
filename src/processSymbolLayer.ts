@@ -353,7 +353,7 @@ const processMarkerPlacementInsidePolygon = (
   // Avoid null values and force them to 1 px
   const size = Math.round(radius * resizeFactor) || 1;
   symbolizer.radius = size;
- 
+
   // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
   // ArcGIS stepX, stepY, offsetX, offsetY
   let maxX = size / 2;
