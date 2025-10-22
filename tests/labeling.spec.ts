@@ -53,7 +53,7 @@ describe("Parse layer with CIMSolidFill label symbol", () => {
     expect(textSymbolizer.anchor).toEqual("right");
     expect(textSymbolizer.rotate).toEqual(0);
     expect(textSymbolizer.font).contain("Tahoma");
-    expect(textSymbolizer.label).toEqual("$feature.name");
+    expect(textSymbolizer.label).toEqual("{{name}}");
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
   });
@@ -76,7 +76,7 @@ describe("Parse layer with halo label symbol", () => {
     expect(textSymbolizer.anchor).toEqual("right");
     expect(textSymbolizer.rotate).toEqual(0);
     expect(textSymbolizer.font).contain("Tahoma");
-    expect(textSymbolizer.label).toEqual("$feature.name");
+    expect(textSymbolizer.label).toEqual("{{name}}");
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
     expect(textSymbolizer.haloColor).toEqual("#ffffff");

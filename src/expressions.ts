@@ -57,7 +57,7 @@ export const convertExpression = (
     expression = convertArcadeExpression(rawExpression);
   }
   if (toLowerCase) {
-    expression = rawExpression.toLowerCase();
+    expression = expression.toLowerCase();
   }
   if (expression.includes("+") || expression.includes("&")) {
     const tokens = expression.includes("+")
@@ -162,11 +162,11 @@ const processPropertyName = (token: string): string => {
 };
 
 const convertArcadeExpression = (expression: string): string => {
-  return expression.replace("$feature.", "");
+  expression = expression.replaceAll("$feature.", "");
+  return `[${expression}]`;
 };
 
 const stringToParameter = (s: string, toLowerCase: boolean): string | null => {
-  s = s.trim();
   if (
     (s.startsWith("'") && s.endsWith("'")) ||
     (s.startsWith('"') && s.endsWith('"'))
