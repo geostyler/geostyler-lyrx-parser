@@ -1,6 +1,7 @@
 import {
   Filter,
   GeoStylerNumberFunction,
+  GeoStylerFunction,
   Rule,
   Style,
   Symbolizer,
@@ -223,7 +224,7 @@ const processLabelClass = (
   }
 
   const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
-  const expression = convertExpression(
+  let expression: string | GeoStylerFunction  = convertExpression(
     labelClass?.expression ?? "",
     labelClass.expressionEngine ?? LabelExpressionEngine.Arcade,
     toLowerCase,

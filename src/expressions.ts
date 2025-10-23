@@ -5,6 +5,8 @@ import {
   Filter,
   Fproperty,
   GeoStylerNumberFunction,
+  GeoStylerStringFunction,
+  GeoStylerFunction,
 } from "geostyler-style";
 import { WARNINGS } from "./toGeostylerUtils.ts";
 
@@ -51,7 +53,7 @@ export const convertExpression = (
   rawExpression: string,
   engine: LabelExpressionEngine,
   toLowerCase: boolean,
-): string => {
+): string | GeoStylerStringFunction => {
   let expression: string = rawExpression;
   if (engine === LabelExpressionEngine.Arcade) {
     expression = convertArcadeExpression(rawExpression);
@@ -59,6 +61,29 @@ export const convertExpression = (
   if (toLowerCase) {
     expression = expression.toLowerCase();
   }
+
+  const regex = /\[\s*if\s*\(([^)]+)\)\s*{([^}]*)}\s*\]/si;
+  const match = expression.match(regex);
+  if (match) {
+    const condition = match[1];
+    const thenPart = match[2];
+    const elsePart = match.length === 4 ? convertArcadeExpression(match[3]) : "";
+
+    const booleanFunction = processGeostylerBooleanFunction(condition, toLowerCase);
+    if (booleanFunction) {
+      const processedThen = convertExpression(thenPart, engine, toLowerCase);
+      return {
+        name: "if_then_else",
+        args: [booleanFunction, processedThen, elsePart]
+      } as unknown as GeoStylerStringFunction;
+    }
+    return processPropertyName(expression);
+  }
+
+  if (/round\s*\(.*\)/i.test(expression)) {
+    return processRoundExpression(expression, toLowerCase, "");
+  }
+
   if (expression.includes("+") || expression.includes("&")) {
     const tokens = expression.includes("+")
       ? expression.split("+")
@@ -146,6 +171,66 @@ export const processRotationExpression = (
     return { args: [fProperty, -1], name: "mul" };
   } else if (rotationType === "Geographic") {
     return { args: [fProperty, 90], name: "sub" };
+  }
+  return null;
+};
+
+export const processRoundExpression = (
+  expression: string,
+  toLowerCase: boolean,
+  language: string,
+): GeoStylerStringFunction | string => {
+  const match = expression.match(/(?:{{\s*)?round\(\s*([a-zA-Z0-9_]+)\s*,\s*(\d+)\s*\)\s*(?:}})?/);
+  if (match) {
+    const field = match[1];
+    const decimalPlaces = Number(match[2]);
+    const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
+    let decimalFormat: string;
+    if (decimalPlaces === 0) {
+      decimalFormat = '0';
+    } else {
+      decimalFormat = '0.' + '0'.repeat(decimalPlaces);
+    }
+    return {
+      args: [decimalFormat, fProperty, language],
+      name: "numberFormat"
+    };
+  }
+  return expression;
+};
+
+export const processGeostylerBooleanFunction = (
+  expression: string,
+  toLowerCase: boolean
+): GeoStylerFunction | null => {
+  const whereClause = convertWhereClause(expression, toLowerCase);
+  if(Array.isArray(whereClause) && whereClause.length === 3) {
+    const fProperty: Fproperty = fieldToFProperty(
+      String(whereClause[1]),
+      toLowerCase
+    );
+    const value = Number(whereClause[2]);
+    if (whereClause[0] === ">") {
+      return {
+        name: "greaterThan",
+        args: [fProperty, value]
+      };
+    } else if (whereClause[0] === "==") {
+      return {
+        name: "equalTo",
+        args: [fProperty, value]
+      };
+    } else if (whereClause[0] === "<") {
+      return {
+        name: "lessThan",
+        args: [fProperty, value]
+      };
+    } else if (whereClause[0] === "!=") {
+      return {
+        name: "notEqualTo",
+        args: [fProperty, value]
+      };
+    }
   }
   return null;
 };

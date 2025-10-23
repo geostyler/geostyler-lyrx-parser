@@ -108,3 +108,30 @@ describe("Parse layer with PerpendicularOffset label symbol", () => {
     expect((textSymbolizer as any).perpendicularOffset).toEqual(10);
   });
 });
+
+describe("Parse lyrx with rounding in label expression", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/labeling/label_with_rounding.lyrx",
+    );
+  });
+
+  const expectedLabel = {
+    name: "numberFormat",
+    args: [
+      "0",
+      { name: "property", args: ["contour"] },
+      ""
+    ]
+  };
+
+  it("should parse label class expression", () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(2);
+    const textSymbolizer = rules[1].symbolizers[0] as TextSymbolizer;
+    expect(textSymbolizer.kind).toEqual("Text");
+    expect(textSymbolizer.label).toEqual(expectedLabel);
+  });
+});
