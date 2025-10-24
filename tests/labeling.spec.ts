@@ -121,7 +121,7 @@ describe("Parse lyrx with rounding in label expression", () => {
   const expectedLabel = {
     name: "numberFormat",
     args: [
-      "0",
+      "#",
       { name: "property", args: ["contour"] },
       ""
     ]

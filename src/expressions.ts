@@ -187,9 +187,9 @@ export const processRoundExpression = (
     const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
     let decimalFormat: string;
     if (decimalPlaces === 0) {
-      decimalFormat = '0';
+      decimalFormat = '#';
     } else {
-      decimalFormat = '0.' + '0'.repeat(decimalPlaces);
+      decimalFormat = '#.' + '#'.repeat(decimalPlaces);
     }
     return {
       args: [decimalFormat, fProperty, language],
