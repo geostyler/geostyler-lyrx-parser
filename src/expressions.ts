@@ -62,6 +62,7 @@ export const convertExpression = (
     expression = expression.toLowerCase();
   }
 
+  // Handle if-then-else expressions.
   const regex = /\[\s*if\s*\(([^)]+)\)\s*{([^}]*)}\s*\]/si;
   const match = expression.match(regex);
   if (match) {
@@ -80,6 +81,7 @@ export const convertExpression = (
     return processPropertyName(expression);
   }
 
+  // Match expressions like "Round($feature.CONTOUR, 0)"
   if (/round\s*\(.*\)/i.test(expression)) {
     return processRoundExpression(expression, toLowerCase, "");
   }
@@ -180,7 +182,8 @@ export const processRoundExpression = (
   toLowerCase: boolean,
   language: string,
 ): GeoStylerStringFunction | string => {
-  const match = expression.match(/(?:{{\s*)?round\(\s*([a-zA-Z0-9_]+)\s*,\s*(\d+)\s*\)\s*(?:}})?/);
+  // Match expressions like "Round($feature.CONTOUR, 0)" and processes the field and decimal places
+  const match = expression.match(/(?:{{\s*)?round\(\s*(\w+)\s*,\s*(\d+)\s*\)\s*(?:}})?/);
   if (match) {
     const field = match[1];
     const decimalPlaces = Number(match[2]);
@@ -204,7 +207,7 @@ export const processGeostylerBooleanFunction = (
   toLowerCase: boolean
 ): GeoStylerFunction | null => {
   const whereClause = convertWhereClause(expression, toLowerCase);
-  if(Array.isArray(whereClause) && whereClause.length === 3) {
+  if (Array.isArray(whereClause) && whereClause.length === 3) {
     const fProperty: Fproperty = fieldToFProperty(
       String(whereClause[1]),
       toLowerCase
@@ -215,17 +218,23 @@ export const processGeostylerBooleanFunction = (
         name: "greaterThan",
         args: [fProperty, value]
       };
-    } else if (whereClause[0] === "==") {
+    } 
+
+    if (whereClause[0] === "==") {
       return {
         name: "equalTo",
         args: [fProperty, value]
       };
-    } else if (whereClause[0] === "<") {
+    }
+    
+    if (whereClause[0] === "<") {
       return {
         name: "lessThan",
         args: [fProperty, value]
       };
-    } else if (whereClause[0] === "!=") {
+    }
+    
+    if (whereClause[0] === "!=") {
       return {
         name: "notEqualTo",
         args: [fProperty, value]
