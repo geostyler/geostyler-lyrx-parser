@@ -39,12 +39,13 @@ import {
   SymbolLayer,
 } from "./esri/types/symbols";
 import { fieldToFProperty } from "./expressions.ts";
+import { resizeBase64Image } from "./base64Utils.ts";
 
-export const processSymbolLayer = (
+export const processSymbolLayer = async (
   layer: SymbolLayer,
   symbol: CIMSymbol,
   options: Options,
-): Symbolizer[] | undefined => {
+): Promise<Symbolizer[] | undefined> => {
   let layerType: string = layer.type;
 
   switch (layerType) {
@@ -60,7 +61,7 @@ export const processSymbolLayer = (
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
     case "CIMPictureMarker":
-      return processSymbolPicture(layer, symbol, options);
+      return await processSymbolPicture(layer, symbol, options);
     default:
       return;
   }
@@ -523,11 +524,11 @@ const processSymbolCharacterMarker = (
   return [symbolCharacterMaker];
 };
 
-const processSymbolVectorMarker = (
+const processSymbolVectorMarker = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
-): Symbolizer[] => {
+): Promise<Symbolizer[]> => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, "size", 3);
   }
@@ -548,7 +549,8 @@ const processSymbolVectorMarker = (
     // TODO: support multiple marker graphics
     const markerGraphic = markerGraphics[0];
     if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
-      symbol = processSymbolReference(markerGraphic, {})[0] as MarkSymbolizer;
+      const symbolReferences = await processSymbolReference(markerGraphic, {});
+      symbol = symbolReferences[0] as MarkSymbolizer;
       const subLayers = markerGraphic.symbol.symbolLayers.filter(
         (sublayer: SymbolLayer) => sublayer.enable,
       );
@@ -690,17 +692,18 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   return [fillSymbolizer];
 };
 
-const processSymbolPicture = (
+const processSymbolPicture = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
-): Symbolizer[] => {
+): Promise<Symbolizer[]> => {
   const size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  const resizedImage = (await resizeBase64Image(layer.url, size)) ?? "";
   const pictureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
     rotate: 0,
     kind: "Icon",
-    image: layer.url,
+    image: resizedImage,
     size: size,
   };
 
