@@ -246,5 +246,6 @@ describe("Parse point with CIMPictureMarker", () => {
     expect(fileName).toBeDefined();
     expect(fileName.startsWith("data:image/png;base64,iVB"));
     expect(fileName.endsWith("CYII="));
+    expect(geostylerStyle.warnings).toEqual([]);
   });
 });
