@@ -163,3 +163,284 @@ describe("Parse graduated values polygon renderer", () => {
     }
   });
 });
+
+describe("Parse unique value polygon renderer with marker symbols inside", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/polygon_marker_inside.lyrx",
+    );
+  });
+
+  const expectedLegendValues = {
+    10: {
+      symbolizers: 3,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x28",
+            radius: 6.5,
+            respectFrame: false,
+          },
+          graphicFillPadding: [4, 4, 4, 4],
+        },
+      ],
+    },
+    11: {
+      symbolizers: 6,
+      graphicFill: 2,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI IGL Font16#0x36",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [1, 12, 1, 12],
+        },
+      ],
+      graphicFill_2: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI IGL Font16#0x36",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [7, 18, 7, 18],
+        },
+      ],
+    },
+    12: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x2a",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [5, 5, 5, 5],
+        },
+      ],
+    },
+    13: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x21",
+            radius: 3.5,
+            respectFrame: true,
+          },
+          graphicFillPadding: [10, 10, 10, 10],
+        },
+      ],
+    },
+    14: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x28",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [22, 22, 22, 22],
+        },
+      ],
+    },
+    15: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "shape://slash",
+            radius: 5,
+          },
+        },
+      ],
+    },
+    16: {
+      symbolizers: 6,
+      graphicFill: 2,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x21",
+            radius: 3.5,
+            respectFrame: true,
+          },
+          graphicFillPadding: [7, 7, 7, 7],
+        },
+      ],
+      graphicFill_2: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0x21",
+            radius: 3.5,
+            respectFrame: true,
+          },
+          graphicFillPadding: [6, 6, 6, 6],
+        },
+      ],
+    },
+    5: {
+      symbolizers: 2,
+      graphicFill: 0,
+    },
+    6: {
+      symbolizers: 6,
+      graphicFill: 2,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI SDS 2.00 1#0x3d",
+            radius: 12,
+            respectFrame: true,
+          },
+          graphicFillPadding: [5, 5, 5, 5],
+        },
+      ],
+      graphicFill_2: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI SDS 2.00 1#0x3d",
+            radius: 12,
+            respectFrame: true,
+          },
+          graphicFillPadding: [5, 5, 5, 5],
+        },
+      ],
+    },
+    7: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI IGL Font23#0x51",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [0, 0, 0, 0],
+        },
+      ],
+    },
+    8: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0xce",
+            radius: 8,
+            respectFrame: true,
+          },
+          graphicFillPadding: [5, 5, 5, 5],
+        },
+      ],
+    },
+    9: {
+      symbolizers: 4,
+      graphicFill: 1,
+      graphicFill_1: [
+        {
+          kind: "Fill",
+          fillOpacity: 1,
+          graphicFill: {
+            kind: "Mark",
+            wellKnownName: "ttf://ESRI Default Marker#0xce",
+            radius: 5.5,
+            respectFrame: true,
+          },
+          graphicFillPadding: [5, 5, 5, 5],
+        },
+      ],
+    },
+  };
+
+  it("should have the expected rules with correct symbolizer graphicFill properties", () => {
+    const rules = geostylerStyle.output?.rules ?? [];
+
+    expect(rules.length).toBe(12);
+
+    for (const rule of rules) {
+      const expected = expectedLegendValues[rule.name];
+      const fillSymbolizers = rule.symbolizers;
+      expect(fillSymbolizers.length).toBe(expected.symbolizers);
+      const graphicFills = rule.symbolizers
+        .filter((s) => (s as FillSymbolizer).graphicFill !== undefined)
+        .map((s) => (s as FillSymbolizer).graphicFill);
+
+      expect(graphicFills.length).toBe(expected.graphicFill);
+
+      graphicFills.forEach((graphicFill, i) => {
+        const fillSymbolizerWithGraphicFill = rule.symbolizers.filter(
+          (s) => (s as FillSymbolizer).graphicFill !== undefined,
+        )[i] as FillSymbolizer;
+        i += 1;
+        expect(graphicFill?.kind).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.kind,
+        );
+        expect((graphicFill as any)?.wellKnownName).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.wellKnownName,
+        );
+        expect((graphicFill as any)?.radius).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.radius,
+        );
+        expect((graphicFill as any)?.respectFrame).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFill.respectFrame,
+        );
+
+        expect(fillSymbolizerWithGraphicFill.graphicFillPadding).toEqual(
+          expected[`graphicFill_${i}`][0].graphicFillPadding,
+        );
+      });
+    }
+  });
+});

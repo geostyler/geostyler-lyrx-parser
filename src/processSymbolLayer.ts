@@ -2,8 +2,10 @@ import { Effect, Options } from "./types.ts";
 import { toWKT } from "./wktGeometries.ts";
 import {
   ESRI_SYMBOLS_FONT,
+  ESRI_SPECIAL_FONT,
   OFFSET_FACTOR,
   POLYGON_FILL_RESIZE_FACTOR,
+  ESRI_SPECIAL_FONT_RESIZE_FACTOR,
   ptToPx,
 } from "./constants.ts";
 import {
@@ -76,6 +78,7 @@ const processSymbolLayerWithSubSymbol = (
   options: Options,
   maxX: number | null = null,
   maxY: number | null = null,
+  respectFrame: boolean = true,
 ): Symbolizer[] => {
   const symbolizers: Symbolizer[] = [];
   if (symbol.type === "CIMPolygonSymbol") {
@@ -83,8 +86,7 @@ const processSymbolLayerWithSubSymbol = (
     const polygonSymbolizer = formatPolygonSymbolizer(
       symbolizer as MarkSymbolizer,
       markerPlacement,
-      maxX,
-      maxY,
+      respectFrame,
     );
     if (polygonSymbolizer) {
       symbolizers.push(polygonSymbolizer);
@@ -219,16 +221,14 @@ const processMarkerPlacementAlongLine = (
 const formatPolygonSymbolizer = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
-  maxX: number | null = null,
-  maxY: number | null = null,
+  respectFrame: boolean,
 ): FillSymbolizer | LineSymbolizer | null => {
   const markerPlacementType = markerPlacement.type;
   if (markerPlacementType === "CIMMarkerPlacementInsidePolygon") {
     const padding = processMarkerPlacementInsidePolygon(
       symbolizer,
       markerPlacement,
-      maxX,
-      maxY,
+      respectFrame,
     );
     return {
       kind: "Fill",
@@ -333,57 +333,43 @@ const processOrientedMarkerAtEndOfLine = (
 const processMarkerPlacementInsidePolygon = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
-  symMaxX: number | null = null,
-  symMaxY: number | null = null,
+  respectFrame: boolean = true
 ): [
   Expression<number>,
   Expression<number>,
   Expression<number>,
   Expression<number>,
 ] => {
+  const isSpecialFont = ESRI_SPECIAL_FONT.some(font => symbolizer?.wellKnownName?.startsWith(font));
   // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
-  // We use an empirical factor to account for this, which works in most cases (but not all)
-  const resizeFactor = symbolizer?.wellKnownName?.startsWith("wkt://POLYGON")
-    ? 1
-    : POLYGON_FILL_RESIZE_FACTOR;
-
-  const radius = typeof symbolizer.radius === "number" ? symbolizer.radius : 0;
-
-  // Size is already in pixel.
-  // Avoid null values and force them to 1 px
-  const size = Math.round(radius * resizeFactor) || 1;
-  symbolizer.radius = size;
-
-  // We use SLD graphic-margin as top, right, bottom, left to mimic the combination of
-  // ArcGIS stepX, stepY, offsetX, offsetY
-  let maxX = size / 2;
-  let maxY = size / 2;
-
-  symMaxX = symMaxX ?? maxX;
-  symMaxY = symMaxY ?? maxY;
-  if (symMaxX && symMaxY) {
-    maxX = Math.floor(symMaxX * resizeFactor) || 1;
-    maxY = Math.floor(symMaxY * resizeFactor) || 1;
+  // We use an empirical factor to account for this, which works in most cases. For special Fonts we need to
+  // use another empirical factor when respectFrame is set to false.
+  let resizeFactor: number;
+  if (respectFrame) {
+    resizeFactor = isSpecialFont ? 1 : POLYGON_FILL_RESIZE_FACTOR;
+  } else {
+    resizeFactor = isSpecialFont ? ESRI_SPECIAL_FONT_RESIZE_FACTOR : 1;
   }
 
   let stepX = ptToPxProp(markerPlacement, "stepX", 0);
   let stepY = ptToPxProp(markerPlacement, "stepY", 0);
 
-  if (stepX < maxX) {
-    stepX += maxX * 2;
+  const radius = typeof symbolizer.radius === "number" ? symbolizer.radius : 0;
+  const size = Math.round(radius * 2 * resizeFactor) || 1;
+  symbolizer.radius = size / 2;
+
+  if (stepX < size) {
+    stepX = size;
   }
 
-  if (stepY < maxY) {
-    stepY += maxY * 2;
+  if (stepY < size) {
+    stepY = size;
   }
 
-  const offsetX = ptToPxProp(markerPlacement, "offsetX", 0);
-  const offsetY = ptToPxProp(markerPlacement, "offsetY", 0);
-
-  const right = Math.round(stepX / 2 - maxX - offsetX);
-  const left = Math.round(stepX / 2 - maxX + offsetX);
-  const top = Math.round(stepY / 2 - maxY - offsetY);
-  const bottom = Math.round(stepY / 2 - maxY + offsetY);
+  const right = Math.round(stepX / 2 - size / 2);
+  const left = Math.round(stepX / 2 - size / 2);
+  const top = Math.round(stepY / 2 - size / 2);
+  const bottom = Math.round(stepY / 2 - size / 2);
 
   return [top, right, bottom, left];
 };
@@ -503,6 +489,7 @@ const processSymbolCharacterMarker = (
   let strokeColor = "#000000";
   let strokeWidth = 0;
   let strokeOpacity = 0;
+  let respectFrame = layer.respectFrame;
   const symbolLayers = layer.symbol.symbolLayers;
   if (symbolLayers) {
     fillColor = extractFillColor(symbolLayers);
@@ -522,6 +509,7 @@ const processSymbolCharacterMarker = (
     color: fillColor,
     wellKnownName: name,
     radius: size / 2,
+    respectFrame: respectFrame,
   } as Symbolizer;
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
@@ -529,6 +517,9 @@ const processSymbolCharacterMarker = (
     layer,
     symbolCharacterMaker,
     options,
+    undefined,
+    undefined,
+    respectFrame,
   );
   if (symbolizerWithSubSymbolizer.length) {
     return symbolizerWithSubSymbolizer;
