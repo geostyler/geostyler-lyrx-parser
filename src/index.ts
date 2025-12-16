@@ -8,6 +8,8 @@ import {
 import { convert } from "./toGeostyler.ts";
 import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
 
+export type ConstructorParams = {};
+
 /**
  * This parser can be used with the GeoStyler.
  * It implements the GeoStyler StyleParser interface to work with ArcGis lyrx
@@ -19,8 +21,14 @@ import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
 export class LyrxParser implements StyleParser<CIMLayerDocument> {
   static title = "ArcGIS Pro lyrx parser";
   title = "ArcGIS Pro lyrx parser";
-
   unsupportedProperties: UnsupportedProperties = {};
+
+  // @ts-ignore currently empty, but allow a common signature regarding the other parsers.
+  private options: ConstructorParams;
+
+  constructor(options?: ConstructorParams) {
+    this.options = options || {};
+  }
 
   readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
     const geostylerStyle = convert(inputStyle);

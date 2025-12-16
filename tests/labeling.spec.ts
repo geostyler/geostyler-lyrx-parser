@@ -53,7 +53,7 @@ describe("Parse layer with CIMSolidFill label symbol", () => {
     expect(textSymbolizer.anchor).toEqual("right");
     expect(textSymbolizer.rotate).toEqual(0);
     expect(textSymbolizer.font).contain("Tahoma");
-    expect(textSymbolizer.label).toEqual("$feature.name");
+    expect(textSymbolizer.label).toEqual("{{name}}");
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
   });
@@ -76,10 +76,11 @@ describe("Parse layer with halo label symbol", () => {
     expect(textSymbolizer.anchor).toEqual("right");
     expect(textSymbolizer.rotate).toEqual(0);
     expect(textSymbolizer.font).contain("Tahoma");
-    expect(textSymbolizer.label).toEqual("$feature.name");
+    expect(textSymbolizer.label).toEqual("{{name}}");
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
     expect(textSymbolizer.haloColor).toEqual("#ffffff");
+    expect(textSymbolizer.offset).toEqual([16, -16]);
     expect(textSymbolizer.haloWidth).toEqual(4.0);
   });
 });
@@ -105,5 +106,32 @@ describe("Parse layer with PerpendicularOffset label symbol", () => {
     expect(textSymbolizer.haloColor).toEqual("#ffffff");
     expect(textSymbolizer.placement).toEqual("line");
     expect((textSymbolizer as any).perpendicularOffset).toEqual(10);
+  });
+});
+
+describe("Parse lyrx with rounding in label expression", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/labeling/label_with_rounding.lyrx",
+    );
+  });
+
+  const expectedLabel = {
+    name: "numberFormat",
+    args: [
+      "#",
+      { name: "property", args: ["contour"] },
+      ""
+    ]
+  };
+
+  it("should parse label class expression", () => {
+    const rules = geostylerStyle.output!.rules;
+    expect(rules.length).toEqual(2);
+    const textSymbolizer = rules[1].symbolizers[0] as TextSymbolizer;
+    expect(textSymbolizer.kind).toEqual("Text");
+    expect(textSymbolizer.label).toEqual(expectedLabel);
   });
 });

@@ -5,6 +5,8 @@ import {
   Filter,
   Fproperty,
   GeoStylerNumberFunction,
+  GeoStylerStringFunction,
+  GeoStylerFunction,
 } from "geostyler-style";
 import { WARNINGS } from "./toGeostylerUtils.ts";
 
@@ -51,14 +53,39 @@ export const convertExpression = (
   rawExpression: string,
   engine: LabelExpressionEngine,
   toLowerCase: boolean,
-): string => {
+): string | GeoStylerStringFunction => {
   let expression: string = rawExpression;
   if (engine === LabelExpressionEngine.Arcade) {
     expression = convertArcadeExpression(rawExpression);
   }
   if (toLowerCase) {
-    expression = rawExpression.toLowerCase();
+    expression = expression.toLowerCase();
   }
+
+  // Handle if-then-else expressions.
+  const regex = /\[\s*if\s*\(([^)]+)\)\s*{([^}]*)}\s*\]/si;
+  const match = expression.match(regex);
+  if (match) {
+    const condition = match[1];
+    const thenPart = match[2];
+    const elsePart = match.length === 4 ? convertArcadeExpression(match[3]) : "";
+
+    const booleanFunction = processGeostylerBooleanFunction(condition, toLowerCase);
+    if (booleanFunction) {
+      const processedThen = convertExpression(thenPart, engine, toLowerCase);
+      return {
+        name: "if_then_else",
+        args: [booleanFunction, processedThen, elsePart]
+      } as unknown as GeoStylerStringFunction;
+    }
+    return processPropertyName(expression);
+  }
+
+  // Match expressions like "Round($feature.CONTOUR, 0)"
+  if (/round\s*\(.*\)/i.test(expression)) {
+    return processRoundExpression(expression, toLowerCase, "");
+  }
+
   if (expression.includes("+") || expression.includes("&")) {
     const tokens = expression.includes("+")
       ? expression.split("+")
@@ -150,6 +177,73 @@ export const processRotationExpression = (
   return null;
 };
 
+export const processRoundExpression = (
+  expression: string,
+  toLowerCase: boolean,
+  language: string,
+): GeoStylerStringFunction | string => {
+  // Match expressions like "Round($feature.CONTOUR, 0)" and processes the field and decimal places
+  const match = expression.match(/(?:{{\s*)?round\(\s*(\w+)\s*,\s*(\d+)\s*\)\s*(?:}})?/);
+  if (match) {
+    const field = match[1];
+    const decimalPlaces = Number(match[2]);
+    const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
+    let decimalFormat: string;
+    if (decimalPlaces === 0) {
+      decimalFormat = '#';
+    } else {
+      decimalFormat = '#.' + '#'.repeat(decimalPlaces);
+    }
+    return {
+      args: [decimalFormat, fProperty, language],
+      name: "numberFormat"
+    };
+  }
+  return expression;
+};
+
+export const processGeostylerBooleanFunction = (
+  expression: string,
+  toLowerCase: boolean
+): GeoStylerFunction | null => {
+  const whereClause = convertWhereClause(expression, toLowerCase);
+  if (Array.isArray(whereClause) && whereClause.length === 3) {
+    const fProperty: Fproperty = fieldToFProperty(
+      String(whereClause[1]),
+      toLowerCase
+    );
+    const value = Number(whereClause[2]);
+    if (whereClause[0] === ">") {
+      return {
+        name: "greaterThan",
+        args: [fProperty, value]
+      };
+    } 
+
+    if (whereClause[0] === "==") {
+      return {
+        name: "equalTo",
+        args: [fProperty, value]
+      };
+    }
+    
+    if (whereClause[0] === "<") {
+      return {
+        name: "lessThan",
+        args: [fProperty, value]
+      };
+    }
+    
+    if (whereClause[0] === "!=") {
+      return {
+        name: "notEqualTo",
+        args: [fProperty, value]
+      };
+    }
+  }
+  return null;
+};
+
 const replaceSpecialLiteral = (literal: string): string => {
   if (literal === "vbnewline") {
     return "/n";
@@ -162,11 +256,11 @@ const processPropertyName = (token: string): string => {
 };
 
 const convertArcadeExpression = (expression: string): string => {
-  return expression.replace("$feature.", "");
+  expression = expression.replaceAll("$feature.", "");
+  return `[${expression}]`;
 };
 
 const stringToParameter = (s: string, toLowerCase: boolean): string | null => {
-  s = s.trim();
   if (
     (s.startsWith("'") && s.endsWith("'")) ||
     (s.startsWith('"') && s.endsWith('"'))

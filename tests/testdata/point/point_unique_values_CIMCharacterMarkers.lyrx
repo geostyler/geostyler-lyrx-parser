@@ -123,7 +123,7 @@
         },
         "dataConnection" : {
           "type" : "CIMStandardDataConnection",
-          "workspaceConnectionString" : "ENCRYPTED_PASSWORD=00022e685a4f7a6c486b6b2b335644615a526578644f7a4841367958795273475543506b446d775a746d34545067513d2a00;SERVER=sqlA-AGIS-312-Prod;INSTANCE=\"sde:sqlserver:sqlA-AGIS-312-Prod.ads.ktag.ch;Encrypt=yes;TrustServerCertificate=no\";DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=\"sqlA-AGIS-312-Prod.ads.ktag.ch;Encrypt=yes;TrustServerCertificate=no\";DATABASE=AGIS_312_Prod;USER=AFU_VFK;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS",
+          "workspaceConnectionString" : "",
           "workspaceFactory" : "SDE",
           "dataset" : "AGIS_312_Prod.AGIS.afu_bu",
           "datasetType" : "esriDTFeatureClass"

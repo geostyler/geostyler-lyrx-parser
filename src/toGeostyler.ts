@@ -1,6 +1,7 @@
 import {
   Filter,
   GeoStylerNumberFunction,
+  GeoStylerFunction,
   Rule,
   Style,
   Symbolizer,
@@ -223,7 +224,7 @@ const processLabelClass = (
   }
 
   const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
-  const expression = convertExpression(
+  const expression: string | GeoStylerFunction  = convertExpression(
     labelClass?.expression ?? "",
     labelClass.expressionEngine ?? LabelExpressionEngine.Arcade,
     toLowerCase,
@@ -273,15 +274,15 @@ const processLabelClass = (
     maplexPointPlacementMethod === "AroundPoint"
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
-    symbolizer.offset = [offset, offset];
+    symbolizer.offset = [offset, offset * -1];
   } else if (
     stdPlacementType === LabelFeatureType.Point &&
     stdPointPlacementType === "AroundPoint"
   ) {
     const offset = maplexPrimaryOffset + fontSize / 2;
-    symbolizer.offset = [offset, offset];
+    symbolizer.offset = [offset, offset * -1];
   } else {
-    symbolizer.offset = [0.0, 0.0];
+    symbolizer.offset = [0, 0];
   }
 
   if (rotationField) {
