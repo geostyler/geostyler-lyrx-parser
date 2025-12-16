@@ -7,6 +7,7 @@ import {
 } from "geostyler-style";
 import { convert } from "./toGeostyler.ts";
 import { CIMLayerDocument } from "./esri/types/CIMLayerDocument.ts";
+import { WARNINGS } from "./toGeostylerUtils.ts";
 
 export type ConstructorParams = {};
 
@@ -30,14 +31,14 @@ export class LyrxParser implements StyleParser<CIMLayerDocument> {
     this.options = options || {};
   }
 
-  readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
-    const geostylerStyle = convert(inputStyle);
+  async readStyle(inputStyle: CIMLayerDocument): Promise<ReadStyleResult> {
+    const geostylerStyle = await convert(inputStyle);
     return Promise.resolve({
       output: {
         name: geostylerStyle[0].name,
         rules: geostylerStyle[0].rules,
       },
-      warnings: [],
+      warnings: WARNINGS,
       errors: [],
     });
   }
