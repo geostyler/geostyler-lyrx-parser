@@ -3,10 +3,10 @@ import { processSymbolLayer } from "./processSymbolLayer.ts";
 import { Symbolizer } from "geostyler-style";
 import { CIMSymbolReference } from "./esri/types/labeling/CIMSymbolReference.ts";
 
-export const processSymbolReference = (
+export const processSymbolReference = async (
   symbolref: CIMSymbolReference,
   options: Options,
-): Symbolizer[] => {
+): Promise<Symbolizer[]> => {
   const symbol = symbolref.symbol;
   const symbolizers: Symbolizer[] = [];
   if (!symbol || !symbol.symbolLayers) {
@@ -14,14 +14,18 @@ export const processSymbolReference = (
   }
   // Drawing order for geostyler is inverse of rule order.
   const layers = symbol.symbolLayers.slice().reverse();
-  layers.forEach((layer) => {
+  for await (const layer of layers) {
     // Skip not enabled layers.
     if (!layer.enable) {
-      return;
+      continue;
     }
 
-    const processedSymbolLayers = processSymbolLayer(layer, symbol, options);
+    const processedSymbolLayers = await processSymbolLayer(
+      layer,
+      symbol,
+      options,
+    );
     if (processedSymbolLayers) symbolizers.push(...processedSymbolLayers);
-  });
+  }
   return symbolizers;
 };
