@@ -1,4 +1,4 @@
-import Sharp from "sharp";
+import { Jimp } from "jimp";
 import { WARNINGS } from "./toGeostylerUtils.ts";
 
 /** Split base64 string */
@@ -6,6 +6,14 @@ interface Base64ImageInfo {
   data: string;
   extension: string;
 }
+
+type SupportedMimeTypes =
+  | "image/bmp"
+  | "image/tiff"
+  | "image/x-ms-bmp"
+  | "image/gif"
+  | "image/jpeg"
+  | "image/png";
 
 /**
  * Get the data and extension from a base64 string.
@@ -29,7 +37,7 @@ const getBase64ImageInfo = (
 };
 
 /**
- * Resize a base64 image to the given size using Sharp.
+ * Resize a base64 image to the given size using Jimp.
  * This is needed because the end reader could be not able to resize a base64 image.
  * @returns The resized base64 image or the original base64 image if resizing failed.
  */
@@ -44,17 +52,21 @@ export const resizeBase64Image = async (
   if (!imageInfo) {
     return base64String;
   }
+  const mimeType = `image/${imageInfo.extension}` as SupportedMimeTypes;
   const buffer = Buffer.from(imageInfo.data, "base64");
-  let resizedBase64Image: Buffer | undefined = undefined;
+  let resizedBase64Image: string | undefined;
   try {
-    resizedBase64Image = await Sharp(buffer)
-      .resize(Math.floor(size))
-      .toBuffer();
+    const image = await Jimp.read(buffer);
+    const resizedImage = image.resize({
+      w: Math.floor(size),
+      h: Math.floor(size),
+    });
+    resizedBase64Image = await resizedImage.getBase64(mimeType);
   } catch (e) {
     WARNINGS.push(`Could not resize image: ${e}`);
   }
   if (resizedBase64Image) {
-    return `data:image/${imageInfo.extension};base64,${resizedBase64Image.toString("base64")}`;
+    return `data:${mimeType};base64,${resizedBase64Image}`;
   }
   return base64String;
 };
