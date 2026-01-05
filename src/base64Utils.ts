@@ -66,7 +66,7 @@ export const resizeBase64Image = async (
     WARNINGS.push(`Could not resize image: ${e}`);
   }
   if (resizedBase64Image) {
-    return `data:${mimeType};base64,${resizedBase64Image}`;
+    return resizedBase64Image;
   }
   return base64String;
 };
