@@ -39,16 +39,13 @@ import {
   SymbolLayer,
 } from "./esri/types/symbols";
 import { fieldToFProperty } from "./expressions.ts";
-// import { writeFileSync, existsSync, mkdirSync } from 'fs';
-// import uuid from 'uuid';
-// import { tmpdir } from 'os';
-// import path from 'path';
+import { resizeBase64Image } from "./base64Utils.ts";
 
-export const processSymbolLayer = (
+export const processSymbolLayer = async (
   layer: SymbolLayer,
   symbol: CIMSymbol,
   options: Options,
-): Symbolizer[] | undefined => {
+): Promise<Symbolizer[] | undefined> => {
   let layerType: string = layer.type;
 
   switch (layerType) {
@@ -63,9 +60,8 @@ export const processSymbolLayer = (
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
-      return processSymbolPicture(layer, symbol, options);
     case "CIMPictureMarker":
-      return processSymbolMarker(layer);
+      return await processSymbolPicture(layer, symbol, options);
     default:
       return;
   }
@@ -333,14 +329,16 @@ const processOrientedMarkerAtEndOfLine = (
 const processMarkerPlacementInsidePolygon = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
-  respectFrame: boolean = true
+  respectFrame: boolean = true,
 ): [
   Expression<number>,
   Expression<number>,
   Expression<number>,
   Expression<number>,
 ] => {
-  const isSpecialFont = ESRI_SPECIAL_FONT.some(font => symbolizer?.wellKnownName?.startsWith(font));
+  const isSpecialFont = ESRI_SPECIAL_FONT.some((font) =>
+    symbolizer?.wellKnownName?.startsWith(font),
+  );
   // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
   // We use an empirical factor to account for this, which works in most cases. For special Fonts we need to
   // use another empirical factor when respectFrame is set to false.
@@ -528,11 +526,11 @@ const processSymbolCharacterMarker = (
   return [symbolCharacterMaker];
 };
 
-const processSymbolVectorMarker = (
+const processSymbolVectorMarker = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
-): Symbolizer[] => {
+): Promise<Symbolizer[]> => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, "size", 3);
   }
@@ -553,7 +551,8 @@ const processSymbolVectorMarker = (
     // TODO: support multiple marker graphics
     const markerGraphic = markerGraphics[0];
     if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
-      symbol = processSymbolReference(markerGraphic, {})[0] as MarkSymbolizer;
+      const symbolReferences = await processSymbolReference(markerGraphic, {});
+      symbol = symbolReferences[0] as MarkSymbolizer;
       const subLayers = markerGraphic.symbol.symbolLayers.filter(
         (sublayer: SymbolLayer) => sublayer.enable,
       );
@@ -695,67 +694,31 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   return [fillSymbolizer];
 };
 
-const processSymbolPicture = (
+const processSymbolPicture = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
-): Symbolizer[] => {
-  // let url = layer.url;
-  // if (!existsSync(url)) {
-  //     let tokens = url.split(';');
-  //     if (tokens.length === 2) {
-  //         let ext = tokens[0].split('/').pop();
-  //         let data = tokens[1].substring('base64,'.length);
-  //         let tempPath = path.join(
-  //             tmpdir(),
-  //             'bridgestyle',
-  //             uuid.v4().replace('-', ''),
-  //         );
-  //         let iconName = `${uuid.v4()}.${ext}`;
-  //         let iconFile = path.join(tempPath, iconName);
-  //         mkdirSync(tempPath, { recursive: true });
-  //         writeFileSync(iconFile, Buffer.from(data, 'base64'));
-  //         usedIcons.push(iconFile);
-  //         url = iconFile;
-  //     }
-  // }
-
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  const picureFillSymbolizer: Symbolizer = {
+): Promise<Symbolizer[]> => {
+  const size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
+  const resizedImage = (await resizeBase64Image(layer.url, size)) ?? "";
+  const pictureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
-    rotate: 0.0,
+    rotate: 0,
     kind: "Icon",
-    color: undefined,
-    // image: url,
-    image: "http://FIXME",
+    image: resizedImage,
     size: size,
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
     cimSymbol,
     layer,
-    picureFillSymbolizer,
+    pictureFillSymbolizer,
     options,
   );
   if (symbolizerWithSubSymbolizer.length) {
     return symbolizerWithSubSymbolizer;
   }
-  return [picureFillSymbolizer];
-};
-
-const processSymbolMarker = (layer: SymbolLayer): Symbolizer[] => {
-  let size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
-  return [
-    {
-      opacity: 1.0,
-      rotate: 0.0,
-      kind: "Icon",
-      color: undefined,
-      // image: url,
-      image: "http://FIXME",
-      size: size,
-    } as Symbolizer,
-  ];
+  return [pictureFillSymbolizer];
 };
 
 const extractEffect = (layer: SymbolLayer): Effect => {

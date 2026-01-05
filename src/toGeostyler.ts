@@ -42,15 +42,21 @@ import { CIMMaplexRotationProperties } from "./esri/types/labeling/CIMMaplexRota
 
 const usedIcons: string[] = [];
 
-export const convert = (
+export const convert = async (
   layerDocument: CIMLayerDocument,
   options: Options = {},
-): [Style, string[], string[]] => {
-  const geoStyler = processLayer(layerDocument?.layerDefinitions?.[0], options);
+): Promise<[Style, string[], string[]]> => {
+  const geoStyler = await processLayer(
+    layerDocument?.layerDefinitions?.[0],
+    options,
+  );
   return [geoStyler, usedIcons, WARNINGS];
 };
 
-const processLayer = (layer: CIMLayerDefinition, options: Options): Style => {
+const processLayer = async (
+  layer: CIMLayerDefinition,
+  options: Options,
+): Promise<Style> => {
   const style: Style = {
     name: layer.name,
     rules: [],
@@ -62,7 +68,7 @@ const processLayer = (layer: CIMLayerDefinition, options: Options): Style => {
   };
 
   if (layer.type === "CIMFeatureLayer") {
-    style.rules = processFeatureLayer(layer as CIMFeatureLayer, options);
+    style.rules = await processFeatureLayer(layer as CIMFeatureLayer, options);
   } else if (layer.type === "CIMRasterLayer") {
     style.rules = processRasterLayer(layer as CIMRasterLayer);
   }
@@ -70,17 +76,17 @@ const processLayer = (layer: CIMLayerDefinition, options: Options): Style => {
   return style;
 };
 
-const processFeatureLayer = (
+const processFeatureLayer = async (
   layer: CIMFeatureLayer,
   options: Options = {},
-): Rule[] => {
+): Promise<Rule[]> => {
   const toLowerCase = !!options.toLowerCase;
   const renderer = layer.renderer;
   if (!renderer) {
     WARNINGS.push(`No renderer on layer: ${layer.name}`);
     return [];
   }
-  const rules = processRenderer(renderer, options);
+  const rules = await processRenderer(renderer, options);
 
   if (layer.labelVisibility) {
     for (const labelClass of layer.labelClasses || []) {
@@ -97,27 +103,39 @@ const processFeatureLayer = (
   return rules;
 };
 
-const processRenderer = (renderer: CIMRenderer, options: Options): Rule[] => {
+const processRenderer = async (
+  renderer: CIMRenderer,
+  options: Options,
+): Promise<Rule[]> => {
   const rules: Rule[] = [];
   // CIMSimpleRenderer
   if (renderer.type === "CIMSimpleRenderer") {
-    rules.push(processSimpleRenderer(renderer as CIMSimpleRenderer, options));
+    rules.push(
+      await processSimpleRenderer(renderer as CIMSimpleRenderer, options),
+    );
     return rules;
   }
   // CIMUniqueValueRenderer
   if (renderer.type === "CIMUniqueValueRenderer") {
     const uvRenderer = renderer as CIMUniqueValueRenderer;
     if (uvRenderer.groups) {
-      uvRenderer.groups.forEach((group) => {
+      for await (const group of uvRenderer.groups) {
         rules.push(
-          ...processUniqueValueGroup(uvRenderer.fields!, group, options),
+          ...(await processUniqueValueGroup(
+            uvRenderer.fields!,
+            group,
+            options,
+          )),
         );
-      });
+      }
     } else if (uvRenderer.defaultSymbol) {
       // This is really a simple renderer
       const rule: Rule = {
         name: "",
-        symbolizers: processSymbolReference(uvRenderer.defaultSymbol, options),
+        symbolizers: await processSymbolReference(
+          uvRenderer.defaultSymbol,
+          options,
+        ),
       };
       rules.push(rule);
     }
@@ -131,7 +149,9 @@ const processRenderer = (renderer: CIMRenderer, options: Options): Rule[] => {
         breaksRenderer.classBreakType,
       )
     ) {
-      rules.push(...processClassBreaksRenderer(breaksRenderer, options));
+      rules.push(
+        ...(await processClassBreaksRenderer(breaksRenderer, options)),
+      );
       return rules;
     }
   }
@@ -162,10 +182,10 @@ const assignRotation = (
     });
 };
 
-const processClassBreaksRenderer = (
+const processClassBreaksRenderer = async (
   renderer: CIMBreaksRenderer,
   options: Options = {},
-): Rule[] => {
+): Promise<Rule[]> => {
   const rules: Rule[] = [];
   const symbolsAscending: Symbolizer[][] = [];
   const field = renderer.field;
@@ -174,8 +194,8 @@ const processClassBreaksRenderer = (
   const rotation = getSymbolRotationFromVisualVariables(renderer, toLowerCase);
 
   const rendererBreaks = renderer.breaks || [];
-  rendererBreaks.forEach((rBreak) => {
-    const symbolizers = processSymbolReference(rBreak.symbol, options);
+  for await (const rBreak of rendererBreaks) {
+    const symbolizers = await processSymbolReference(rBreak.symbol, options);
     const upperbound = rBreak.upperBound || 0;
 
     let filter: Filter;
@@ -202,7 +222,7 @@ const processClassBreaksRenderer = (
 
     symbolsAscending.push(symbolizers);
     rules.push(ruleDef);
-  });
+  }
 
   if (!renderer.showInAscendingOrder) {
     rules.reverse();
@@ -224,7 +244,7 @@ const processLabelClass = (
   }
 
   const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
-  const expression: string | GeoStylerFunction  = convertExpression(
+  const expression: string | GeoStylerFunction = convertExpression(
     labelClass?.expression ?? "",
     labelClass.expressionEngine ?? LabelExpressionEngine.Arcade,
     toLowerCase,
@@ -267,8 +287,10 @@ const processLabelClass = (
     maplexPlacementType === LabelFeatureType.Line
   ) {
     symbolizer.placement = "line";
-    const primaryOffset = maplexPrimaryOffset ?? ptToPxProp(textSymbol, "primaryOffset", 0);
-    symbolizer.perpendicularOffset = primaryOffset !== 0 ? primaryOffset + fontSize / 2 : 0;
+    const primaryOffset =
+      maplexPrimaryOffset ?? ptToPxProp(textSymbol, "primaryOffset", 0);
+    symbolizer.perpendicularOffset =
+      primaryOffset !== 0 ? primaryOffset + fontSize / 2 : 0;
   } else if (
     maplexPlacementType === LabelFeatureType.Point &&
     maplexPointPlacementMethod === "AroundPoint"
@@ -329,25 +351,25 @@ const processLabelClass = (
   return rule;
 };
 
-const processSimpleRenderer = (
+const processSimpleRenderer = async (
   renderer: CIMSimpleRenderer,
   options: Options,
-): Rule => {
+): Promise<Rule> => {
   return {
     name: renderer.label || "",
-    symbolizers: processSymbolReference(renderer.symbol, options),
+    symbolizers: await processSymbolReference(renderer.symbol, options),
   };
 };
 
-const processUniqueValueGroup = (
+const processUniqueValueGroup = async (
   fields: string[],
   group: Group,
   options: Options,
-): Rule[] => {
+): Promise<Rule[]> => {
   const toLowerCase = options.toLowerCase || false;
   const rules: Rule[] = [];
   group.classes = group.classes || [];
-  group.classes.forEach((oneClass) => {
+  for await (const oneClass of group.classes) {
     const name = oneClass.label || "label";
     const values = oneClass.values;
     const conditions: Filter[] = [];
@@ -375,7 +397,7 @@ const processUniqueValueGroup = (
       const rule: Rule = {
         name,
         filter: ruleFilter,
-        symbolizers: processSymbolReference(oneClass.symbol, options),
+        symbolizers: await processSymbolReference(oneClass.symbol, options),
       };
       const scaleDenominator = processScaleDenominator(
         oneClass.symbol.minScale,
@@ -387,10 +409,10 @@ const processUniqueValueGroup = (
       rules.push(rule);
     }
     const alternateSymbols = oneClass.alternateSymbols || [];
-    alternateSymbols.forEach((symbolRef) => {
+    for await (const symbolRef of alternateSymbols) {
       const altRule: Rule = {
         name,
-        symbolizers: processSymbolReference(symbolRef, options),
+        symbolizers: await processSymbolReference(symbolRef, options),
       };
       if (ruleFilter) {
         altRule.filter = ruleFilter;
@@ -403,8 +425,8 @@ const processUniqueValueGroup = (
         altRule.scaleDenominator = scaleDenominator;
       }
       rules.push(altRule);
-    });
-  });
+    }
+  }
 
   return rules;
 };
