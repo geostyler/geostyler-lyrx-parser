@@ -329,14 +329,16 @@ const processOrientedMarkerAtEndOfLine = (
 const processMarkerPlacementInsidePolygon = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
-  respectFrame: boolean = true
+  respectFrame: boolean = true,
 ): [
   Expression<number>,
   Expression<number>,
   Expression<number>,
   Expression<number>,
 ] => {
-  const isSpecialFont = ESRI_SPECIAL_FONT.some(font => symbolizer?.wellKnownName?.startsWith(font));
+  const isSpecialFont = ESRI_SPECIAL_FONT.some((font) =>
+    symbolizer?.wellKnownName?.startsWith(font),
+  );
   // In case of markers in a polygon fill, it seems ArcGIS does some undocumented resizing of the marker.
   // We use an empirical factor to account for this, which works in most cases. For special Fonts we need to
   // use another empirical factor when respectFrame is set to false.

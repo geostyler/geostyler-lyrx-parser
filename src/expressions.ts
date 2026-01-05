@@ -63,19 +63,23 @@ export const convertExpression = (
   }
 
   // Handle if-then-else expressions.
-  const regex = /\[\s*if\s*\(([^)]+)\)\s*{([^}]*)}\s*\]/si;
+  const regex = /\[\s*if\s*\(([^)]+)\)\s*{([^}]*)}\s*\]/is;
   const match = expression.match(regex);
   if (match) {
     const condition = match[1];
     const thenPart = match[2];
-    const elsePart = match.length === 4 ? convertArcadeExpression(match[3]) : "";
+    const elsePart =
+      match.length === 4 ? convertArcadeExpression(match[3]) : "";
 
-    const booleanFunction = processGeostylerBooleanFunction(condition, toLowerCase);
+    const booleanFunction = processGeostylerBooleanFunction(
+      condition,
+      toLowerCase,
+    );
     if (booleanFunction) {
       const processedThen = convertExpression(thenPart, engine, toLowerCase);
       return {
         name: "if_then_else",
-        args: [booleanFunction, processedThen, elsePart]
+        args: [booleanFunction, processedThen, elsePart],
       } as unknown as GeoStylerStringFunction;
     }
     return processPropertyName(expression);
@@ -183,20 +187,22 @@ export const processRoundExpression = (
   language: string,
 ): GeoStylerStringFunction | string => {
   // Match expressions like "Round($feature.CONTOUR, 0)" and processes the field and decimal places
-  const match = expression.match(/(?:{{\s*)?round\(\s*(\w+)\s*,\s*(\d+)\s*\)\s*(?:}})?/);
+  const match = expression.match(
+    /(?:{{\s*)?round\(\s*(\w+)\s*,\s*(\d+)\s*\)\s*(?:}})?/,
+  );
   if (match) {
     const field = match[1];
     const decimalPlaces = Number(match[2]);
     const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
     let decimalFormat: string;
     if (decimalPlaces === 0) {
-      decimalFormat = '#';
+      decimalFormat = "#";
     } else {
-      decimalFormat = '#.' + '#'.repeat(decimalPlaces);
+      decimalFormat = "#." + "#".repeat(decimalPlaces);
     }
     return {
       args: [decimalFormat, fProperty, language],
-      name: "numberFormat"
+      name: "numberFormat",
     };
   }
   return expression;
@@ -204,40 +210,40 @@ export const processRoundExpression = (
 
 export const processGeostylerBooleanFunction = (
   expression: string,
-  toLowerCase: boolean
+  toLowerCase: boolean,
 ): GeoStylerFunction | null => {
   const whereClause = convertWhereClause(expression, toLowerCase);
   if (Array.isArray(whereClause) && whereClause.length === 3) {
     const fProperty: Fproperty = fieldToFProperty(
       String(whereClause[1]),
-      toLowerCase
+      toLowerCase,
     );
     const value = Number(whereClause[2]);
     if (whereClause[0] === ">") {
       return {
         name: "greaterThan",
-        args: [fProperty, value]
+        args: [fProperty, value],
       };
-    } 
+    }
 
     if (whereClause[0] === "==") {
       return {
         name: "equalTo",
-        args: [fProperty, value]
+        args: [fProperty, value],
       };
     }
-    
+
     if (whereClause[0] === "<") {
       return {
         name: "lessThan",
-        args: [fProperty, value]
+        args: [fProperty, value],
       };
     }
-    
+
     if (whereClause[0] === "!=") {
       return {
         name: "notEqualTo",
-        args: [fProperty, value]
+        args: [fProperty, value],
       };
     }
   }

@@ -244,7 +244,7 @@ const processLabelClass = (
   }
 
   const textSymbol = labelClass.textSymbol?.symbol as CIMTextSymbol;
-  const expression: string | GeoStylerFunction  = convertExpression(
+  const expression: string | GeoStylerFunction = convertExpression(
     labelClass?.expression ?? "",
     labelClass.expressionEngine ?? LabelExpressionEngine.Arcade,
     toLowerCase,
