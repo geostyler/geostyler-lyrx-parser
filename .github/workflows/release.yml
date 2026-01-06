@@ -6,20 +6,20 @@ on:
     branches:
       - next
 
-permissions:
-  id-token: write  # Required for npm OIDC
-  contents: write  # To publish release on GitHub.
-
 jobs:
   release:
-    name: Release
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources 🔰
         uses: actions/checkout@v4
 
       - name: Setup Node.js 20 👷🏻
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -29,10 +29,9 @@ jobs:
       - name: Build artifacts 🏗️
         run: npm run build
 
-      - name: Release 🚀
-        uses: cycjimmy/semantic-release-action@v6.0.0
-        id: semantic
+      - id: semantic-release-step
+        name: Release with Semantic Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
 
