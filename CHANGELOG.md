@@ -1,3 +1,50 @@
+## [1.3.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.2.0...v1.3.0) (2026-01-06)
+
+### Features
+
+* **#125:** add missing comma ([b0fc25c](https://github.com/geostyler/geostyler-lyrx-parser/commit/b0fc25c2e04e32276bbeb31694364137472dafe6)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** add missing space ([b164913](https://github.com/geostyler/geostyler-lyrx-parser/commit/b164913714e857ca7bb2e30b56d86efdf0828c42)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** add symbolizer.placement line ([27813d2](https://github.com/geostyler/geostyler-lyrx-parser/commit/27813d28d18875d78075d45bfa5d8aa5c6d10238)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** change requests ([472821d](https://github.com/geostyler/geostyler-lyrx-parser/commit/472821d2e4725dff18d980ddc5bc099bb4bf9aa4)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** make use of property perpendicularOffset ([19168af](https://github.com/geostyler/geostyler-lyrx-parser/commit/19168afafcf4f2cf40c7ad73c3522a027497af43)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** remove FIXME, offset value ([0b615f8](https://github.com/geostyler/geostyler-lyrx-parser/commit/0b615f821b08210555a443e0752279b921714444)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#125:** update package ([1c3f9ab](https://github.com/geostyler/geostyler-lyrx-parser/commit/1c3f9abf93ff825b5a3b4c6b3941ab9c30bc4714)), closes [#125](https://github.com/geostyler/geostyler-lyrx-parser/issues/125)
+* **#145:** add options to the parser constructor ([26f38c7](https://github.com/geostyler/geostyler-lyrx-parser/commit/26f38c7722121851c6691675e787417668526285)), closes [#145](https://github.com/geostyler/geostyler-lyrx-parser/issues/145)
+* **#150:** boolean and rounding functions ([01abc0e](https://github.com/geostyler/geostyler-lyrx-parser/commit/01abc0e7a6f3196c02ce461c93f533887a72d11f)), closes [#150](https://github.com/geostyler/geostyler-lyrx-parser/issues/150)
+* **#150:** change decimal format pattern ([8577898](https://github.com/geostyler/geostyler-lyrx-parser/commit/85778987e7fd6afddc29616bd65203d3185e213d)), closes [#150](https://github.com/geostyler/geostyler-lyrx-parser/issues/150)
+* **#150:** change requests ([c069651](https://github.com/geostyler/geostyler-lyrx-parser/commit/c06965164f00d47f7fdb0789149b265f77e89c46)), closes [#150](https://github.com/geostyler/geostyler-lyrx-parser/issues/150)
+* **#26:** be able to resize base64 images to the wanted end size ([4a301b2](https://github.com/geostyler/geostyler-lyrx-parser/commit/4a301b2c3978cd790db630c95cbc33b2fa138a0d)), closes [#26](https://github.com/geostyler/geostyler-lyrx-parser/issues/26)
+* **#26:** use jimp over sharp to support bmp images ([e0a9875](https://github.com/geostyler/geostyler-lyrx-parser/commit/e0a98754f679493775de3bb73f6974ca823f0c53)), closes [#26](https://github.com/geostyler/geostyler-lyrx-parser/issues/26)
+* **#26:** write layer url as icon image ([53348c5](https://github.com/geostyler/geostyler-lyrx-parser/commit/53348c5ed446dd59c9d9419b0d6e4c801664365e)), closes [#26](https://github.com/geostyler/geostyler-lyrx-parser/issues/26)
+
+### Bug Fixes
+
+* **#137:** change to fillOpacity ([7767bb4](https://github.com/geostyler/geostyler-lyrx-parser/commit/7767bb428f76ceba111b69572ebd2f4b6d634043)), closes [#137](https://github.com/geostyler/geostyler-lyrx-parser/issues/137)
+* **#139:** case MarkerPosition, added test ([6e20625](https://github.com/geostyler/geostyler-lyrx-parser/commit/6e2062507401eb53cc2fa01cb43f9bc529a35852)), closes [#139](https://github.com/geostyler/geostyler-lyrx-parser/issues/139)
+* **#139:** rename symbolizer ([4fc4ff8](https://github.com/geostyler/geostyler-lyrx-parser/commit/4fc4ff8da3872619ae83e1ed16058db88397c733)), closes [#139](https://github.com/geostyler/geostyler-lyrx-parser/issues/139)
+* **#139:** simplify function position ([de71bad](https://github.com/geostyler/geostyler-lyrx-parser/commit/de71bad82020fb3a30f9c4e546227d50f51c63d0)), closes [#139](https://github.com/geostyler/geostyler-lyrx-parser/issues/139)
+* **#142:** add respectFrame, specialFonts, refactor processMarkerPlacementInsidePolygon, test ([c6e40c6](https://github.com/geostyler/geostyler-lyrx-parser/commit/c6e40c6d7ee46bf7258f04468bac5b5940db854a)), closes [#142](https://github.com/geostyler/geostyler-lyrx-parser/issues/142)
+* **#142:** change request ([9824a15](https://github.com/geostyler/geostyler-lyrx-parser/commit/9824a15aacf08d53ceebb653cd9e0d4979661eca)), closes [#142](https://github.com/geostyler/geostyler-lyrx-parser/issues/142)
+* **#142:** change requests ([ca59001](https://github.com/geostyler/geostyler-lyrx-parser/commit/ca590019908873419e4b4478a38ffef84ff4b179)), closes [#142](https://github.com/geostyler/geostyler-lyrx-parser/issues/142)
+* **#148:** add missing brackets ([b562c62](https://github.com/geostyler/geostyler-lyrx-parser/commit/b562c629c85761aa152d6919e6b9b2b6345bce95)), closes [#148](https://github.com/geostyler/geostyler-lyrx-parser/issues/148)
+* **#148:** correct labeling tests ([7256f7e](https://github.com/geostyler/geostyler-lyrx-parser/commit/7256f7e7b9d47338f9987cdccc111ad544689a95)), closes [#148](https://github.com/geostyler/geostyler-lyrx-parser/issues/148)
+* **132:** added missing haloWidth to test ([7348a5a](https://github.com/geostyler/geostyler-lyrx-parser/commit/7348a5ae884a8adadb87bba1342b331d4e1678ed))
+* **132:** change halo size transfer ([0f2bea6](https://github.com/geostyler/geostyler-lyrx-parser/commit/0f2bea6a7d2ef10e8398b9f1cad720b9edcaff87))
+* **134:** invert DisplacementY for label ([316c282](https://github.com/geostyler/geostyler-lyrx-parser/commit/316c2826f4c6c774dc76ec75f66b542dd91a8dc4))
+* **134:** remove logging ([fabdeb6](https://github.com/geostyler/geostyler-lyrx-parser/commit/fabdeb6e0adfb2edd0e3fcc79a0dfe2764564e47))
+* add semantic-release deps to create releases ([a92abf8](https://github.com/geostyler/geostyler-lyrx-parser/commit/a92abf8a64b3b9e736e5624114a3381a99fb124f))
+* add semantic-release to create releases ([4452b85](https://github.com/geostyler/geostyler-lyrx-parser/commit/4452b85d9cd689d9da88af9a3f0d037448b3c310))
+* apply suggestions from code review ([869aeca](https://github.com/geostyler/geostyler-lyrx-parser/commit/869aeca74f21ae487f6a93d9105c98718d947fcd))
+* ci permission ([79c3873](https://github.com/geostyler/geostyler-lyrx-parser/commit/79c3873de37e6a9c9c52b92a722330d7cc6ee340))
+* ci use semantic-release directly ([b23cbf7](https://github.com/geostyler/geostyler-lyrx-parser/commit/b23cbf75bd0b8d66fc110242e02d52f32e577f5b))
+* clean ci release and dependencies ([0346662](https://github.com/geostyler/geostyler-lyrx-parser/commit/03466622236a6fd00aac314897d501d256e3f7c8))
+* run lint ([db74d6a](https://github.com/geostyler/geostyler-lyrx-parser/commit/db74d6aa169d53364c54ef7f9172f29e6119a431))
+* test cycjimmy semantic-release-action v6 ([33a908f](https://github.com/geostyler/geostyler-lyrx-parser/commit/33a908f4b6afcb570bfe172a4913b027e572b505))
+* try fix ci by re-adding github-actions bot ([3af5ed8](https://github.com/geostyler/geostyler-lyrx-parser/commit/3af5ed8cb0a82c7b0583a93b948854981f7a11e1))
+* try further with semantic-release-action v6 and oidc ([3aff81b](https://github.com/geostyler/geostyler-lyrx-parser/commit/3aff81b9fea01a2dace2198876de462089802075))
+* update ci release action ([82f3f68](https://github.com/geostyler/geostyler-lyrx-parser/commit/82f3f686bca2f9ae7c6a351dffe854f400aad3ef))
+* update to node 24 ([145261d](https://github.com/geostyler/geostyler-lyrx-parser/commit/145261d265b8ade7bf6187a5045399f1e43f160c))
+
 ## [1.2.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.1.3...v1.2.0) (2025-06-13)
 
 ### Features
