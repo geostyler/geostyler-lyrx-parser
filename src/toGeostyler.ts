@@ -444,6 +444,9 @@ const getSymbolRotationFromVisualVariables = (
       visualVariable.visualVariableInfoZ?.valueExpressionInfo?.expression ||
       visualVariable.visualVariableInfoZ?.expression;
     const rotationType = visualVariable.rotationTypeZ;
+    if (!expression) {
+      return null;
+    }
     return processRotationExpression(expression, rotationType, toLowerCase);
   });
   return null;
