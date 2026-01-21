@@ -1,6 +1,8 @@
 import { WellKnownName } from "geostyler-style";
 import { Geometry } from "./esri/types";
 
+type CurveSegment = { a?: number[][]; b?: number[][]; c?: number[][] };
+
 export const toWKT = (
   geometry: Geometry,
 ): { wellKnownName: WellKnownName; maxX?: number; maxY?: number } => {
@@ -38,14 +40,11 @@ export const toWKT = (
     const firstCurve = curveRing[1];
     if (firstCurve && curveRing.length === 2) {
       const curve = firstCurve?.a || firstCurve?.b || firstCurve?.c;
-      if (curve) {
+      if (curve && Array.isArray(startPoint)) {
         const endPoint = curve[0];
         const centerPoint = curve[1];
         if (JSON.stringify(endPoint) === JSON.stringify(startPoint)) {
-          const radius = distanceBetweenPoints(
-            startPoint as number[],
-            centerPoint,
-          );
+          const radius = distanceBetweenPoints(startPoint, centerPoint);
           return {
             wellKnownName: "circle" as WellKnownName,
             maxX: radius,
@@ -84,7 +83,9 @@ const distanceBetweenPoints = (a: number[], b: number[]): number => {
   return Math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2);
 };
 
-const curveRingToCoordinates = (curveRing: any[]): number[][] => {
+const curveRingToCoordinates = (
+  curveRing: (number[] | CurveSegment)[],
+): number[][] => {
   const coords: number[][] = [];
   const segments = 16; // Number of segments to approximate curves
 
@@ -93,10 +94,14 @@ const curveRingToCoordinates = (curveRing: any[]): number[][] => {
 
     // If it's a point coordinate
     if (Array.isArray(segment) && typeof segment[0] === "number") {
-      coords.push(segment as number[]);
+      coords.push(segment);
     }
     // If it's a curve object
-    else if (typeof segment === "object" && segment !== null) {
+    else if (
+      !Array.isArray(segment) &&
+      typeof segment === "object" &&
+      segment !== null
+    ) {
       const prevPoint = coords[coords.length - 1] || [0, 0];
 
       // Arc curve (property 'a')
@@ -176,8 +181,8 @@ const approximateArc = (
   if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 
   for (let i = 1; i <= segments; i++) {
-    const t = i / segments;
-    const angle = startAngle + angleDiff * t;
+    const progress = i / segments;
+    const angle = startAngle + angleDiff * progress;
     const x = centerPoint[0] + radius * Math.cos(angle);
     const y = centerPoint[1] + radius * Math.sin(angle);
     coords.push([x, y]);
@@ -196,17 +201,23 @@ const approximateCubicBezier = (
   const coords: number[][] = [];
 
   for (let i = 1; i <= segments; i++) {
-    const t = i / segments;
-    const t2 = t * t;
-    const t3 = t2 * t;
-    const mt = 1 - t;
-    const mt2 = mt * mt;
-    const mt3 = mt2 * mt;
+    const param = i / segments;
+    const paramSquared = param * param;
+    const paramCubed = paramSquared * param;
+    const oneMinusParam = 1 - param;
+    const oneMinusParamSquared = oneMinusParam * oneMinusParam;
+    const oneMinusParamCubed = oneMinusParamSquared * oneMinusParam;
 
     const x =
-      mt3 * p0[0] + 3 * mt2 * t * p1[0] + 3 * mt * t2 * p2[0] + t3 * p3[0];
+      oneMinusParamCubed * p0[0] +
+      3 * oneMinusParamSquared * param * p1[0] +
+      3 * oneMinusParam * paramSquared * p2[0] +
+      paramCubed * p3[0];
     const y =
-      mt3 * p0[1] + 3 * mt2 * t * p1[1] + 3 * mt * t2 * p2[1] + t3 * p3[1];
+      oneMinusParamCubed * p0[1] +
+      3 * oneMinusParamSquared * param * p1[1] +
+      3 * oneMinusParam * paramSquared * p2[1] +
+      paramCubed * p3[1];
 
     coords.push([x, y]);
   }

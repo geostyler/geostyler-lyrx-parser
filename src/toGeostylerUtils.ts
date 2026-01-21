@@ -81,9 +81,9 @@ export const extractFillColor = (symbolLayers: SymbolLayer[]): string => {
       }
     } else if (sl.type === "CIMVectorMarker") {
       // Extract color from markerGraphics if available
-      if (sl.markerGraphics && sl.markerGraphics.length > 0) {
+      if (sl.markerGraphics?.length > 0) {
         const markerGraphic = sl.markerGraphics[0];
-        if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
+        if (markerGraphic.symbol?.symbolLayers) {
           const subLayers = markerGraphic.symbol.symbolLayers.filter(
             (sublayer: SymbolLayer) => sublayer.enable,
           );
