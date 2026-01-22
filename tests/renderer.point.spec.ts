@@ -249,3 +249,20 @@ describe("Parse point with CIMPictureMarker", () => {
     expect(geostylerStyle.warnings).toEqual([]);
   });
 });
+
+describe("Parse point with Bezier curve marker", () => {
+  const lyrxFile = "./tests/testdata/point/point_curveRings_marker.lyrx";
+
+  it("should parse bezier curve marker to wellKnownName wkt://polygon", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    // Test if it is a MarkSymbolizer.
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(5);
+    const symbolizer = rules?.[0].symbolizers?.[0] as MarkSymbolizer;
+    expect(symbolizer.kind).toEqual("Mark");
+    expect(symbolizer.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
+    expect(symbolizer.color).toBe("#c93100");
+    expect(symbolizer.radius).toBeCloseTo(6.1666, 3);
+    expect(geostylerStyle.warnings).toEqual([]);
+  });
+});

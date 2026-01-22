@@ -6,7 +6,7 @@ type CIMScaleDependentSizeVariation = {};
 export type Geometry = {
   rings?: number[][][];
   paths?: number[][][];
-  curveRings?: { a?: number[][]; c?: number[][] }[][];
+  curveRings?: { a?: number[][]; b?: number[][]; c?: number[][] }[][];
 };
 
 /**
