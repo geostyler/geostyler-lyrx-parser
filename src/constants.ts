@@ -7,6 +7,8 @@ export const ESRI_SPECIAL_FONT: string[] = [
 ];
 export const ESRI_SPECIAL_FONT_RESIZE_FACTOR: number = 1.8;
 
+export const PT_TO_PX_FACTOR: number = 4 / 3;
+
 export enum MarkerPlacementPosition {
   START = "startPoint",
   END = "endPoint",
@@ -18,6 +20,5 @@ export enum MarkerPlacementAngle {
 }
 
 export const ptToPx = (pt: number): number => {
-  const PT_TO_PX_FACTOR: number = 4 / 3;
   return pt * PT_TO_PX_FACTOR;
 };

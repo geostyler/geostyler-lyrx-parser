@@ -6,6 +6,7 @@ import { CIMSymbolReference } from "./esri/types/labeling/CIMSymbolReference.ts"
 export const processSymbolReference = async (
   symbolref: CIMSymbolReference,
   options: Options,
+  outerSize?: number,
 ): Promise<Symbolizer[]> => {
   const symbol = symbolref.symbol;
   const symbolizers: Symbolizer[] = [];
@@ -24,6 +25,7 @@ export const processSymbolReference = async (
       layer,
       symbol,
       options,
+      outerSize,
     );
     if (processedSymbolLayers) symbolizers.push(...processedSymbolLayers);
   }

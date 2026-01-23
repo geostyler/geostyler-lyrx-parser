@@ -73,10 +73,22 @@ export const toWKT = (
 };
 
 const heightNormalized = (coords: number[][]): number[][] => {
-  const height =
-    Math.max(...coords.map((coord) => coord[1])) -
-    Math.min(...coords.map((coord) => coord[1]));
-  return coords.map((coord) => [coord[0] / height, coord[1] / height]);
+  const minX = Math.min(...coords.map((coord) => coord[0]));
+  const maxX = Math.max(...coords.map((coord) => coord[0]));
+  const minY = Math.min(...coords.map((coord) => coord[1]));
+  const maxY = Math.max(...coords.map((coord) => coord[1]));
+  
+  const height = maxY - minY;
+  
+  // Calculate the center of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
+  // Normalize by height and center around (0, 0)
+  return coords.map((coord) => [
+    (coord[0] - centerX) / height,
+    (coord[1] - centerY) / height
+  ]);
 };
 
 const distanceBetweenPoints = (a: number[], b: number[]): number => {

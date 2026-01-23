@@ -7,6 +7,7 @@ import {
   POLYGON_FILL_RESIZE_FACTOR,
   ESRI_SPECIAL_FONT_RESIZE_FACTOR,
   ptToPx,
+  PT_TO_PX_FACTOR,
 } from "./constants.ts";
 import {
   angleIn360Degrees,
@@ -45,6 +46,7 @@ export const processSymbolLayer = async (
   layer: SymbolLayer,
   symbol: CIMSymbol,
   options: Options,
+  outerSize?: number,
 ): Promise<Symbolizer[] | undefined> => {
   let layerType: string = layer.type;
 
@@ -56,7 +58,7 @@ export const processSymbolLayer = async (
     case "CIMCharacterMarker":
       return processSymbolCharacterMarker(layer, symbol, options);
     case "CIMVectorMarker":
-      return processSymbolVectorMarker(layer, symbol, options);
+      return processSymbolVectorMarker(layer, symbol, options, outerSize);
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
@@ -530,10 +532,12 @@ const processSymbolVectorMarker = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
+  outerSize?: number,
 ): Promise<Symbolizer[]> => {
   if (layer.size) {
     layer.size = ptToPxProp(layer, "size", 3);
   }
+
   // Default values
   let fillColor = "#ff0000";
   let strokeColor = "#000000";
@@ -551,7 +555,9 @@ const processSymbolVectorMarker = async (
     // TODO: support multiple marker graphics
     const markerGraphic = markerGraphics[0];
     if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
-      const symbolReferences = await processSymbolReference(markerGraphic, {});
+      // Pass this layer's size as outerSize for nested processing
+      const sizeToPassDown = outerSize !== undefined ? outerSize : (layer.size !== undefined ? layer.size : 10);
+      const symbolReferences = await processSymbolReference(markerGraphic, {}, sizeToPassDown);
       symbol = symbolReferences[0] as MarkSymbolizer;
       const subLayers = markerGraphic.symbol.symbolLayers.filter(
         (sublayer: SymbolLayer) => sublayer.enable,
@@ -559,10 +565,15 @@ const processSymbolVectorMarker = async (
       fillColor = extractFillColor(subLayers);
       [strokeColor, strokeWidth, strokeOpacity] = extractStroke(subLayers);
       const layerSize = layer.size !== undefined ? layer.size : 10;
-      markerSize =
-        typeof symbol.radius === "number" ? symbol.radius : layerSize;
       if (markerGraphic.symbol.type === "CIMPointSymbol") {
         wellKnownName = symbol.wellKnownName ?? wellKnownName;
+        // For nested CIMPointSymbol: use the radius calculated by nested processing if available
+        // The nested VectorMarker has already applied frame scaling
+        if (symbol.radius !== undefined && typeof symbol.radius === 'number' && wellKnownName?.startsWith("wkt://")) {
+          markerSize = symbol.radius * 2;
+        } else {
+          markerSize = layerSize;
+        }
       } else if (
         ["CIMLineSymbol", "CIMPolygonSymbol"].includes(
           markerGraphic.symbol.type,
@@ -574,6 +585,28 @@ const processSymbolVectorMarker = async (
           wellKnownName = shape.wellKnownName;
           maxX = ptToPxProp(shape, "maxX", 0);
           maxY = ptToPxProp(shape, "maxY", 0);
+          
+          // Apply frame scaling for:
+          // 1. Geometries with curveRings, OR
+          // 2. Regular rings when in nested context (outerSize provided, indicating outer/inner frame structure)
+          const frame = (layer as any).frame;
+          const sizeForScaling = outerSize !== undefined ? outerSize : layerSize;
+          const hasCurveRings = geometry.curveRings !== undefined;
+          const hasNestedFrames = outerSize !== undefined; // Indicates we're using inner frame with outer context
+          
+          if (frame && wellKnownName?.startsWith("wkt://") && (hasCurveRings || hasNestedFrames)) {
+            const frameWidth = Math.abs(frame.xmax - frame.xmin);
+            const frameHeight = Math.abs(frame.ymax - frame.ymin);
+            const frameMax = Math.max(frameWidth, frameHeight);
+            
+            const originalSize = sizeForScaling / PT_TO_PX_FACTOR;
+            const scaleFactor = originalSize / frameMax;
+            markerSize = sizeForScaling * scaleFactor;
+          } else {
+            markerSize = sizeForScaling;
+          }
+        } else {
+          markerSize = layerSize;
         }
       }
     }
