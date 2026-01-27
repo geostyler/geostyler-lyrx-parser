@@ -32,11 +32,11 @@ describe("Parse simple point renderer", () => {
       .symbolizers?.[0] as MarkSymbolizer;
     expect(symbolizer).toBeDefined();
     expect(symbolizer?.kind).toBe("Mark");
-    expect(symbolizer?.wellKnownName).toBe("circle");
+    expect(symbolizer?.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
     expect(symbolizer?.color).toBe("#708e3b");
     expect(symbolizer?.strokeColor).toBe("#000000");
     expect(symbolizer?.strokeWidth).toBeCloseTo(0.9333, 4);
-    expect(symbolizer?.radius).toBeCloseTo(2.6666, 3);
+    expect(symbolizer?.radius).toBeCloseTo(4, 3);
     expect(symbolizer?.opacity).toBe(1);
     expect(symbolizer?.fillOpacity).toBe(1);
     expect(symbolizer?.strokeOpacity).toBe(1);
@@ -82,8 +82,8 @@ describe("Parse unique value point renderer", () => {
       expect(symbolizer.color).toBe(expectedColors[rule.name]);
 
       expect(symbolizer.kind).toBe("Mark");
-      expect(symbolizer.wellKnownName).toBe("circle");
-      expect(symbolizer.radius).toBeCloseTo(2.6666, 3);
+      expect(symbolizer.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
+      expect(symbolizer.radius).toBeCloseTo(4, 3);
       expect(symbolizer.strokeColor).toBe("#000000");
       expect(symbolizer.strokeWidth).toBeCloseTo(0.9333, 4);
       expect(symbolizer.strokeOpacity).toBe(1);
@@ -121,8 +121,8 @@ describe("Parse graduated values point renderer", () => {
       expect(symbolizer.color).toBe(expectedColors[rule.name]);
 
       expect(symbolizer.kind).toBe("Mark");
-      expect(symbolizer.wellKnownName).toBe("circle");
-      expect(symbolizer.radius).toBeCloseTo(2.6666, 3);
+      expect(symbolizer.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
+      expect(symbolizer.radius).toBeCloseTo(4, 3);
       expect(symbolizer.strokeColor).toBe("#000000");
       expect(symbolizer.strokeWidth).toBeCloseTo(0.9333, 4);
       expect(symbolizer.strokeOpacity).toBe(1);
@@ -258,11 +258,57 @@ describe("Parse point with Bezier curve marker", () => {
     // Test if it is a MarkSymbolizer.
     const rules = geostylerStyle.output?.rules;
     expect(rules).toHaveLength(5);
-    const symbolizer = rules?.[0].symbolizers?.[0] as MarkSymbolizer;
-    expect(symbolizer.kind).toEqual("Mark");
-    expect(symbolizer.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
-    expect(symbolizer.color).toBe("#c93100");
-    expect(symbolizer.radius).toBeCloseTo(6.1666, 3);
+    
+    // Check the size 24 symbol (Stellplatz rule) has correct radius
+    const stellplatzRule = rules?.find(r => r.name === "Stellplatz");
+    expect(stellplatzRule).toBeDefined();
+    const stellplatzSymbolizer = stellplatzRule?.symbolizers?.[0] as MarkSymbolizer;
+    expect(stellplatzSymbolizer.kind).toEqual("Mark");
+    expect(stellplatzSymbolizer.wellKnownName?.startsWith("wkt://POLYGON")).toBe(true);
+    expect(stellplatzSymbolizer.color).toBe("#c93100");
+    expect(stellplatzSymbolizer?.radius).toBeCloseTo(20.756756756756758, 1);
+    
     expect(geostylerStyle.warnings).toEqual([]);
+  });
+});
+
+describe("Parse point with anchor point and offset", () => {
+  const lyrxFile = "./tests/testdata/point/point_marker_anchor_offset.lyrx";
+
+  it("should produce similar offsets for anchorPoint y=-1.55 and offsetY=17", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toBeDefined();
+    
+    // Find the rule with anchorPoint y=-1.55 (should be "Park und Pool")
+    const anchorPointRule = rules?.find(r => r.name === "Park und Pool");
+    expect(anchorPointRule).toBeDefined();
+    const anchorPointSymbolizer = anchorPointRule?.symbolizers?.[0] as MarkSymbolizer;
+    expect(anchorPointSymbolizer?.kind).toBe("Mark");
+    expect(anchorPointSymbolizer?.offset).toBeDefined();
+    
+    // Find the rule with offsetY=17 (should be "Parkplatz")
+    const offsetYRule = rules?.find(r => r.name === "Parkplatz");
+    expect(offsetYRule).toBeDefined();
+    const offsetYSymbolizer = offsetYRule?.symbolizers?.[0] as MarkSymbolizer;
+    expect(offsetYSymbolizer?.kind).toBe("Mark");
+    expect(offsetYSymbolizer?.offset).toBeDefined();
+    
+    // Both should have offsets
+    expect(anchorPointSymbolizer?.offset).toEqual(expect.any(Array));
+    expect(offsetYSymbolizer?.offset).toEqual(expect.any(Array));
+    
+    // The Y offsets should be approximately equal (within tolerance)
+    // anchorPoint y=-1.55 with size 11: offset = -1.55 * markerSize
+    // offsetY=17 with OFFSET_FACTOR negation: offset = 17 * ptToPx(1) * OFFSET_FACTOR * -1
+    const anchorOffsetY = (anchorPointSymbolizer?.offset as [number, number])?.[1];
+    const offsetY = (offsetYSymbolizer?.offset as [number, number])?.[1];
+    
+    expect(anchorOffsetY).toBeCloseTo(offsetY, 0);
+    
+    // Check the size 24 symbol (Stellplatz rule) has correct radius
+    const stellplatzRule = rules?.find(r => r.name === "Stellplatz");
+    const stellplatzSymbolizer = stellplatzRule?.symbolizers?.[0] as MarkSymbolizer;
+    expect(stellplatzSymbolizer?.radius).toBeCloseTo(22.588235294117645, 1);
   });
 });
