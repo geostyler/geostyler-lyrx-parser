@@ -3,11 +3,10 @@ import { toWKT } from "./wktGeometries.ts";
 import {
   ESRI_SYMBOLS_FONT,
   ESRI_SPECIAL_FONT,
-  OFFSET_FACTOR,
+  SCALE_FACTOR,
   POLYGON_FILL_RESIZE_FACTOR,
   ESRI_SPECIAL_FONT_RESIZE_FACTOR,
   ptToPx,
-  PT_TO_PX_FACTOR,
 } from "./constants.ts";
 import {
   angleIn360Degrees,
@@ -47,6 +46,7 @@ export const processSymbolLayer = async (
   symbol: CIMSymbol,
   options: Options,
   outerSize?: number,
+  outerFrameMax?: number,
 ): Promise<Symbolizer[] | undefined> => {
   let layerType: string = layer.type;
 
@@ -58,7 +58,13 @@ export const processSymbolLayer = async (
     case "CIMCharacterMarker":
       return processSymbolCharacterMarker(layer, symbol, options);
     case "CIMVectorMarker":
-      return processSymbolVectorMarker(layer, symbol, options, outerSize);
+      return processSymbolVectorMarker(
+        layer,
+        symbol,
+        options,
+        outerSize,
+        outerFrameMax,
+      );
     case "CIMHatchFill":
       return processSymbolHatchFill(layer);
     case "CIMPictureFill":
@@ -499,7 +505,7 @@ const processSymbolCharacterMarker = (
 
   const symbolCharacterMaker = {
     opacity: 1.0,
-    offset: extractOffset(layer),
+    offset: extractOffset(layer, size),
     fillOpacity: fillOpacity,
     strokeColor: strokeColor,
     strokeOpacity: strokeOpacity,
@@ -528,86 +534,123 @@ const processSymbolCharacterMarker = (
   return [symbolCharacterMaker];
 };
 
+const calculateFrameMax = (frame: any): number => {
+  const frameWidth = Math.abs(frame.xmax - frame.xmin);
+  const frameHeight = Math.abs(frame.ymax - frame.ymin);
+  return Math.max(frameWidth, frameHeight);
+};
+
 const processSymbolVectorMarker = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
   options: Options,
   outerSize?: number,
+  outerFrameMax?: number,
 ): Promise<Symbolizer[]> => {
-  if (layer.size) {
-    layer.size = ptToPxProp(layer, "size", 3);
-  }
+  const layerSizeInPoints = (layer as any).size || 10;
+  const frame = (layer as any).frame;
 
   // Default values
   let fillColor = "#ff0000";
   let strokeColor = "#000000";
   let strokeWidth = 1.0;
-  let markerSize = 10;
+  let markerSize = ptToPx(layerSizeInPoints);
   let strokeOpacity = 1;
   let wellKnownName: WellKnownName = "circle";
   let maxX: number | null = null;
   let maxY: number | null = null;
 
-  let symbol: MarkSymbolizer;
-  const markerGraphics =
-    layer.markerGraphics !== undefined ? layer.markerGraphics : [];
-  if (markerGraphics.length > 0) {
-    // TODO: support multiple marker graphics
-    const markerGraphic = markerGraphics[0];
-    if (markerGraphic.symbol && markerGraphic.symbol.symbolLayers) {
-      // Pass this layer's size as outerSize for nested processing
-      const sizeToPassDown = outerSize !== undefined ? outerSize : (layer.size !== undefined ? layer.size : 10);
-      const symbolReferences = await processSymbolReference(markerGraphic, {}, sizeToPassDown);
-      symbol = symbolReferences[0] as MarkSymbolizer;
-      const subLayers = markerGraphic.symbol.symbolLayers.filter(
-        (sublayer: SymbolLayer) => sublayer.enable,
-      );
-      fillColor = extractFillColor(subLayers);
-      [strokeColor, strokeWidth, strokeOpacity] = extractStroke(subLayers);
-      const layerSize = layer.size !== undefined ? layer.size : 10;
-      if (markerGraphic.symbol.type === "CIMPointSymbol") {
-        wellKnownName = symbol.wellKnownName ?? wellKnownName;
-        // For nested CIMPointSymbol: use the radius calculated by nested processing if available
-        // The nested VectorMarker has already applied frame scaling
-        if (symbol.radius !== undefined && typeof symbol.radius === 'number' && wellKnownName?.startsWith("wkt://")) {
-          markerSize = symbol.radius * 2;
-        } else {
-          markerSize = layerSize;
-        }
+  const markerGraphics = layer.markerGraphics || [];
+  if (markerGraphics.length === 0) {
+    const marker: MarkSymbolizer = {
+      opacity: 1,
+      rotate: 0,
+      kind: "Mark",
+      color: fillColor,
+      wellKnownName: wellKnownName,
+      radius: markerSize / 2,
+      strokeColor: strokeColor,
+      strokeWidth: strokeWidth,
+      strokeOpacity: strokeOpacity,
+      fillOpacity: 1,
+      offset: extractOffset(layer, markerSize),
+    };
+    return [marker];
+  }
+
+  // TODO: support multiple marker graphics
+  const markerGraphic = markerGraphics[0];
+
+  if (!markerGraphic.symbol || !markerGraphic.symbol.symbolLayers) {
+    const marker: MarkSymbolizer = {
+      opacity: 1,
+      rotate: 0,
+      kind: "Mark",
+      color: fillColor,
+      wellKnownName: wellKnownName,
+      radius: markerSize / 2,
+      strokeColor: strokeColor,
+      strokeWidth: strokeWidth,
+      strokeOpacity: strokeOpacity,
+      fillOpacity: 1,
+      offset: extractOffset(layer, markerSize),
+    };
+    return [marker];
+  }
+
+  // Process nested symbols
+  const outerFrameMaxValue = frame ? calculateFrameMax(frame) : undefined;
+  const symbolReferences = await processSymbolReference(
+    markerGraphic,
+    {},
+    ptToPx(layerSizeInPoints),
+    outerFrameMaxValue,
+  );
+  const symbol = symbolReferences[0] as MarkSymbolizer;
+
+  const subLayers = markerGraphic.symbol.symbolLayers.filter(
+    (sublayer: SymbolLayer) => sublayer.enable,
+  );
+  fillColor = extractFillColor(subLayers);
+  [strokeColor, strokeWidth, strokeOpacity] = extractStroke(subLayers);
+
+  if (markerGraphic.symbol.type === "CIMPointSymbol") {
+    wellKnownName = symbol.wellKnownName ?? wellKnownName;
+    // For nested CIMPointSymbol with WKT geometry, use the pre-calculated radius
+    if (
+      typeof symbol.radius === "number" &&
+      wellKnownName?.startsWith("wkt://")
+    ) {
+      markerSize = symbol.radius * 2;
+    }
+  } else if (
+    ["CIMLineSymbol", "CIMPolygonSymbol"].includes(markerGraphic.symbol.type)
+  ) {
+    const geometry = markerGraphic.geometry;
+    if (geometry) {
+      const shape = toWKT(geometry);
+      wellKnownName = shape.wellKnownName;
+      maxX = ptToPxProp(shape, "maxX", 0);
+      maxY = ptToPxProp(shape, "maxY", 0);
+
+      // Check if it's a simple circle (2 elements: start point + arc)
+      const isSimpleCircle = geometry.curveRings?.[0]?.length === 2;
+
+      if (isSimpleCircle) {
+        // For circles: use diameter-based sizing with scale factor
+        markerSize = ptToPx(layerSizeInPoints) * SCALE_FACTOR;
       } else if (
-        ["CIMLineSymbol", "CIMPolygonSymbol"].includes(
-          markerGraphic.symbol.type,
-        )
+        wellKnownName?.startsWith("wkt://") &&
+        (geometry.curveRings || outerSize)
       ) {
-        const geometry = markerGraphic.geometry;
-        if (geometry) {
-          const shape = toWKT(geometry);
-          wellKnownName = shape.wellKnownName;
-          maxX = ptToPxProp(shape, "maxX", 0);
-          maxY = ptToPxProp(shape, "maxY", 0);
-          
-          // Apply frame scaling for:
-          // 1. Geometries with curveRings, OR
-          // 2. Regular rings when in nested context (outerSize provided, indicating outer/inner frame structure)
-          const frame = (layer as any).frame;
-          const sizeForScaling = outerSize !== undefined ? outerSize : layerSize;
-          const hasCurveRings = geometry.curveRings !== undefined;
-          const hasNestedFrames = outerSize !== undefined; // Indicates we're using inner frame with outer context
-          
-          if (frame && wellKnownName?.startsWith("wkt://") && (hasCurveRings || hasNestedFrames)) {
-            const frameWidth = Math.abs(frame.xmax - frame.xmin);
-            const frameHeight = Math.abs(frame.ymax - frame.ymin);
-            const frameMax = Math.max(frameWidth, frameHeight);
-            
-            const originalSize = sizeForScaling / PT_TO_PX_FACTOR;
-            const scaleFactor = originalSize / frameMax;
-            markerSize = sizeForScaling * scaleFactor;
-          } else {
-            markerSize = sizeForScaling;
-          }
-        } else {
-          markerSize = layerSize;
-        }
+        // For other WKT geometries, apply frame scaling
+        const sizeForScaling = outerSize
+          ? outerSize / (4 / 3)
+          : layerSizeInPoints;
+        const frameMax =
+          outerFrameMax ?? (frame ? calculateFrameMax(frame) : sizeForScaling);
+        const scaleFactor = sizeForScaling / frameMax;
+        markerSize = ptToPx(sizeForScaling * scaleFactor);
       }
     }
   }
@@ -624,6 +667,7 @@ const processSymbolVectorMarker = async (
     strokeWidth: strokeWidth,
     strokeOpacity: strokeOpacity,
     fillOpacity: 1,
+    offset: extractOffset(layer, markerSize),
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
@@ -809,12 +853,46 @@ const hatchMarkerForAngle = (angle: number): WellKnownName => {
 
 const extractOffset = (
   symbolLayer: SymbolLayer,
+  markerSize?: number,
 ): undefined | [number, number] => {
-  // Arcgis looks to apply a strange factor.
-  let offsetX = ptToPxProp(symbolLayer, "offsetX", 0) * OFFSET_FACTOR;
-  let offsetY = ptToPxProp(symbolLayer, "offsetY", 0) * OFFSET_FACTOR * -1;
+  let offsetX = 0;
+  let offsetY = 0;
+  const layerAny = symbolLayer as any;
 
-  if (offsetX === 0 && offsetY !== 0) {
+  // Check if anchorPoint is defined and has non-zero values
+  if (
+    layerAny.anchorPoint &&
+    (layerAny.anchorPoint.x !== 0 || layerAny.anchorPoint.y !== 0)
+  ) {
+    const { x, y } = layerAny.anchorPoint;
+    const anchorPointUnits = layerAny.anchorPointUnits || "Relative";
+
+    if (anchorPointUnits === "Relative" && markerSize !== undefined) {
+      // Relative units: percentage-based, convert to pixels
+      // x and y are typically values like 0, -0.5, 0.5 representing center, top, bottom
+      offsetX = x * markerSize;
+      offsetY = y * markerSize;
+    } else {
+      // Absolute units or fallback
+      offsetX = ptToPx(x);
+      offsetY = ptToPx(y);
+    }
+  }
+
+  // Check offsetX/offsetY if anchorPoint didn't provide values
+  if (
+    offsetX === 0 &&
+    offsetY === 0 &&
+    (layerAny.offsetX !== undefined || layerAny.offsetY !== undefined)
+  ) {
+    // Fallback to offsetX/offsetY if anchorPoint is not defined or is zero
+    // Arcgis looks to apply a strange scaling factor.
+    offsetX = (layerAny.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
+    offsetY = (layerAny.offsetY || 0) * ptToPx(1) * SCALE_FACTOR * -1;
+  }
+
+  // Return undefined only if BOTH offsets are 0
+  if (offsetX === 0 && offsetY === 0) {
     return undefined;
   }
   return [offsetX, offsetY];
