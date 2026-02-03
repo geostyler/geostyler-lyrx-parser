@@ -34,6 +34,7 @@ import {
 } from "geostyler-style";
 import {
   CIMEffect,
+  getFrameMax,
   CIMMarkerPlacement,
   CIMSymbol,
   SymbolLayer,
@@ -534,12 +535,6 @@ const processSymbolCharacterMarker = (
   return [symbolCharacterMaker];
 };
 
-const calculateFrameMax = (frame: any): number => {
-  const frameWidth = Math.abs(frame.xmax - frame.xmin);
-  const frameHeight = Math.abs(frame.ymax - frame.ymin);
-  return Math.max(frameWidth, frameHeight);
-};
-
 const processSymbolVectorMarker = async (
   layer: SymbolLayer,
   cimSymbol: CIMSymbol,
@@ -547,8 +542,8 @@ const processSymbolVectorMarker = async (
   outerSize?: number,
   outerFrameMax?: number,
 ): Promise<Symbolizer[]> => {
-  const layerSizeInPoints = (layer as any).size || 10;
-  const frame = (layer as any).frame;
+  const layerSizeInPoints = layer.size ?? 10;
+  const frame = layer.frame;
 
   // Default values
   let fillColor = "#ff0000";
@@ -599,7 +594,7 @@ const processSymbolVectorMarker = async (
   }
 
   // Process nested symbols
-  const outerFrameMaxValue = frame ? calculateFrameMax(frame) : undefined;
+  const outerFrameMaxValue = frame ? getFrameMax(frame) : undefined;
   const symbolReferences = await processSymbolReference(
     markerGraphic,
     {},
@@ -648,7 +643,7 @@ const processSymbolVectorMarker = async (
           ? outerSize / (4 / 3)
           : layerSizeInPoints;
         const frameMax =
-          outerFrameMax ?? (frame ? calculateFrameMax(frame) : sizeForScaling);
+          outerFrameMax ?? (frame ? getFrameMax(frame) : sizeForScaling);
         const scaleFactor = sizeForScaling / frameMax;
         markerSize = ptToPx(sizeForScaling * scaleFactor);
       }
@@ -857,15 +852,14 @@ const extractOffset = (
 ): undefined | [number, number] => {
   let offsetX = 0;
   let offsetY = 0;
-  const layerAny = symbolLayer as any;
 
   // Check if anchorPoint is defined and has non-zero values
   if (
-    layerAny.anchorPoint &&
-    (layerAny.anchorPoint.x !== 0 || layerAny.anchorPoint.y !== 0)
+    symbolLayer.anchorPoint &&
+    (symbolLayer.anchorPoint.x !== 0 || symbolLayer.anchorPoint.y !== 0)
   ) {
-    const { x, y } = layerAny.anchorPoint;
-    const anchorPointUnits = layerAny.anchorPointUnits || "Relative";
+    const { x, y } = symbolLayer.anchorPoint;
+    const anchorPointUnits = symbolLayer.anchorPointUnits || "Relative";
 
     if (anchorPointUnits === "Relative" && markerSize !== undefined) {
       // Relative units: percentage-based, convert to pixels
@@ -883,12 +877,12 @@ const extractOffset = (
   if (
     offsetX === 0 &&
     offsetY === 0 &&
-    (layerAny.offsetX !== undefined || layerAny.offsetY !== undefined)
+    (symbolLayer.offsetX !== undefined || symbolLayer.offsetY !== undefined)
   ) {
     // Fallback to offsetX/offsetY if anchorPoint is not defined or is zero
     // Arcgis looks to apply a strange scaling factor.
-    offsetX = (layerAny.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
-    offsetY = (layerAny.offsetY || 0) * ptToPx(1) * SCALE_FACTOR * -1;
+    offsetX = (symbolLayer.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
+    offsetY = (symbolLayer.offsetY || 0) * ptToPx(1) * SCALE_FACTOR * -1;
   }
 
   // Return undefined only if BOTH offsets are 0
