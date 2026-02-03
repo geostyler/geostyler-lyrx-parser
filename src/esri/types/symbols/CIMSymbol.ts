@@ -1,6 +1,7 @@
 import { CIMObject } from "../CIMObject.ts";
 import { CIMColor } from "./CIMTextSymbol.ts";
 import { CIMSymbolReference } from "../labeling";
+import { Frame } from "./Frame.ts";
 
 export type CIMColorType = CIMColor & CIMObject;
 
@@ -34,7 +35,15 @@ export type SymbolLayer = CIMObject & {
   size: number;
   symbol: CIMSymbol;
   respectFrame: boolean;
+  frame?: Frame;
   url?: string;
+  anchorPoint?: {
+    x: number;
+    y: number;
+  };
+  anchorPointUnits?: string;
+  offsetX?: number;
+  offsetY?: number;
 };
 
 export type CIMSymbol = CIMObject & {

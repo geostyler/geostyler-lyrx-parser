@@ -38,15 +38,22 @@ export const toWKT = (
 
     // Check if it's a simple circle (single arc that closes)
     const firstCurve = curveRing[1];
-    if (firstCurve && curveRing.length === 2) {
+    if (firstCurve && curveRing.length === 2 && Array.isArray(startPoint)) {
       const curve = firstCurve?.a || firstCurve?.b || firstCurve?.c;
-      if (curve && Array.isArray(startPoint)) {
+      if (curve) {
         const endPoint = curve[0];
         const centerPoint = curve[1];
         if (JSON.stringify(endPoint) === JSON.stringify(startPoint)) {
+          // It's a circle - convert to WKT polygon
           const radius = distanceBetweenPoints(startPoint, centerPoint);
+          const circleCoords = approximateCircle(centerPoint, radius, 32);
+          const normalizedCoords = heightNormalized(circleCoords);
+          const coordinates = normalizedCoords
+            .map((j) => j.join(" "))
+            .join(", ");
           return {
-            wellKnownName: "circle" as WellKnownName,
+            wellKnownName: `wkt://POLYGON((${coordinates}))` as WellKnownName,
+            // Return the original radius (not normalized) for proper scaling
             maxX: radius,
             maxY: radius,
           };
@@ -73,10 +80,22 @@ export const toWKT = (
 };
 
 const heightNormalized = (coords: number[][]): number[][] => {
-  const height =
-    Math.max(...coords.map((coord) => coord[1])) -
-    Math.min(...coords.map((coord) => coord[1]));
-  return coords.map((coord) => [coord[0] / height, coord[1] / height]);
+  const minX = Math.min(...coords.map((coord) => coord[0]));
+  const maxX = Math.max(...coords.map((coord) => coord[0]));
+  const minY = Math.min(...coords.map((coord) => coord[1]));
+  const maxY = Math.max(...coords.map((coord) => coord[1]));
+  
+  const height = maxY - minY;
+  
+  // Calculate the center of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
+  // Normalize by height and center around (0, 0)
+  return coords.map((coord) => [
+    (coord[0] - centerX) / height,
+    (coord[1] - centerY) / height,
+  ]);
 };
 
 const distanceBetweenPoints = (a: number[], b: number[]): number => {
@@ -154,6 +173,23 @@ const curveRingToCoordinates = (
     }
   }
 
+  return coords;
+};
+
+const approximateCircle = (
+  centerPoint: number[],
+  radius: number,
+  segments: number = 32,
+): number[][] => {
+  const coords: number[][] = [];
+  for (let i = 0; i < segments; i++) {
+    const angle = (2 * Math.PI * i) / segments;
+    const x = centerPoint[0] + radius * Math.cos(angle);
+    const y = centerPoint[1] + radius * Math.sin(angle);
+    coords.push([x, y]);
+  }
+  // Close the ring by adding the first point again
+  coords.push(coords[0]);
   return coords;
 };
 
