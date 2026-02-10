@@ -100,12 +100,12 @@ export const convertExpression = (
         return processPropertyName(token);
       } else {
         const literal = token.replaceAll('"', "");
-        return replaceSpecialLiteral(literal);
+        return replaceNewLineExpression(literal, engine);
       }
     });
     return parsedExpression.join("");
   }
-  return processPropertyName(expression);
+  return replaceNewLineExpression(processPropertyName(expression), engine);
 };
 
 export const convertWhereClause = (
@@ -214,10 +214,12 @@ export const processGeostylerBooleanFunction = (
 ): GeoStylerFunction | null => {
   const whereClause = convertWhereClause(expression, toLowerCase);
   if (Array.isArray(whereClause) && whereClause.length === 3) {
-    const fProperty: Fproperty = fieldToFProperty(
-      String(whereClause[1]),
-      toLowerCase,
-    );
+    // Extract field name and remove brackets if present
+    let fieldName = String(whereClause[1]);
+    // Remove [ ] or {{ }} brackets from property names
+    fieldName = fieldName.replace(/^\[(.+)\]$/, "$1").replace(/^{{(.+)}}$/, "$1");
+    
+    const fProperty: Fproperty = fieldToFProperty(fieldName, toLowerCase);
     const value = Number(whereClause[2]);
     if (whereClause[0] === ">") {
       return {
@@ -250,11 +252,19 @@ export const processGeostylerBooleanFunction = (
   return null;
 };
 
-const replaceSpecialLiteral = (literal: string): string => {
-  if (literal === "vbnewline") {
-    return "/n";
+const replaceNewLineExpression = (
+  literal: string,
+  engine: LabelExpressionEngine,
+): string => {
+  let result = literal;
+  if (engine === LabelExpressionEngine.Arcade) {
+    result = result.replace(/TextFormatting\.NewLine/gi, "\n");
+  } else {
+    result = result.replace(/vbNewLine/gi, "\n");
   }
-  return literal;
+  // Replace spaces with non-breaking space character (U+00A0)
+  result = result.replace(/ /g, "\u00A0");
+  return result;
 };
 
 const processPropertyName = (token: string): string => {
@@ -262,8 +272,9 @@ const processPropertyName = (token: string): string => {
 };
 
 const convertArcadeExpression = (expression: string): string => {
-  expression = expression.replaceAll("$feature.", "");
-  return `[${expression}]`;
+  // Replace each $feature.PropertyName with [PropertyName] separately
+  // This preserves other parts of the expression like TextFormatting.NewLine, functions, etc.
+  return expression.replace(/\$feature\.(\w+)/g, "[$1]");
 };
 
 const stringToParameter = (s: string, toLowerCase: boolean): string | null => {
