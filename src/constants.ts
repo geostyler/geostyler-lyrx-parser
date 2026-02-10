@@ -1,6 +1,6 @@
 export const ESRI_SYMBOLS_FONT: string = "ESRI Default Marker";
 export const POLYGON_FILL_RESIZE_FACTOR: number = 2 / 3;
-export const OFFSET_FACTOR: number = 4 / 3;
+export const SCALE_FACTOR: number = 3 / 2;
 export const ESRI_SPECIAL_FONT: string[] = [
   "ttf://ESRI SDS 2.00",
   "ttf://ESRI SDS 1.95",
@@ -18,6 +18,5 @@ export enum MarkerPlacementAngle {
 }
 
 export const ptToPx = (pt: number): number => {
-  const PT_TO_PX_FACTOR: number = 4 / 3;
-  return pt * PT_TO_PX_FACTOR;
+  return pt * (4 / 3);
 };
