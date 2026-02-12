@@ -186,13 +186,13 @@ export const processRoundExpression = (
   toLowerCase: boolean,
   language: string,
 ): GeoStylerStringFunction | string => {
-  // Match expressions like "Round($feature.CONTOUR, 0)" and processes the field and decimal places
+   // Match expressions like "Round([CONTOUR], 0)" or "round({{CONTOUR}}, 0)" and processes the field and decimal places
   const match = expression.match(
-    /(?:{{\s*)?round\(\s*(\w+)\s*,\s*(\d+)\s*\)\s*(?:}})?/,
+    /round\s*\(\s*(?:\[(\w+)\]|{{(\w+)}})\s*,\s*(\d+)\s*\)/i,
   );
   if (match) {
-    const field = match[1];
-    const decimalPlaces = Number(match[2]);
+    const field = match[1] || match[2]; // Get field from either bracket type
+    const decimalPlaces = Number(match[3]);
     const fProperty: Fproperty = fieldToFProperty(field, toLowerCase);
     let decimalFormat: string;
     if (decimalPlaces === 0) {
