@@ -32,7 +32,7 @@ describe("Parse lyrx with vbscript label classes", () => {
     expect(rules.length).toEqual(2);
     const textSymbolizer = rules[1].symbolizers[0] as TextSymbolizer;
     expect(textSymbolizer.kind).toEqual("Text");
-    expect(textSymbolizer.label).toEqual("{{bew_nr}} / {{bew_foerde}} l/s");
+    expect(textSymbolizer.label).toEqual("{{bew_nr}}\u00A0/\u00A0{{bew_foerde}}\u00A0l/s");
   });
 });
 
