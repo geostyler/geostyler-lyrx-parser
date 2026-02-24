@@ -57,9 +57,14 @@ export const resizeBase64Image = async (
   let resizedBase64Image: string | undefined;
   try {
     const image = await Jimp.read(buffer);
+    const newDimensions = scaleToSize(
+      size,
+      image.bitmap.height,
+      image.bitmap.width,
+    );
     const resizedImage = image.resize({
-      w: Math.floor(size),
-      h: Math.floor(size),
+      h: newDimensions[0],
+      w: newDimensions[1],
     });
     resizedBase64Image = await resizedImage.getBase64(mimeType);
   } catch (e) {
@@ -69,4 +74,20 @@ export const resizeBase64Image = async (
     return resizedBase64Image;
   }
   return base64String;
+};
+
+/**
+ * Use the given size as the new max side size and scale the other side proportionally.
+ */
+export const scaleToSize = (
+  newMaxSize: number,
+  height: number,
+  width: number,
+): [number, number] => {
+  const ratio = newMaxSize / Math.max(height, width);
+  const newMin = ratio * Math.min(height, width);
+  return [
+    height > width ? newMaxSize : newMin,
+    width > height ? newMaxSize : newMin,
+  ];
 };
