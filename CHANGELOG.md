@@ -1,3 +1,21 @@
+## [1.4.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.3.0...v1.4.0) (2026-03-05)
+
+### Features
+
+* **#161:** add functions and test for bezier curves ([bee76e1](https://github.com/geostyler/geostyler-lyrx-parser/commit/bee76e1791fcaab81ea01a6d7d79307838ea4527)), closes [#161](https://github.com/geostyler/geostyler-lyrx-parser/issues/161)
+* **#161:** change requests ([2dc340a](https://github.com/geostyler/geostyler-lyrx-parser/commit/2dc340a377daf0f6b24288a4256c6f8864ee3e6d)), closes [#161](https://github.com/geostyler/geostyler-lyrx-parser/issues/161)
+* **#166:** enhance expression parsing for Arcade and VBScript labels ([5ed36d6](https://github.com/geostyler/geostyler-lyrx-parser/commit/5ed36d6b8953018a17971797df86c524305a6115)), closes [#166](https://github.com/geostyler/geostyler-lyrx-parser/issues/166)
+* **#166:** fix rounding expression and spaces in test label ([f4c6004](https://github.com/geostyler/geostyler-lyrx-parser/commit/f4c6004bf80fa569326701051af35886eb0bcade))
+
+### Bug Fixes
+
+* **#159:** return null on empty expression ([445d805](https://github.com/geostyler/geostyler-lyrx-parser/commit/445d80515b894cc4e8434d3d3a3ae1ddc6ab7633)), closes [#159](https://github.com/geostyler/geostyler-lyrx-parser/issues/159)
+* **#163:**  update CIMSymbol, add Frame type ([59c711b](https://github.com/geostyler/geostyler-lyrx-parser/commit/59c711b367e7c5e9e1c42fd0a29ba4021b820b89)), closes [#163](https://github.com/geostyler/geostyler-lyrx-parser/issues/163)
+* **#163:** fixed size consistency and improved calculation ([93b1708](https://github.com/geostyler/geostyler-lyrx-parser/commit/93b17087881370b64002691d8c368b86bcd317a1))
+* **#163:** fixed sizing and positioning ([f5931c2](https://github.com/geostyler/geostyler-lyrx-parser/commit/f5931c27676976b0c25ae544c4642088db72ba37))
+* **#165:** fix image inlineContent dimensions ([3f16b5c](https://github.com/geostyler/geostyler-lyrx-parser/commit/3f16b5ca1589fe18ea20255754469b1e4174fbdd))
+* dependencies ([67d6a65](https://github.com/geostyler/geostyler-lyrx-parser/commit/67d6a65913e7f7803ec62e2e0d2e4510ca526e13))
+
 ## [1.3.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.2.0...v1.3.0) (2026-01-06)
 
 ### Features
