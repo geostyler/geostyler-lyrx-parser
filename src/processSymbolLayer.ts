@@ -7,6 +7,8 @@ import {
   POLYGON_FILL_RESIZE_FACTOR,
   ESRI_SPECIAL_FONT_RESIZE_FACTOR,
   ptToPx,
+  MarkerPlacementPosition,
+  MarkerPlacementAngle,
 } from "./constants.ts";
 import {
   angleIn360Degrees,
@@ -259,22 +261,18 @@ const processOrientedMarkerAtEndOfLine = (
   orientedMarker: string,
   options: Options,
 ): MarkSymbolizer | undefined => {
-  // let markerPositionFnc: string;
-  // let markerRotationFnc: string;
+  let markerPositionFnc: string;
+  let markerRotationFnc: string;
   let rotation: number;
 
   if (orientedMarker === "start") {
-    // markerPositionFnc = MarkerPlacementPosition.START;
-    // markerRotationFnc = MarkerPlacementAngle.START;
+    markerPositionFnc = MarkerPlacementPosition.START;
+    markerRotationFnc = MarkerPlacementAngle.START;
     rotation = layer?.rotation ?? 180;
   } else if (orientedMarker === "end") {
-    // markerPositionFnc = MarkerPlacementPosition.END;
-    // markerRotationFnc = MarkerPlacementAngle.END;
+    markerPositionFnc = MarkerPlacementPosition.END;
+    markerRotationFnc = MarkerPlacementAngle.END;
     rotation = layer?.rotation ?? 0;
-  } else if (orientedMarker === "both") {
-    // markerPositionFnc = MarkerPlacementPosition.BOTH;
-    // markerRotationFnc = MarkerPlacementAngle.BOTH;
-    rotation = layer?.rotation ?? 90;
   } else {
     return undefined;
   }
@@ -318,19 +316,29 @@ const processOrientedMarkerAtEndOfLine = (
     strokeColor: strokeColor,
     strokeOpacity: strokeOpacity,
     strokeWidth: strokeWidth,
-    // FIXME see issue #66 use markerRotationFnc ? Previous code was:
-    // rotate: ['Add', [markerRotationFnc, ['PropertyName', 'shape']], rotation],
-    rotate: { args: [fProperty, rotation], name: "add" },
+    rotate: {
+      args: [
+        {
+          args: [fProperty],
+          fnName: markerRotationFnc,
+          name: "custom",
+        },
+        rotation,
+      ],
+      name: "add",
+    },
     kind: "Mark",
     color: fillColor,
     wellKnownName: name,
     radius: ptToPxProp(layer, "size", 10) / 2,
-    // @ts-ignore FIXME see issue #66
-    geometry: [null, ["PropertyName", "shape"]],
-    // geometry: [markerPositionFnc, ["PropertyName", "shape"]],
-    // @ts-ignore FIXME see issue #66
+    geometry: {
+      args: [fProperty],
+      fnName: markerPositionFnc,
+      name: "custom",
+    },
     // Functions "endPoint" and "endAngle" are not supported in the legend in GeoServer,
     // so we include this symbol only on the map and not in the legend
+    // @ts-ignore FIXME see issue #170
     inclusion: "mapOnly",
   };
 };
