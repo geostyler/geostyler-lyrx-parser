@@ -213,8 +213,12 @@ const approximateArc = (
 
   let angleDiff = endAngle - startAngle;
   // Normalize angle difference
-  if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-  if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+  if (angleDiff > Math.PI) {
+    angleDiff -= 2 * Math.PI;
+  }
+  if (angleDiff < -Math.PI) {
+    angleDiff += 2 * Math.PI;
+  }
 
   for (let i = 1; i <= segments; i++) {
     const progress = i / segments;

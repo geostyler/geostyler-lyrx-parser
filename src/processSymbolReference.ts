@@ -29,7 +29,9 @@ export const processSymbolReference = async (
       outerSize,
       outerFrameMax,
     );
-    if (processedSymbolLayers) symbolizers.push(...processedSymbolLayers);
+    if (processedSymbolLayers) {
+      symbolizers.push(...processedSymbolLayers);
+    }
   }
   return symbolizers;
 };

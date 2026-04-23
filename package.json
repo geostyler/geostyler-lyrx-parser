@@ -27,7 +27,7 @@
   "scripts": {
     "build": "babel src -d dist --source-maps --extensions '.ts' && tsc --declaration",
     "typecheck": " tsc --project tsconfig-typecheck.json",
-    "lint": "eslint -c .eslintrc.cjs src/**/*.ts && npm run prettier:check",
+    "lint": "eslint -c eslint.config.mjs src/**/*.ts && npm run prettier:check",
     "prettier:check": "prettier src --write",
     "prettier": "prettier src --write",
     "prepublishOnly": "npm run build",
@@ -47,19 +47,18 @@
     "@babel/preset-typescript": "^7.25.7",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@terrestris/eslint-config-typescript": "^5.0.0",
-    "@types/node": "^24.0.0",
+    "@terrestris/eslint-config-typescript": "10.0.0",
+    "@types/node": "^25.6.0",
     "@types/pngjs": "^6.0.5",
-    "@typescript-eslint/eslint-plugin": "^7.12.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
-    "@typescript-eslint/parser": "^7.12.0",
-    "conventional-changelog-conventionalcommits": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "coveralls": "^3.1.1",
-    "eslint": "^8.40.0",
+    "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.0.0",
     "prettier": "^3.4.0",
     "typescript": "^5.4.5",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=20.6.0"
