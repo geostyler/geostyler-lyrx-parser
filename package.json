@@ -37,7 +37,7 @@
     "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
-    "geostyler-style": "^11.0.2",
+    "geostyler-style": "^12.0.0",
     "jimp": "^1.6.0"
   },
   "devDependencies": {

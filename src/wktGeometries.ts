@@ -84,13 +84,13 @@ const heightNormalized = (coords: number[][]): number[][] => {
   const maxX = Math.max(...coords.map((coord) => coord[0]));
   const minY = Math.min(...coords.map((coord) => coord[1]));
   const maxY = Math.max(...coords.map((coord) => coord[1]));
-  
+
   const height = maxY - minY;
-  
+
   // Calculate the center of the bounding box
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
-  
+
   // Normalize by height and center around (0, 0)
   return coords.map((coord) => [
     (coord[0] - centerX) / height,

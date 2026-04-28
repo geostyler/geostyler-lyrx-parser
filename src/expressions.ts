@@ -186,7 +186,7 @@ export const processRoundExpression = (
   toLowerCase: boolean,
   language: string,
 ): GeoStylerStringFunction | string => {
-   // Match expressions like "Round([CONTOUR], 0)" or "round({{CONTOUR}}, 0)" and processes the field and decimal places
+  // Match expressions like "Round([CONTOUR], 0)" or "round({{CONTOUR}}, 0)" and processes the field and decimal places
   const match = expression.match(
     /round\s*\(\s*(?:\[(\w+)\]|{{(\w+)}})\s*,\s*(\d+)\s*\)/i,
   );
@@ -217,8 +217,10 @@ export const processGeostylerBooleanFunction = (
     // Extract field name and remove brackets if present
     let fieldName = String(whereClause[1]);
     // Remove [ ] or {{ }} brackets from property names
-    fieldName = fieldName.replace(/^\[(.+)\]$/, "$1").replace(/^{{(.+)}}$/, "$1");
-    
+    fieldName = fieldName
+      .replace(/^\[(.+)\]$/, "$1")
+      .replace(/^{{(.+)}}$/, "$1");
+
     const fProperty: Fproperty = fieldToFProperty(fieldName, toLowerCase);
     const value = Number(whereClause[2]);
     if (whereClause[0] === ">") {
