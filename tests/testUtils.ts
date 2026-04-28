@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ConstructorParams, LyrxParser } from "../src/index.ts";
+import { ConstructorParams, LyrxParser } from "../src/LyrxStyleParser.ts";
 import { CIMLayerDocument } from "../src/esri/types/CIMLayerDocument.ts";
 import { ReadStyleResult } from "geostyler-style";
 
