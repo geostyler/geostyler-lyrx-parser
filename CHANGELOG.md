@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.4.0...v1.5.0) (2026-04-29)
+
+### Features
+
+* support geometry in symbolizer and custom function ([#66](https://github.com/geostyler/geostyler-lyrx-parser/issues/66)) ([eca4a0b](https://github.com/geostyler/geostyler-lyrx-parser/commit/eca4a0b7dce4173b86da7461afcfc79e4d266a96))
+
 ## [1.4.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.3.0...v1.4.0) (2026-03-05)
 
 ### Features
