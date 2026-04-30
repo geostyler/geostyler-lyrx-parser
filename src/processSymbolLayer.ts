@@ -132,21 +132,20 @@ const processSymbolLayerWithSubSymbol = (
           processOrientedMarkerAtEndOfLineFn("end");
         }
       } else {
-        const lineSymbolizer = formatLineSymbolizer(
-          symbolizer as PointSymbolizer,
-          layer as SymbolLayer,
+        symbolizers.push(
+          formatLineSymbolizer(
+            symbolizer as PointSymbolizer,
+            layer as SymbolLayer,
+          ),
         );
-        symbolizers.push(lineSymbolizer);
       }
 
       return symbolizers;
     }
     // Not CIMCharacterMarker
-    const lineSymbolizer = formatLineSymbolizer(
-      symbolizer as PointSymbolizer,
-      layer as SymbolLayer,
+    symbolizers.push(
+      formatLineSymbolizer(symbolizer as PointSymbolizer, layer as SymbolLayer),
     );
-    symbolizers.push(lineSymbolizer);
     return symbolizers;
   }
   return symbolizers;
@@ -170,7 +169,8 @@ const formatLineSymbolizer = (
         !symbolizer.wellKnownName.startsWith("wkt://") &&
         symbolizer.strokeWidth === 0
       ) {
-        // If the marker has a known shape with strokeWidth of 0, we don't want to render it because Geoserver still draws a line.
+        // If the marker has a known shape with strokeWidth of 0, we don't want to
+        // render it because Geoserver still draws a line.
         delete symbolizer.strokeWidth;
         delete symbolizer.strokeColor;
         delete symbolizer.strokeOpacity;
@@ -205,7 +205,8 @@ const processMarkerPlacementAlongLine = (
   if (placementTemplate.length === 1) {
     // The markers are placed with the same distance.
     const distance = ptToPx(placementTemplate[0]);
-    // The distance must be larger than the size of the marker and we add a default spacing of 1, which is not necessary in lyrx
+    // The distance must be larger than the size of the marker and we add a default
+    // spacing of 1, which is not necessary in lyrx
     return distance >= size + 1 ? [distance, 1] : [size + 1, 1];
   } else {
     // The markers are placed with different distances.
@@ -219,7 +220,8 @@ const processMarkerPlacementAlongLine = (
       (sum, value) => sum + value,
       0,
     );
-    // The length of the markers is the templateLength. For the whole pattern we need to caluculate the appropriate spacing.
+    // The length of the markers is the templateLength. For the whole pattern we need
+    // to caluculate the appropriate spacing.
     const spacing = totalDasharray - templateLength;
     return [templateLength, spacing];
   }
@@ -565,40 +567,42 @@ const processSymbolVectorMarker = async (
 
   const markerGraphics = layer.markerGraphics || [];
   if (markerGraphics.length === 0) {
-    const marker: MarkSymbolizer = {
-      opacity: 1,
-      rotate: 0,
-      kind: "Mark",
-      color: fillColor,
-      wellKnownName: wellKnownName,
-      radius: markerSize / 2,
-      strokeColor: strokeColor,
-      strokeWidth: strokeWidth,
-      strokeOpacity: strokeOpacity,
-      fillOpacity: 1,
-      offset: extractOffset(layer, markerSize),
-    };
-    return [marker];
+    return [
+      {
+        opacity: 1,
+        rotate: 0,
+        kind: "Mark",
+        color: fillColor,
+        wellKnownName: wellKnownName,
+        radius: markerSize / 2,
+        strokeColor: strokeColor,
+        strokeWidth: strokeWidth,
+        strokeOpacity: strokeOpacity,
+        fillOpacity: 1,
+        offset: extractOffset(layer, markerSize),
+      },
+    ];
   }
 
   // TODO: support multiple marker graphics
   const markerGraphic = markerGraphics[0];
 
   if (!markerGraphic.symbol || !markerGraphic.symbol.symbolLayers) {
-    const marker: MarkSymbolizer = {
-      opacity: 1,
-      rotate: 0,
-      kind: "Mark",
-      color: fillColor,
-      wellKnownName: wellKnownName,
-      radius: markerSize / 2,
-      strokeColor: strokeColor,
-      strokeWidth: strokeWidth,
-      strokeOpacity: strokeOpacity,
-      fillOpacity: 1,
-      offset: extractOffset(layer, markerSize),
-    };
-    return [marker];
+    return [
+      {
+        opacity: 1,
+        rotate: 0,
+        kind: "Mark",
+        color: fillColor,
+        wellKnownName: wellKnownName,
+        radius: markerSize / 2,
+        strokeColor: strokeColor,
+        strokeWidth: strokeWidth,
+        strokeOpacity: strokeOpacity,
+        fillOpacity: 1,
+        offset: extractOffset(layer, markerSize),
+      },
+    ];
   }
 
   // Process nested symbols

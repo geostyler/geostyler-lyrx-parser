@@ -3,9 +3,10 @@
   "version": "1.5.0",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/LyrxStyleParser.js",
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
   "repository": {
     "type": "git",
@@ -25,9 +26,11 @@
   },
   "homepage": "https://github.com/geostyler/geostyler-lyrx-parser#readme",
   "scripts": {
-    "build": "babel src -d dist --source-maps --extensions '.ts' && tsc --declaration",
+    "build-browser": "vite build --config vite.config.browser.ts",
+    "build-dist": "vite build --config vite.config.dist.ts && tsc -p tsconfig.json --emitDeclarationOnly",
+    "build": "npm run build-browser && npm run build-dist",
     "typecheck": " tsc --project tsconfig-typecheck.json",
-    "lint": "eslint -c .eslintrc.cjs src/**/*.ts && npm run prettier:check",
+    "lint": "eslint -c eslint.config.mjs src/**/*.ts && npm run prettier:check",
     "prettier:check": "prettier src --write",
     "prettier": "prettier src --write",
     "prepublishOnly": "npm run build",
@@ -37,29 +40,25 @@
     "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "geostyler-style": "^12.0.0",
-    "jimp": "^1.6.0"
+    "jimp": "1.6.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.25.7",
-    "@babel/core": "^7.25.7",
-    "@babel/preset-env": "^7.25.7",
-    "@babel/preset-typescript": "^7.25.7",
+    "@eslint/js": "^9.34.4",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@terrestris/eslint-config-typescript": "^5.0.0",
-    "@types/node": "^24.0.0",
+    "@terrestris/eslint-config-typescript": "10.0.0",
+    "@types/node": "^25.6.0",
     "@types/pngjs": "^6.0.5",
-    "@typescript-eslint/eslint-plugin": "^7.12.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
-    "@typescript-eslint/parser": "^7.12.0",
-    "conventional-changelog-conventionalcommits": "^9.0.0",
-    "coveralls": "^3.1.1",
-    "eslint": "^8.40.0",
-    "eslint-config-prettier": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "eslint": "^9.33.0",
     "prettier": "^3.4.0",
     "typescript": "^5.4.5",
-    "vitest": "^3.0.0"
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=20.6.0"
