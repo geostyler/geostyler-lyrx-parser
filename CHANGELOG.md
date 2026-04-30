@@ -1,3 +1,17 @@
+## [2.0.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.5.0...v2.0.0) (2026-04-30)
+
+### ⚠ BREAKING CHANGES
+
+* The build is now done with vite, and the main
+file is now dist/LyrxStyleParser.js.
+
+### Bug Fixes
+
+* remove unused packages ([28b8d1d](https://github.com/geostyler/geostyler-lyrx-parser/commit/28b8d1d68cd8629b00bec8f53ccf5e996c6aa5c1))
+* update package-lock.json ([be386b1](https://github.com/geostyler/geostyler-lyrx-parser/commit/be386b1071bde34ee787b775359105a515f23e30))
+* update some dev dependencies ([9d8c2f3](https://github.com/geostyler/geostyler-lyrx-parser/commit/9d8c2f319787432f05d8e918f8c14e21c677c268))
+* use more common geostyler build ([2bb3a07](https://github.com/geostyler/geostyler-lyrx-parser/commit/2bb3a07ff584c3956c96582d1ab83e7fa0666b0d))
+
 ## [1.5.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.4.0...v1.5.0) (2026-04-29)
 
 ### Features
