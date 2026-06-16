@@ -178,10 +178,12 @@ const formatLineSymbolizer = (
     }
     lineSymbolizer.width = size;
     lineSymbolizer.perpendicularOffset = ptToPxProp(
-      symbolizer,
-      "perpendicularOffset",
+      markerPlacement,
+      "offset",
       0.0,
     );
+    lineSymbolizer.dashOffset =
+      ptToPxProp(markerPlacement, "offsetAlongLine", 0.0);
     lineSymbolizer.dasharray = template;
     return lineSymbolizer;
   }
@@ -247,11 +249,15 @@ const formatPolygonSymbolizer = (
     };
   }
   if (markerPlacementType === "CIMMarkerPlacementAlongLineSameSize") {
+    const size = ptToPxProp(symbolizer, "size", 10);
+    const template = processMarkerPlacementAlongLine(markerPlacement, size);
     return {
       kind: "Line",
       opacity: 1.0,
-      width: ptToPxProp(symbolizer, "size", 10),
-      perpendicularOffset: ptToPxProp(symbolizer, "perpendicularOffset", 0.0),
+      width: size,
+      perpendicularOffset: ptToPxProp(markerPlacement, "offset", 0.0),
+      dashOffset: ptToPxProp(markerPlacement, "offsetAlongLine", 0.0),
+      dasharray: template,
       graphicStroke: symbolizer,
     };
   }

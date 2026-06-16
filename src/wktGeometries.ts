@@ -19,16 +19,19 @@ export const toWKT = (
     };
   }
 
-  const path = geometry?.paths?.[0];
-  if (
-    path &&
-    path[0][0] === 2 &&
-    path[0][1] === 0 &&
-    path[1][0] - 2 &&
-    path[1][1] === 0
-  ) {
+  if (geometry.paths) {
+    const normalizedPaths = geometry.paths.map((path) =>
+      heightNormalized(path),
+    );
+    const pathStrings = normalizedPaths.map(
+      (path) => `(${path.map((j) => j.join(" ")).join(", ")})`,
+    );
+    const allCoords = normalizedPaths.flat();
     return {
-      wellKnownName: "wkt://MULTILINESTRING((0 2, 0 0))" as WellKnownName,
+      wellKnownName:
+        `wkt://MULTILINESTRING(${pathStrings.join(", ")})` as WellKnownName,
+      maxX: Math.max(...allCoords.map((coord) => coord[0])),
+      maxY: Math.max(...allCoords.map((coord) => coord[1])),
     };
   }
 

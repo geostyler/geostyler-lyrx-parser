@@ -9,6 +9,8 @@ export type CIMMarkerPlacement = CIMObject & {
   angleToLine: boolean;
   extremityPlacement: string;
   flipFirst: boolean;
+  offset: number;
+  offsetAlongLine: number;
   placementTemplate: number[];
   positionArray: number[];
 };
