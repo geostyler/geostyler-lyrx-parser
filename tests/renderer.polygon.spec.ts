@@ -1,5 +1,10 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { FillSymbolizer, ReadStyleResult } from "geostyler-style";
+import {
+  FillSymbolizer,
+  LineSymbolizer,
+  MarkSymbolizer,
+  ReadStyleResult,
+} from "geostyler-style";
 import { loadGeostylerStyle } from "./testUtils.ts";
 
 describe("Parse simple polygon renderer", () => {
@@ -410,7 +415,7 @@ describe("Parse unique value polygon renderer with marker symbols inside", () =>
     expect(rules.length).toBe(12);
 
     for (const rule of rules) {
-      const expected = expectedLegendValues[rule.name];
+      const expected = expectedLegendValues[rule.name as unknown as keyof typeof expectedLegendValues];
       const fillSymbolizers = rule.symbolizers;
       expect(fillSymbolizers.length).toBe(expected.symbolizers);
       const graphicFills = rule.symbolizers
@@ -424,23 +429,96 @@ describe("Parse unique value polygon renderer with marker symbols inside", () =>
           (s) => (s as FillSymbolizer).graphicFill !== undefined,
         )[i] as FillSymbolizer;
         i += 1;
+        const expectedGraphicFill = (expected as any)[`graphicFill_${i}`];
         expect(graphicFill?.kind).toEqual(
-          expected[`graphicFill_${i}`][0].graphicFill.kind,
+          expectedGraphicFill[0].graphicFill.kind,
         );
         expect((graphicFill as any)?.wellKnownName).toEqual(
-          expected[`graphicFill_${i}`][0].graphicFill.wellKnownName,
+          expectedGraphicFill[0].graphicFill.wellKnownName,
         );
         expect((graphicFill as any)?.radius).toEqual(
-          expected[`graphicFill_${i}`][0].graphicFill.radius,
+          expectedGraphicFill[0].graphicFill.radius,
         );
         expect((graphicFill as any)?.respectFrame).toEqual(
-          expected[`graphicFill_${i}`][0].graphicFill.respectFrame,
+          expectedGraphicFill[0].graphicFill.respectFrame,
         );
 
         expect(fillSymbolizerWithGraphicFill.graphicFillPadding).toEqual(
-          expected[`graphicFill_${i}`][0].graphicFillPadding,
+          expectedGraphicFill[0].graphicFillPadding,
         );
       });
     }
+  });
+});
+
+describe("Parse polygon renderer with offset marker along line", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/polygon_with_offset_marker.lyrx",
+    );
+  });
+
+  it("should parse a valid style object", () => {
+    expect(geostylerStyle).toBeDefined();
+    expect(geostylerStyle.output).toBeDefined();
+    expect(geostylerStyle.output?.name).toBe(
+      "Grundwasservorkommen Zweites Stockwerk (DM Bund)",
+    );
+  });
+
+  it("should have a single rule with two symbolizers", () => {
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+    expect(rules?.[0].symbolizers).toHaveLength(2);
+  });
+
+  it("should have a fill symbolizer with outline", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[0] as FillSymbolizer;
+    expect(symbolizer.kind).toBe("Fill");
+    expect(symbolizer.outlineColor).toBe("#2c0087");
+    expect(symbolizer.outlineOpacity).toBe(1);
+    expect(symbolizer.outlineWidth).toBeCloseTo(2.6667, 3);
+  });
+
+  it("should have a line symbolizer with graphic stroke along polygon border", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    expect(symbolizer.kind).toBe("Line");
+    expect(symbolizer.opacity).toBe(1);
+  });
+
+  it("should have the correct perpendicularOffset from offset", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    expect(symbolizer.perpendicularOffset).toBeCloseTo(-3.3333, 3);
+  });
+
+  it("should have the correct dashOffset from offsetAlongLine", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    expect(symbolizer.dashOffset).toBeCloseTo(2.6667, 3);
+  });
+
+  it("should have a dasharray from placementTemplate", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    expect(symbolizer.dasharray).toBeDefined();
+    expect(symbolizer.dasharray).toHaveLength(2);
+    expect(symbolizer.dasharray?.[0]).toBeCloseTo(13.3333, 3);
+    expect(symbolizer.dasharray?.[1]).toBe(1);
+  });
+
+  it("should have a WKT multilinestring as graphic stroke", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    const graphicStroke = symbolizer.graphicStroke as MarkSymbolizer;
+    expect(graphicStroke.kind).toBe("Mark");
+    expect(graphicStroke.wellKnownName).toBe(
+      "wkt://MULTILINESTRING((0 0.5, 0 -0.5))",
+    );
+    expect(graphicStroke.strokeColor).toBe("#2c0087");
   });
 });
