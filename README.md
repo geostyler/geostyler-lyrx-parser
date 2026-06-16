@@ -8,6 +8,10 @@ This parser can read Lyrx files and write GeoStyler styler, but it can not write
 
 This project is originally based on the GeoCat/bridge-style (MIT license).
 
+## :rocket: GeoStyler Code Sprint 2026
+
+We are happy to announce the next **online-only** GeoStyler Code Sprint from **28.-30.09.2026**. Be part of it! More infos on https://geostyler.org.
+
 ## <a name="funding"></a>Funding & financial sponsorship
 
 Maintenance and further development of this code can be funded through the
