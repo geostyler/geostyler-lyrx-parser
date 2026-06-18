@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v2.0.0...v2.1.0) (2026-06-18)
+
+### Features
+
+* **#180:** fix geometry paths, add offset for markerPlacement and test ([112c4cb](https://github.com/geostyler/geostyler-lyrx-parser/commit/112c4cb2842bf07e2740fd0ec61bb6d6e9498755))
+
 ## [2.0.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v1.5.0...v2.0.0) (2026-04-30)
 
 ### ⚠ BREAKING CHANGES
