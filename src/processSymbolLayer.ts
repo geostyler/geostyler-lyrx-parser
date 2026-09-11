@@ -182,8 +182,11 @@ const formatLineSymbolizer = (
       "offset",
       0.0,
     );
-    lineSymbolizer.dashOffset =
-      ptToPxProp(markerPlacement, "offsetAlongLine", 0.0);
+    lineSymbolizer.dashOffset = ptToPxProp(
+      markerPlacement,
+      "offsetAlongLine",
+      0.0,
+    );
     lineSymbolizer.dasharray = template;
     return lineSymbolizer;
   }
