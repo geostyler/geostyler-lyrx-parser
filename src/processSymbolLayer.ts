@@ -246,7 +246,6 @@ const formatPolygonSymbolizer = (
     );
     return {
       kind: "Fill",
-      fillOpacity: 1.0,
       graphicFill: symbolizer,
       graphicFillPadding: padding,
     };
@@ -729,6 +728,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   const markSymbolizer: MarkSymbolizer = {
     kind: "Mark",
     color: color,
+    fillOpacity: opacity,
     wellKnownName: wellKnowName,
     radius: separation,
     strokeColor: color,
@@ -739,7 +739,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   const fillSymbolizer: FillSymbolizer = {
     kind: "Fill",
-    fillOpacity: 1.0,
     graphicFill: markSymbolizer,
   };
 
