@@ -903,7 +903,7 @@ const extractOffset = (
     // Fallback to offsetX/offsetY if anchorPoint is not defined or is zero
     // Arcgis looks to apply a strange scaling factor.
     offsetX = (symbolLayer.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
-    offsetY = (symbolLayer.offsetY || 0) * ptToPx(1) * SCALE_FACTOR * -1;
+    offsetY = (symbolLayer.offsetY || 0) * ptToPx(1) * SCALE_FACTOR;
   }
 
   // Return undefined only if BOTH offsets are 0
