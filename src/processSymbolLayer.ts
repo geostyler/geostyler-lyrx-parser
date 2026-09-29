@@ -157,7 +157,6 @@ const formatLineSymbolizer = (
 ): LineSymbolizer => {
   const lineSymbolizer: LineSymbolizer = {
     kind: "Line",
-    opacity: 1.0,
     graphicStroke: symbolizer,
   };
   const markerPlacement = layer.markerPlacement;
@@ -176,7 +175,6 @@ const formatLineSymbolizer = (
         delete symbolizer.strokeOpacity;
       }
     }
-    lineSymbolizer.width = size;
     lineSymbolizer.perpendicularOffset = ptToPxProp(
       markerPlacement,
       "offset",
@@ -255,8 +253,6 @@ const formatPolygonSymbolizer = (
     const template = processMarkerPlacementAlongLine(markerPlacement, size);
     return {
       kind: "Line",
-      opacity: 1.0,
-      width: size,
       perpendicularOffset: ptToPxProp(markerPlacement, "offset", 0.0),
       dashOffset: ptToPxProp(markerPlacement, "offsetAlongLine", 0.0),
       dasharray: template,
