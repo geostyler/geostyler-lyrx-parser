@@ -522,3 +522,72 @@ describe("Parse polygon renderer with offset marker along line", () => {
     expect(graphicStroke.strokeColor).toBe("#2c0087");
   });
 });
+
+describe("Parse polygon renderer with multi-value placementTemplate", () => {
+  let geostylerStyle: ReadStyleResult;
+
+  beforeAll(async () => {
+    geostylerStyle = await loadGeostylerStyle(
+      "./tests/testdata/polygon/polygon_with_multi_offset_marker.lyrx",
+    );
+  });
+
+  it("should have a single rule with three symbolizers", () => {
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toHaveLength(1);
+    expect(rules?.[0].symbolizers).toHaveLength(3);
+  });
+
+  it("should have a fill symbolizer as first symbolizer", () => {
+    const symbolizer = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[0] as FillSymbolizer;
+    expect(symbolizer.kind).toBe("Fill");
+  });
+
+  it("should have two line symbolizers with a 3-value dasharray", () => {
+    const sym1 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    const sym2 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[2] as LineSymbolizer;
+    expect(sym1.kind).toBe("Line");
+    expect(sym2.kind).toBe("Line");
+    expect(sym1.dasharray).toEqual(sym2.dasharray);
+    expect(sym1.dasharray).toHaveLength(3);
+    expect(sym1.dasharray?.[0]).toBeCloseTo(2.6667, 3);
+    expect(sym1.dasharray?.[1]).toBe(14);
+    expect(sym1.dasharray?.[2]).toBeCloseTo(2.6667, 3);
+  });
+
+  it("should have the same perpendicularOffset on both line symbolizers", () => {
+    const sym1 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    const sym2 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[2] as LineSymbolizer;
+    expect(sym1.perpendicularOffset).toBeCloseTo(-3.3333, 3);
+    expect(sym2.perpendicularOffset).toBeCloseTo(-3.3333, 3);
+  });
+
+  it("should have dashOffset 0 for first and lineWidth + template[1] for second", () => {
+    const sym1 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    const sym2 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[2] as LineSymbolizer;
+    expect(sym1.dashOffset).toBe(0);
+    expect(sym2.dashOffset).toBeCloseTo(5.3333, 3);
+  });
+
+  it("should have WKT graphic stroke on both line symbolizers", () => {
+    const sym1 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[1] as LineSymbolizer;
+    const sym2 = geostylerStyle.output?.rules?.[0]
+      .symbolizers?.[2] as LineSymbolizer;
+    const gs1 = sym1.graphicStroke as MarkSymbolizer;
+    const gs2 = sym2.graphicStroke as MarkSymbolizer;
+    expect(gs1.wellKnownName).toBe(
+      "wkt://MULTILINESTRING((0 0.5, 0 -0.5))",
+    );
+    expect(gs2.wellKnownName).toBe(
+      "wkt://MULTILINESTRING((0 0.5, 0 -0.5))",
+    );
+  });
+});

@@ -96,7 +96,11 @@ const processSymbolLayerWithSubSymbol = (
       respectFrame,
     );
     if (polygonSymbolizer) {
-      symbolizers.push(polygonSymbolizer);
+      if (Array.isArray(polygonSymbolizer)) {
+        symbolizers.push(...polygonSymbolizer);
+      } else {
+        symbolizers.push(polygonSymbolizer);
+      }
     }
     return symbolizers;
   }
@@ -232,11 +236,41 @@ const processMarkerPlacementAlongLine = (
   }
 };
 
+const createMultipleLineSymbolizers = (
+  symbolizer: MarkSymbolizer,
+  markerPlacement: CIMMarkerPlacement,
+  size: number,
+  placementTemplate: number[],
+): LineSymbolizer[] => {
+  const lineWidth =
+    typeof symbolizer.strokeWidth === "number" ? symbolizer.strokeWidth : 0;
+  const ptToPxAndCeil = (v: number) => Math.ceil(ptToPx(v));
+  const space = placementTemplate
+    .map(ptToPxAndCeil)
+    .reduce((sum, v) => sum + v, 0);
+  const dasharray = [lineWidth, space, lineWidth];
+  const perpendicularOffset = ptToPxProp(markerPlacement, "offset", 0.0);
+
+  return placementTemplate.map((_, index) => {
+    const dashOffset =
+      index === 0 ? 0 : lineWidth + ptToPx(placementTemplate[index]);
+    return {
+      kind: "Line" as const,
+      opacity: 1.0,
+      width: size,
+      perpendicularOffset,
+      dashOffset,
+      dasharray,
+      graphicStroke: { ...symbolizer },
+    };
+  });
+};
+
 const formatPolygonSymbolizer = (
   symbolizer: MarkSymbolizer,
   markerPlacement: CIMMarkerPlacement,
   respectFrame: boolean,
-): FillSymbolizer | LineSymbolizer | null => {
+): FillSymbolizer | LineSymbolizer | LineSymbolizer[] | null => {
   const markerPlacementType = markerPlacement.type;
   if (markerPlacementType === "CIMMarkerPlacementInsidePolygon") {
     const padding = processMarkerPlacementInsidePolygon(
@@ -253,6 +287,17 @@ const formatPolygonSymbolizer = (
   }
   if (markerPlacementType === "CIMMarkerPlacementAlongLineSameSize") {
     const size = ptToPxProp(symbolizer, "size", 10);
+    const placementTemplate = markerPlacement.placementTemplate;
+
+    if (placementTemplate && placementTemplate.length > 1) {
+      return createMultipleLineSymbolizers(
+        symbolizer,
+        markerPlacement,
+        size,
+        placementTemplate,
+      );
+    }
+
     const template = processMarkerPlacementAlongLine(markerPlacement, size);
     return {
       kind: "Line",
