@@ -157,7 +157,6 @@ const formatLineSymbolizer = (
 ): LineSymbolizer => {
   const lineSymbolizer: LineSymbolizer = {
     kind: "Line",
-    opacity: 1.0,
     graphicStroke: symbolizer,
   };
   const markerPlacement = layer.markerPlacement;
@@ -176,7 +175,6 @@ const formatLineSymbolizer = (
         delete symbolizer.strokeOpacity;
       }
     }
-    lineSymbolizer.width = size;
     lineSymbolizer.perpendicularOffset = ptToPxProp(
       markerPlacement,
       "offset",
@@ -246,7 +244,6 @@ const formatPolygonSymbolizer = (
     );
     return {
       kind: "Fill",
-      fillOpacity: 1.0,
       graphicFill: symbolizer,
       graphicFillPadding: padding,
     };
@@ -256,8 +253,6 @@ const formatPolygonSymbolizer = (
     const template = processMarkerPlacementAlongLine(markerPlacement, size);
     return {
       kind: "Line",
-      opacity: 1.0,
-      width: size,
       perpendicularOffset: ptToPxProp(markerPlacement, "offset", 0.0),
       dashOffset: ptToPxProp(markerPlacement, "offsetAlongLine", 0.0),
       dasharray: template,
@@ -729,6 +724,7 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
   const markSymbolizer: MarkSymbolizer = {
     kind: "Mark",
     color: color,
+    fillOpacity: opacity,
     wellKnownName: wellKnowName,
     radius: separation,
     strokeColor: color,
@@ -739,7 +735,6 @@ const processSymbolHatchFill = (layer: SymbolLayer): Symbolizer[] => {
 
   const fillSymbolizer: FillSymbolizer = {
     kind: "Fill",
-    fillOpacity: 1.0,
     graphicFill: markSymbolizer,
   };
 

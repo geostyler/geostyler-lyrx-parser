@@ -487,7 +487,8 @@ describe("Parse polygon renderer with offset marker along line", () => {
     const symbolizer = geostylerStyle.output?.rules?.[0]
       .symbolizers?.[1] as LineSymbolizer;
     expect(symbolizer.kind).toBe("Line");
-    expect(symbolizer.opacity).toBe(1);
+    const graphicStroke = symbolizer.graphicStroke as MarkSymbolizer;
+    expect(graphicStroke.opacity).toBe(1);
   });
 
   it("should have the correct perpendicularOffset from offset", () => {
