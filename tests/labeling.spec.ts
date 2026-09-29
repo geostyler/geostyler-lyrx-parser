@@ -32,7 +32,9 @@ describe("Parse lyrx with vbscript label classes", () => {
     expect(rules.length).toEqual(2);
     const textSymbolizer = rules[1].symbolizers[0] as TextSymbolizer;
     expect(textSymbolizer.kind).toEqual("Text");
-    expect(textSymbolizer.label).toEqual("{{bew_nr}}\u00A0/\u00A0{{bew_foerde}}\u00A0l/s");
+    expect(textSymbolizer.label).toEqual(
+      "{{bew_nr}}\u00A0/\u00A0{{bew_foerde}}\u00A0l/s",
+    );
   });
 });
 
@@ -56,6 +58,7 @@ describe("Parse layer with CIMSolidFill label symbol", () => {
     expect(textSymbolizer.label).toEqual("{{name}}");
     expect(textSymbolizer.color).toEqual("#38a800");
     expect(textSymbolizer.fontWeight).toEqual("normal");
+    expect(textSymbolizer.wrap).toEqual(48);
   });
 });
 
@@ -120,11 +123,7 @@ describe("Parse lyrx with rounding in label expression", () => {
 
   const expectedLabel = {
     name: "numberFormat",
-    args: [
-      "#",
-      { name: "property", args: ["contour"] },
-      ""
-    ]
+    args: ["#", { name: "property", args: ["contour"] }, ""],
   };
 
   it("should parse label class expression", () => {

@@ -270,6 +270,13 @@ const processLabelClass = (
     fontWeight: fontWeight,
   };
 
+  const maxCharInLabel =
+    labelClass.maplexLabelPlacementProperties?.labelStackingProperties
+      ?.maximumNumberOfCharsPerLine;
+  if (maxCharInLabel) {
+    // Empirical calculation.
+    symbolizer.wrap = maxCharInLabel * 2;
+  }
   const stdProperties = labelClass.standardLabelPlacementProperties;
   const stdPlacementType = stdProperties?.featureType;
   const stdPointPlacementType = stdProperties?.pointPlacementMethod;
