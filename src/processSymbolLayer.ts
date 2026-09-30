@@ -250,8 +250,9 @@ const createMultipleLineSymbolizers = (
   const perpendicularOffset = ptToPxProp(markerPlacement, "offset", 0.0);
 
   return placementTemplate.map((_, index) => {
-    const dashOffset =
-      index === 0 ? 0 : lineWidth + ptToPx(placementTemplate[index]);
+    const dashOffset = placementTemplate
+      .slice(1, index + 1)
+      .reduce((sum, v) => sum + lineWidth + ptToPx(v), 0);
     return {
       kind: "Line" as const,
       opacity: 1.0,
