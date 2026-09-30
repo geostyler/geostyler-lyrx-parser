@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/LyrxStyleParser.ts'),
+      entry: path.resolve('src/LyrxStyleParser.ts'),
       formats: ['es'],
       fileName: 'LyrxStyleParser',
     },
@@ -20,8 +20,8 @@ export default defineConfig({
         externalLiveBindings: false,
       },
     },
-    sourcemap: false,
+    sourcemap: true,
     outDir: 'dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
   },
 });
