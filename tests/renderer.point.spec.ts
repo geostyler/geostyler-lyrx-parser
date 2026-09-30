@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import {
   Fadd,
-  FCustom,
+  Fcustom,
   Fproperty,
   IconSymbolizer,
   LineSymbolizer,
@@ -340,7 +340,7 @@ describe("Parse point marker with a geometry", () => {
     expect(markSymbolizer?.kind).toBe("Mark");
     expect(markSymbolizer?.geometry).toBeDefined();
     // Check the geometry expression.
-    const geometryExpr = markSymbolizer.geometry as FCustom;
+    const geometryExpr = markSymbolizer.geometry as Fcustom;
     expect(geometryExpr.name).toEqual("custom");
     expect(geometryExpr.fnName).toEqual("endPoint");
     const geometryPropExpr = geometryExpr.args[0] as Fproperty;
@@ -352,7 +352,7 @@ describe("Parse point marker with a geometry", () => {
     expect(rotation).toBeDefined();
     expect(rotation.name).toEqual("add");
     expect(rotation.args.length).toEqual(2);
-    const rotationArgsFCustom = rotation.args[0] as FCustom;
+    const rotationArgsFCustom = rotation.args[0] as Fcustom;
     const rotationArgsNumber = rotation.args[1] as number;
     expect(rotationArgsFCustom).toBeDefined();
     expect(rotationArgsFCustom.fnName).toEqual("endAngle");
