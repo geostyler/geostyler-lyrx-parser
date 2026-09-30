@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "geostyler-style": "^13.0.0",
-    "jimp": "1.6.0"
+    "jimp": "1.6.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
@@ -58,6 +58,7 @@
     "prettier": "^3.9.9",
     "typescript": "^5.4.5",
     "vite": "^8.3.1",
+    "vite-plugin-node-polyfills": "^0.28.0",
     "vitest": "^5.0.2"
   },
   "engines": {
