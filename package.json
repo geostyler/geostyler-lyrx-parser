@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "geostyler-style": "^13.1.0",
-    "jimp": "1.6.0"
+    "jimp": "1.6.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
