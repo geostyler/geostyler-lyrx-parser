@@ -1,12 +1,11 @@
 {
   "name": "geostyler-lyrx-parser",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "GeoStyler Style Parser implementation for ArcGIS Pro Layer Files (Lyrx)",
   "type": "module",
   "main": "dist/LyrxStyleParser.js",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "repository": {
     "type": "git",
@@ -41,7 +40,7 @@
   },
   "dependencies": {
     "geostyler-style": "^13.1.0",
-    "jimp": "1.6.1"
+    "jimp": "1.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
@@ -53,12 +52,11 @@
     "@types/pngjs": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "^8.70.1",
     "@typescript-eslint/parser": "^8.70.1",
-    "conventional-changelog-conventionalcommits": "^10.4.0",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
     "eslint": "^9.33.0",
     "prettier": "^3.9.9",
     "typescript": "^5.4.5",
     "vite": "^8.3.1",
-    "vite-plugin-node-polyfills": "^0.28.0",
     "vitest": "^5.0.2"
   },
   "engines": {

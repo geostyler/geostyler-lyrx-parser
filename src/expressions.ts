@@ -103,7 +103,10 @@ export const convertExpression = (
         return replaceNewLineExpression(literal, engine);
       }
     });
-    return parsedExpression.join("");
+    return {
+      name: "strConcat",
+      args: parsedExpression,
+    };
   }
   return replaceNewLineExpression(processPropertyName(expression), engine);
 };

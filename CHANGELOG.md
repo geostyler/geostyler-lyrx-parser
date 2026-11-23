@@ -1,3 +1,26 @@
+## [2.2.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v2.1.0...v2.2.0) (2026-10-20)
+
+### Features
+
+* **#200:** fix multiValue lines on polygonSymbology ([aedc4f1](https://github.com/geostyler/geostyler-lyrx-parser/commit/aedc4f16c7364a703656946c37541bdf5bb07129))
+* add wrap to text symbolizer ([#201](https://github.com/geostyler/geostyler-lyrx-parser/issues/201)) ([91e9bf6](https://github.com/geostyler/geostyler-lyrx-parser/commit/91e9bf6c94b7eda0ca1f6cc255ae6afbde9dbe46))
+
+### Bug Fixes
+
+* **#192:** remove invert ([24c0ba6](https://github.com/geostyler/geostyler-lyrx-parser/commit/24c0ba65c66456fcc78b1d4f394551212d6e9a0b)), closes [#192](https://github.com/geostyler/geostyler-lyrx-parser/issues/192)
+* **#198:** fixed placing of fill-opacity ([e378d58](https://github.com/geostyler/geostyler-lyrx-parser/commit/e378d5809f51a6992f963654b50c82b52ca3667d))
+* **#198:** placing of stroke-opacity and stroke-width ([8cb8b37](https://github.com/geostyler/geostyler-lyrx-parser/commit/8cb8b375a26ff09aa014f0bde0a9afd682d54734)), closes [#198](https://github.com/geostyler/geostyler-lyrx-parser/issues/198)
+* **#200:** fix spacing, null division ([a4ed545](https://github.com/geostyler/geostyler-lyrx-parser/commit/a4ed545e463ee572201c5333f3dcc26709c14ea0))
+* **#61:** update jimp to 1.6.1 to fix file-type vulnerability ([dfb05df](https://github.com/geostyler/geostyler-lyrx-parser/commit/dfb05df2b5077bbf40b270fd60e9709e09575dad)), closes [jimp-dev/jimp#1402](https://github.com/jimp-dev/jimp/issues/1402)
+* cleanup ([0ea6655](https://github.com/geostyler/geostyler-lyrx-parser/commit/0ea665513193725612d404f2ed07f73c227ca278))
+* cleanup more unused files ([16d5b48](https://github.com/geostyler/geostyler-lyrx-parser/commit/16d5b487627bfd5fd94e957b2e6743396c39adcc))
+* conventional-changelog-conventionalcommits v9 is needed ([4ef8151](https://github.com/geostyler/geostyler-lyrx-parser/commit/4ef8151dbc9817fa92c472b1a47c76d716e3b775))
+* fix a dev dependency and ci install ([36a734c](https://github.com/geostyler/geostyler-lyrx-parser/commit/36a734c8cba526d6742cbe9b26a7b82953e9b8bb))
+* fix named import for fcustom ([356e90f](https://github.com/geostyler/geostyler-lyrx-parser/commit/356e90f5658f5c8986a07a63daf38ae2ef3f7698))
+* update ci actions ([cf89c35](https://github.com/geostyler/geostyler-lyrx-parser/commit/cf89c356734435ec26eeecc23fe3cd6738ae95cc))
+* update dependencies ([e12331d](https://github.com/geostyler/geostyler-lyrx-parser/commit/e12331d752e1ce21b1947464a29ed6bb975b620b))
+* use concatenate expression for multi prop label ([#201](https://github.com/geostyler/geostyler-lyrx-parser/issues/201)) ([984c24c](https://github.com/geostyler/geostyler-lyrx-parser/commit/984c24c9c9d58f196115c4c99b920b52feb9af04))
+
 ## [2.1.0](https://github.com/geostyler/geostyler-lyrx-parser/compare/v2.0.0...v2.1.0) (2026-06-18)
 
 ### Features
