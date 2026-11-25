@@ -1,37 +1,30 @@
 name: Release
-
 on:
   workflow_dispatch:
   push:
-    branches:
-      - next
+    branches: [next]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
 
 jobs:
   release:
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources 🔰
-        uses: actions/checkout@v7
+    uses: geostyler/workflows/.github/workflows/release.yml@v1.0.1
+    with:
+      package-manager: npm
+      release-method: action
+    secrets:
+      github-token: ${{ secrets.GH_RELEASE_TOKEN }}
+      npm-token: ${{ secrets.NPM_TOKEN }}
 
-      - name: Setup Node.js 24 👷🏻
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-
-      - name: Install dependencies ⏬
-        run: npm ci
-
-      - name: Build artifacts 🏗️
-        run: npm run build
-
-      - id: semantic-release-step
-        name: Release with Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-
+  notify-discord:
+    needs: release
+    if: needs.release.outputs.tag_name != ''
+    uses: geostyler/workflows/.github/workflows/notify-discord.yml@v1.0.1
+    with:
+      message: ${{ github.event.repository.name }} [${{ needs.release.outputs.tag_name }}] has been released.
+    secrets:
+      discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

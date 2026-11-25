@@ -28,7 +28,7 @@
     "build-browser": "vite build --config vite.config.browser.ts",
     "build-dist": "vite build --config vite.config.dist.ts && tsc -p tsconfig.json --emitDeclarationOnly",
     "build": "npm run build-browser && npm run build-dist",
-    "typecheck": " tsc --project tsconfig-typecheck.json",
+    "check": " tsc --project tsconfig-typecheck.json",
     "lint": "eslint -c eslint.config.mjs src/**/*.ts && npm run prettier:check",
     "prettier:check": "prettier src --write",
     "prettier": "prettier src --write",
@@ -36,7 +36,7 @@
     "release": "np --no-yarn",
     "test": "vitest",
     "lint:test": "npm run lint && npm run test",
-    "lint:typecheck:test": "npm run lint && npm run typecheck && npm run test"
+    "lint:typecheck:test": "npm run lint && npm run check && npm run test"
   },
   "dependencies": {
     "geostyler-style": "^13.1.0",
