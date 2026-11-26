@@ -282,41 +282,58 @@ describe("Parse point with Bezier curve marker", () => {
 describe("Parse point with anchor point and offset", () => {
   const lyrxFile = "./tests/testdata/point/point_marker_anchor_offset.lyrx";
 
-  it("should produce similar offsets for anchorPoint y=-1.55 and offsetY=17", async () => {
+  it("should map standard relative anchorPoint to anchor property", async () => {
     const geostylerStyle = await loadGeostylerStyle(lyrxFile);
     const rules = geostylerStyle.output?.rules;
     expect(rules).toBeDefined();
 
-    // Find the rule with anchorPoint y=-1.55 (should be "Park und Pool")
+    // "Park und Pool" has two symbol layers (reversed):
+    // symbolizers[0] = anchorPoint {x:0, y:-0.5} → anchor: "bottom"
+    // symbolizers[1] = anchorPoint {x:0, y:-1.55} → offset (non-standard)
+    const anchorPointRule = rules?.find((r) => r.name === "Park und Pool");
+    expect(anchorPointRule).toBeDefined();
+    const standardAnchorSymbolizer = anchorPointRule
+      ?.symbolizers?.[0] as MarkSymbolizer;
+    expect(standardAnchorSymbolizer?.kind).toBe("Mark");
+    expect(standardAnchorSymbolizer?.anchor).toBe("bottom");
+    expect(standardAnchorSymbolizer?.offset).toBeUndefined();
+  });
+
+  it("should convert non-standard relative anchorPoint to offset", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toBeDefined();
+
+    // "Park und Pool" symbolizers[1] = Layer 0: anchorPoint {x:0, y:-1.55}, size=11
     const anchorPointRule = rules?.find((r) => r.name === "Park und Pool");
     expect(anchorPointRule).toBeDefined();
     const anchorPointSymbolizer = anchorPointRule
-      ?.symbolizers?.[0] as MarkSymbolizer;
+      ?.symbolizers?.[1] as MarkSymbolizer;
     expect(anchorPointSymbolizer?.kind).toBe("Mark");
+    expect(anchorPointSymbolizer?.anchor).toBeUndefined();
     expect(anchorPointSymbolizer?.offset).toBeDefined();
+    expect(anchorPointSymbolizer?.offset).toEqual(expect.any(Array));
+  });
 
-    // Find the rule with offsetY=17 (should be "Parkplatz")
+  it("should convert offsetY to offset", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toBeDefined();
+
+    // "Parkplatz" symbolizers[1] = Layer 0: anchorPoint {x:0,y:0}, offsetY=17
     const offsetYRule = rules?.find((r) => r.name === "Parkplatz");
     expect(offsetYRule).toBeDefined();
-    const offsetYSymbolizer = offsetYRule?.symbolizers?.[0] as MarkSymbolizer;
+    const offsetYSymbolizer = offsetYRule?.symbolizers?.[1] as MarkSymbolizer;
     expect(offsetYSymbolizer?.kind).toBe("Mark");
     expect(offsetYSymbolizer?.offset).toBeDefined();
-
-    // Both should have offsets
-    expect(anchorPointSymbolizer?.offset).toEqual(expect.any(Array));
     expect(offsetYSymbolizer?.offset).toEqual(expect.any(Array));
+  });
 
-    // The Y offsets should be approximately equal (within tolerance)
-    // anchorPoint y=-1.55 with size 11: offset = -1.55 * markerSize
-    // offsetY=17 with OFFSET_FACTOR negation: offset = 17 * ptToPx(1) * OFFSET_FACTOR * -1
-    const anchorOffsetY = (
-      anchorPointSymbolizer?.offset as [number, number]
-    )?.[1];
-    const offsetY = (offsetYSymbolizer?.offset as [number, number])?.[1];
+  it("should have correct radius for Stellplatz", async () => {
+    const geostylerStyle = await loadGeostylerStyle(lyrxFile);
+    const rules = geostylerStyle.output?.rules;
+    expect(rules).toBeDefined();
 
-    expect(anchorOffsetY).toBeCloseTo(offsetY, 0);
-
-    // Check the size 24 symbol (Stellplatz rule) has correct radius
     const stellplatzRule = rules?.find((r) => r.name === "Stellplatz");
     const stellplatzSymbolizer = stellplatzRule
       ?.symbolizers?.[0] as MarkSymbolizer;

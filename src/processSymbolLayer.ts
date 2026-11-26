@@ -26,6 +26,7 @@ import {
 } from "./toGeostylerUtils.ts";
 import { processSymbolReference } from "./processSymbolReference.ts";
 import {
+  AnchorType,
   Expression,
   FillSymbolizer,
   LineSymbolizer,
@@ -564,9 +565,11 @@ const processSymbolCharacterMarker = (
     [strokeColor, strokeWidth, strokeOpacity] = extractStroke(symbolLayers);
   }
 
+  const { anchor, offset } = extractAnchorAndOffset(layer, size);
   const symbolCharacterMaker = {
     opacity: 1.0,
-    offset: extractOffset(layer, size),
+    anchor: anchor,
+    offset: offset,
     fillOpacity: fillOpacity,
     strokeColor: strokeColor,
     strokeOpacity: strokeOpacity,
@@ -616,6 +619,7 @@ const processSymbolVectorMarker = async (
   let maxY: number | null = null;
 
   const markerGraphics = layer.markerGraphics || [];
+  const vectorMarkerAnchorAndOffset = extractAnchorAndOffset(layer, markerSize);
   if (markerGraphics.length === 0) {
     return [
       {
@@ -629,7 +633,8 @@ const processSymbolVectorMarker = async (
         strokeWidth: strokeWidth,
         strokeOpacity: strokeOpacity,
         fillOpacity: 1,
-        offset: extractOffset(layer, markerSize),
+        anchor: vectorMarkerAnchorAndOffset.anchor,
+        offset: vectorMarkerAnchorAndOffset.offset,
       },
     ];
   }
@@ -650,7 +655,8 @@ const processSymbolVectorMarker = async (
         strokeWidth: strokeWidth,
         strokeOpacity: strokeOpacity,
         fillOpacity: 1,
-        offset: extractOffset(layer, markerSize),
+        anchor: vectorMarkerAnchorAndOffset.anchor,
+        offset: vectorMarkerAnchorAndOffset.offset,
       },
     ];
   }
@@ -724,7 +730,8 @@ const processSymbolVectorMarker = async (
     strokeWidth: strokeWidth,
     strokeOpacity: strokeOpacity,
     fillOpacity: 1,
-    offset: extractOffset(layer, markerSize),
+    anchor: vectorMarkerAnchorAndOffset.anchor,
+    offset: vectorMarkerAnchorAndOffset.offset,
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
@@ -835,12 +842,16 @@ const processSymbolPicture = async (
 ): Promise<Symbolizer[]> => {
   const size = ptToPxProp(layer, "height", ptToPxProp(layer, "size", 0));
   const resizedImage = (await resizeBase64Image(layer.url, size)) ?? "";
+  const { anchor: pictureAnchor, offset: pictureOffset } =
+    extractAnchorAndOffset(layer, size);
   const pictureFillSymbolizer: Symbolizer = {
     opacity: 1.0,
     rotate: 0,
     kind: "Icon",
     image: resizedImage,
     size: size,
+    anchor: pictureAnchor,
+    offset: pictureOffset,
   };
 
   const symbolizerWithSubSymbolizer = processSymbolLayerWithSubSymbol(
@@ -908,14 +919,38 @@ const hatchMarkerForAngle = (angle: number): WellKnownName => {
   ][quadrant];
 };
 
-const extractOffset = (
+const relativeAnchorPointToAnchorType = (
+  x: number,
+  y: number,
+): AnchorType | undefined => {
+  const key = `${x},${y}`;
+  const mapping: Record<string, AnchorType> = {
+    "0,0": "center",
+    "0,0.5": "top",
+    "0,-0.5": "bottom",
+    "0.5,0": "left",
+    "-0.5,0": "right",
+    "0.5,0.5": "top-left",
+    "-0.5,0.5": "top-right",
+    "0.5,-0.5": "bottom-left",
+    "-0.5,-0.5": "bottom-right",
+  };
+  return mapping[key];
+};
+
+type AnchorAndOffset = {
+  anchor?: AnchorType;
+  offset?: [number, number];
+};
+
+const extractAnchorAndOffset = (
   symbolLayer: SymbolLayer,
   markerSize?: number,
-): undefined | [number, number] => {
+): AnchorAndOffset => {
   let offsetX = 0;
   let offsetY = 0;
+  let anchor: AnchorType | undefined;
 
-  // Check if anchorPoint is defined and has non-zero values
   if (
     symbolLayer.anchorPoint &&
     (symbolLayer.anchorPoint.x !== 0 || symbolLayer.anchorPoint.y !== 0)
@@ -923,33 +958,27 @@ const extractOffset = (
     const { x, y } = symbolLayer.anchorPoint;
     const anchorPointUnits = symbolLayer.anchorPointUnits || "Relative";
 
-    if (anchorPointUnits === "Relative" && markerSize !== undefined) {
-      // Relative units: percentage-based, convert to pixels
-      // x and y are typically values like 0, -0.5, 0.5 representing center, top, bottom
-      offsetX = x * markerSize;
-      offsetY = y * markerSize;
+    if (anchorPointUnits === "Relative") {
+      const mappedAnchor = relativeAnchorPointToAnchorType(x, y);
+      if (mappedAnchor) {
+        anchor = mappedAnchor;
+      } else if (markerSize !== undefined) {
+        offsetX = x * markerSize;
+        offsetY = y * markerSize;
+      }
     } else {
-      // Absolute units or fallback
       offsetX = ptToPx(x);
       offsetY = ptToPx(y);
     }
   }
 
-  // Check offsetX/offsetY if anchorPoint didn't provide values
-  if (
-    offsetX === 0 &&
-    offsetY === 0 &&
-    (symbolLayer.offsetX !== undefined || symbolLayer.offsetY !== undefined)
-  ) {
-    // Fallback to offsetX/offsetY if anchorPoint is not defined or is zero
-    // Arcgis looks to apply a strange scaling factor.
-    offsetX = (symbolLayer.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
-    offsetY = (symbolLayer.offsetY || 0) * ptToPx(1) * SCALE_FACTOR;
+  if (symbolLayer.offsetX !== undefined || symbolLayer.offsetY !== undefined) {
+    offsetX += (symbolLayer.offsetX || 0) * ptToPx(1) * SCALE_FACTOR;
+    offsetY += (symbolLayer.offsetY || 0) * ptToPx(1) * SCALE_FACTOR;
   }
 
-  // Return undefined only if BOTH offsets are 0
-  if (offsetX === 0 && offsetY === 0) {
-    return undefined;
-  }
-  return [offsetX, offsetY];
+  return {
+    anchor,
+    offset: offsetX === 0 && offsetY === 0 ? undefined : [offsetX, offsetY],
+  };
 };
