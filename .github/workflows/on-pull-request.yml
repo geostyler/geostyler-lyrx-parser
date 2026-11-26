@@ -1,42 +1,10 @@
-name: Test Pull Request
-
+name: Test build
 on: pull_request
 
 jobs:
   build:
-    strategy:
-      matrix:
-        node-version: [20, 22, 24]
-        os: [ubuntu-latest]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: Checkout sources
-      uses: actions/checkout@v7
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v7
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Cache Node.js modules 💾
-      uses: actions/cache@v6
-      with:
-        path: ~/.npm
-        key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.OS }}-node-
-          ${{ runner.OS }}-
-
-    - name: Install dependencies ⏬
-      run: npm ci
-
-    - name: Lint code 💄
-      run: npm run lint
-
-    - name: Test code ✅
-      run: npm run test
-
-    - name: Build artifacts 🏗️
-      run: npm run build
+    uses: geostyler/workflows/.github/workflows/on-pull-request.yml@v1.0.1
+    with:
+      node-versions: '["22", "24"]'
+      package-manager: npm
+      test-command: 'npm test'
